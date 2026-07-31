@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<script>document.documentElement.classList.add('js')</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>«Моя любовь, душа моя — Россия!» — Всероссийский гражданско-патриотический диктант · 2026</title>
+<meta name="description" content="V Всероссийский гражданско-патриотический диктант «Моя любовь, душа моя — Россия!». 6–8 ноября 2026 года. Проверьте знания истории, культуры и традиций народов России — онлайн, бесплатно, с именным сертификатом.">
+<meta property="og:title" content="«Моя любовь, душа моя — Россия!» · Диктант-2026">
+<meta property="og:description" content="6–8 ноября 2026. Всероссийский гражданско-патриотический диктант — 40 минут, которые объединяют.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/img/og.webp">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="preload" href="assets/fonts/unbounded-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/manrope-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">К содержанию</a>
+
+<!-- атмосферный фон -->
+<div class="bg-scene" aria-hidden="true">
+  <div class="blob blob--sky"></div>
+  <div class="blob blob--blue"></div>
+  <div class="blob blob--gold"></div>
+</div>
+<div class="noise" aria-hidden="true"></div>
+
+<!-- топбар (мобильные) -->
+<header class="topbar">
+  <a href="index.html" aria-label="На главную"><img class="topbar__logo" src="assets/img/logo-diktant-tricolor.png" alt="Моя любовь, душа моя — Россия"></a>
+  <span class="topbar__spacer"></span>
+  <a class="btn btn--primary btn--sm" href="test.html">Участвовать</a>
+  <button class="burger" aria-label="Меню" aria-expanded="false"><span></span></button>
+</header>
+
+<!-- мобильное меню -->
+<div class="drawer" aria-label="Меню сайта">
+  <div class="drawer__scrim"></div>
+  <div class="drawer__panel">
+    <div class="drawer__head">
+      <img src="assets/img/logo-diktant-tricolor.png" alt="Моя любовь, душа моя — Россия">
+      <button class="drawer__close" aria-label="Закрыть меню">✕</button>
+    </div>
+    <nav class="nav" aria-label="Разделы">
+      <a class="nav__link is-active" href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2Z"/></svg>
+        Главная</a>
+      <a class="nav__link" href="materials.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4a2 2 0 0 0-2-2H6.5A2.5 2.5 0 0 0 4 4.5Zm0 0A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>
+        Материалы для подготовки</a>
+      <a class="nav__link" href="news.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0V9"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8Z"/></svg>
+        Новости</a>
+    </nav>
+    <div class="sidebar__cta">
+      <span class="sidebar__date"><i class="dot"></i>6–8 ноября 2026</span>
+      <a class="btn btn--primary" href="test.html" style="width:100%">Принять участие</a>
+      <p class="sidebar__foot">Оргкомитет: <a href="mailto:diktant-russia@ranepa.ru">diktant-russia@ranepa.ru</a></p>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+  <!-- ================= САЙДБАР ================= -->
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="index.html" aria-label="«Моя любовь, душа моя — Россия!» — на главную">
+      <img class="sidebar__logo" src="assets/img/logo-diktant.png" alt="Логотип диктанта «Моя любовь, душа моя — Россия!»">
+      <span class="sidebar__caption">Всероссийский гражданско-патриотический диктант · 2026</span>
+    </a>
+    <nav class="nav" aria-label="Разделы сайта">
+      <a class="nav__link is-active" href="index.html" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2Z"/></svg>
+        Главная</a>
+      <a class="nav__link" href="materials.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4a2 2 0 0 0-2-2H6.5A2.5 2.5 0 0 0 4 4.5Zm0 0A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>
+        Материалы для подготовки</a>
+      <a class="nav__link" href="news.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0V9"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8Z"/></svg>
+        Новости</a>
+    </nav>
+    <div class="sidebar__cta">
+      <span class="sidebar__date"><i class="dot"></i>6–8 ноября 2026</span>
+      <a class="btn btn--primary" href="test.html" style="width:100%">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Принять участие</a>
+      <p class="sidebar__foot">Оргкомитет проекта:<br><a href="mailto:diktant-russia@ranepa.ru">diktant-russia@ranepa.ru</a></p>
+    </div>
+  </aside>
+
+  <!-- ================= КОНТЕНТ ================= -->
+  <main class="main" id="main">
+    <div class="container">
+
+      <!-- ═══════ HERO ═══════ -->
+      <section class="hero">
+        <div class="hero__glow hero__glow--1" aria-hidden="true"></div>
+        <div class="hero__glow hero__glow--2" aria-hidden="true"></div>
+        <div class="hero__rings" aria-hidden="true"></div>
+        <div class="hero__inner">
+          <div class="hero__content">
+            <div class="hero__meta">
+              <img class="hero__logo-year" src="assets/img/logo-diktant-short.png" alt="Диктант «Моя любовь, душа моя — Россия!»" style="width:auto">
+              <img class="hero__logo-year" src="assets/img/logo-genr.png" alt="2026 — Год единства народов России" style="width:auto">
+            </div>
+            <span class="hero__kicker">V Всероссийский гражданско-патриотический диктант</span>
+            <h1 class="hero__title">
+              <span class="w1">«Моя любовь,</span><br>
+              <span class="w2">душа моя —</span><br>
+              <span class="w3">Россия!»</span>
+            </h1>
+            <p class="hero__lead">6–8 ноября 2026 года вся страна — от пятиклассников до людей солидного возраста — ответит на вопросы об истории, культуре и единстве народов России. <b>Присоединяйтесь: это 40 минут, которые объединяют.</b></p>
+            <div class="hero__ctas btn-row">
+              <a class="btn btn--primary btn--lg" href="test.html">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                Принять участие</a>
+              <a class="btn btn--glass-deep btn--lg" href="materials.html">Подготовиться</a>
+            </div>
+            <div class="hero__note">
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="3"/><path d="M8 22h8m-4-4v4"/></svg>онлайн с любого устройства</span>
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>40 минут · до 30 баллов</span>
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>сертификат каждому</span>
+            </div>
+          </div>
+          <div class="collage" aria-hidden="false">
+            <span class="sticker sticker--red collage__s1">6–8 ноября<br>2026</span>
+            <figure class="collage__item collage__item--a">
+              <img src="assets/img/hero-ceremony.webp" alt="Торжественное открытие диктанта: рота почётного караула с Государственным флагом России" fetchpriority="high">
+            </figure>
+            <figure class="collage__item collage__item--b">
+              <img src="assets/img/hero-students.webp" alt="Участники пишут диктант онлайн со смартфонов" fetchpriority="high">
+            </figure>
+            <figure class="collage__item collage__item--c">
+              <img src="assets/img/hero-bishop.webp" alt="Представитель духовенства приветствует участников диктанта">
+            </figure>
+            <span class="sticker sticker--gold collage__s2">все 89<br>регионов</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════ ОБРАТНЫЙ ОТСЧЁТ ═══════ -->
+      <div class="countdown glass" role="timer" aria-label="Обратный отсчёт до начала диктанта">
+        <p class="countdown__label">До начала Всероссийского гражданско-патриотического диктанта осталось:
+          <small>Старт — 6 ноября 2026 года в 10:00 по московскому времени</small>
+        </p>
+        <div class="countdown__grid">
+          <div class="cd-cell"><b data-cd="d">0</b><span data-cdl="d">дней</span></div>
+          <div class="cd-cell"><b data-cd="h">00</b><span data-cdl="h">часов</span></div>
+          <div class="cd-cell"><b data-cd="m">00</b><span data-cdl="m">минут</span></div>
+          <div class="cd-cell"><b data-cd="s">00</b><span data-cdl="s">секунд</span></div>
+        </div>
+      </div>
+
+      <!-- ═══════ БЕГУЩАЯ СТРОКА ТЕМ ═══════ -->
+      <div class="marquee" aria-hidden="true">
+        <div class="marquee__track">
+          <span class="marquee__item">История</span>
+          <span class="marquee__item">Культура</span>
+          <span class="marquee__item">Год единства народов России</span>
+          <span class="marquee__item">Право</span>
+          <span class="marquee__item">Гражданская идентичность</span>
+          <span class="marquee__item">Религии</span>
+          <span class="marquee__item">6–8 ноября 2026</span>
+        </div>
+      </div>
+
+      <!-- якоря -->
+      <nav class="anchor-pills" aria-label="Быстрые переходы по странице">
+        <a class="chip" href="#goal">О диктанте</a>
+        <a class="chip" href="#quotes">Обращения</a>
+        <a class="chip" href="#stats">4 сезона в цифрах</a>
+        <a class="chip" href="#format">Формат</a>
+        <a class="chip" href="#guests">Почётные гости</a>
+        <a class="chip" href="#media">Медиа</a>
+        <a class="chip" href="#faq">Вопросы</a>
+      </nav>
+
+      <!-- ═══════ ЦЕЛЬ ═══════ -->
+      <section class="sec" id="goal">
+        <header class="sec-head" data-reveal>
+          <span class="sec-overline"><span class="n">01</span>О диктанте</span>
+          <h2 class="sec-title">Один день — <span class="grad">и вся страна</span> отвечает на вопросы о России</h2>
+        </header>
+        <div class="aim">
+          <div class="aim__card glass" data-reveal>
+            <div class="aim__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="#fff"/></svg>
+            </div>
+            <p>Цель диктанта — <b>укрепление гражданского мира и согласия</b> в России, а также единства народов нашей страны на основе общероссийской гражданской идентичности.</p>
+          </div>
+          <div class="aim__facts">
+            <div class="fact-row glass" data-reveal style="--d:.08s">
+              <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#205e98" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="21" width="4" height="0"/><path d="M4 18v3M4 4h11l-2 4 2 4H4z"/></svg></span>
+              <b><em>V</em> сезон</b>
+              <span>проводится ежегодно с 2022 года</span>
+            </div>
+            <div class="fact-row glass" data-reveal style="--d:.16s">
+              <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#205e98" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+              <b><span data-count="78494">0</span></b>
+              <span>участников написали диктант в 2025 году</span>
+            </div>
+            <div class="fact-row glass" data-reveal style="--d:.24s">
+              <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#205e98" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>
+              <b><span data-count="89">0</span></b>
+              <span>регионов России — от Калининграда до Камчатки</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════ ЗАДАЧИ ═══════ -->
+      <section class="sec" id="tasks">
+        <header class="sec-head" data-reveal>
+          <span class="sec-overline"><span class="n">02</span>Задачи проекта</span>
+          <h2 class="sec-title">Зачем стране <em>диктант</em></h2>
+          <p class="sec-lead">Диктант — не проверка «на оценку», а масштабное исследование того, какие ценности живут в каждом из нас, и общий разговор о будущем России.</p>
+        </header>
+        <div class="tasks-grid">
+          <article class="task-card glass" data-reveal>
+            <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#205e98" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/></svg></span>
+            <span class="task-card__num">01</span>
+            <p>Выявление усвоенного и реализуемого молодёжью в повседневной жизни набора ценностных ориентаций</p>
+          </article>
+          <article class="task-card glass" data-reveal style="--d:.08s">
+            <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#205e98" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5v6"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></span>
+            <span class="task-card__num">02</span>
+            <p>Поддержка государственной политики в сфере воспитания и обучения</p>
+          </article>
+          <article class="task-card glass" data-reveal style="--d:.16s">
+            <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#205e98" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/></svg></span>
+            <span class="task-card__num">03</span>
+            <p>Разработка предложений по практической реализации Стратегии развития системы воспитания и Стратегии национальной безопасности РФ</p>
+          </article>
+          <article class="task-card glass" data-reveal>
+            <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#205e98" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5ZM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></span>
+            <span class="task-card__num">04</span>
+            <p>Сохранение и укрепление традиционных духовно-нравственных ценностей</p>
+          </article>
+          <article class="task-card glass" data-reveal style="--d:.08s">
+            <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#205e98" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="task-card__num">05</span>
+            <p>Недопущение фальсификации исторических событий и сохранение памяти о значимых достижениях российского государства с его многовековой историей</p>
+          </article>
+          <article class="task-card glass" data-reveal style="--d:.16s">
+            <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#205e98" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2Z"/></svg></span>
+            <span class="task-card__num">06</span>
+            <p>Формирование в молодёжном сознании общественно-значимых ориентиров развития российского общества</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════ ЦИТАТЫ ═══════ -->
+      <section class="sec" id="quotes">
+        <header class="sec-head" data-reveal>
+          <span class="sec-overline"><span class="n">03</span>Обращения</span>
+          <h2 class="sec-title">Слова, с которыми <span class="grad">мы начинаем</span></h2>
+        </header>
+        <div class="quotes">
+          <figure class="quote-card quote-card--main glass" data-reveal>
+            <span class="quote-card__mark" aria-hidden="true">«</span>
+            <blockquote>Мы должны сделать все, чтобы сегодняшние дети и вообще все наши граждане гордились тем, что они наследники, внуки, правнуки победителей. Знали героев своей страны и своей семьи, чтобы все понимали, что это часть нашей жизни.</blockquote>
+            <figcaption class="quote-card__who">
+              <span class="quote-card__ava"><img src="assets/img/quote-putin.webp" alt="В. В. Путин"></span>
+              <span>
+                <span class="quote-card__name">В. В. Путин</span>
+                <span class="quote-card__role">Президент Российской Федерации</span>
+              </span>
+            </figcaption>
+          </figure>
+          <figure class="quote-card glass" data-reveal style="--d:.1s">
+            <span class="quote-card__mark" aria-hidden="true">«</span>
+            <blockquote>Гражданско-патриотический диктант — не просто интеллектуальное испытание. Это возможность вместе вспомнить нашу героическую историю, обратиться к духовным истокам и почувствовать себя частью большой общности. Мы создаём будущее страны, где чувство личной ответственности и гражданская солидарность становятся настоящей силой, объединяющей народ.</blockquote>
+            <figcaption class="quote-card__who">
+              <span class="quote-card__ava"><img src="assets/img/quote-komissarov.webp" alt="А. Г. Комиссаров"></span>
+              <span>
+                <span class="quote-card__name">А. Г. Комиссаров</span>
+                <span class="quote-card__role">Ректор Президентской академии</span>
+              </span>
+            </figcaption>
+          </figure>
+          <figure class="quote-card glass" data-reveal style="--d:.2s">
+            <span class="quote-card__mark" aria-hidden="true">«</span>
+            <blockquote>Сейчас — время сосредоточения и возрождения тех главных нравственных и духовных традиций, которые наши предки выработали за столетия. Наш долг — сохранять и преумножать этот опыт. Благословляю всех участников и желаю успеха в этом значимом деле.</blockquote>
+            <figcaption class="quote-card__who">
+              <span class="quote-card__ava"><img src="assets/img/quote-episkop.webp" alt="Епископ Кирилл"></span>
+              <span>
+                <span class="quote-card__name">Епископ Сергиево-Посадский и Дмитровский Кирилл</span>
+                <span class="quote-card__role">Ректор Московской духовной академии, президент НОТА</span>
+              </span>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- ═══════ 4 СЕЗОНА · СТАТИСТИКА ═══════ -->
+      <section class="sec" id="stats" style="padding-top:0">
+        <div class="stats" data-inview>
+          <header class="sec-head" data-reveal>
+            <span class="sec-overline"><span class="n">04</span>Диктант в разрезе 4 сезонов</span>
+            <h2 class="sec-title">Растём вместе со страной</h2>
+            <p class="sec-lead">Каждый год диктант пишет всё больше людей — а география проекта уже достигла всех субъектов Российской Федерации.</p>
+          </header>
+          <div class="stats__grid">
+            <div class="stat-panel stat-panel--line glass-deep" data-reveal>
+              <div class="stat-panel__head">
+                <span class="stat-panel__ic"><svg viewBox="0 0 24 24" fill="none" stroke="#62bae3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                <h3>Участники<small>человек за сезон</small></h3>
+              </div>
+              <p class="stat-big"><b data-count="78.5">0</b><span>тысяч<br>в 2025 году</span></p>
+              <div class="stat-chart">
+                <svg class="chart" viewBox="0 0 400 170" role="img" aria-label="График роста участников: 4,5 тысячи в 2022, 10 в 2023, 18 в 2024, 78,5 тысячи в 2025">
+                  <defs>
+                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#62bae3" stop-opacity=".38"/>
+                      <stop offset="1" stop-color="#62bae3" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <line class="grid-line" x1="36" y1="140" x2="392" y2="140"/>
+                  <line class="grid-line" x1="36" y1="95" x2="392" y2="95"/>
+                  <line class="grid-line" x1="36" y1="50" x2="392" y2="50"/>
+                  <path class="line-area chart-area" d="M40 132.6 C 75 131, 111 123.75, 146 123.75 C 181 123.75, 217 110.75, 252 110.75 C 287 110.75, 323 12.4, 358 12.4 L358 140 L40 140 Z"/>
+                  <path class="line-path chart-line" d="M40 132.6 C 75 131, 111 123.75, 146 123.75 C 181 123.75, 217 110.75, 252 110.75 C 287 110.75, 323 12.4, 358 12.4"/>
+                  <g class="line-g"><circle class="chart-dot" cx="40" cy="132.6" r="5"/><text class="val-label" x="40" y="118" text-anchor="middle">4,5 тыс.</text><text class="axis-label" x="40" y="160" text-anchor="middle">2022</text></g>
+                  <g class="line-g"><circle class="chart-dot" cx="146" cy="123.75" r="5"/><text class="val-label" x="146" y="109" text-anchor="middle">10 тыс.</text><text class="axis-label" x="146" y="160" text-anchor="middle">2023</text></g>
+                  <g class="line-g"><circle class="chart-dot" cx="252" cy="110.75" r="5"/><text class="val-label" x="252" y="96" text-anchor="middle">18 тыс.</text><text class="axis-label" x="252" y="160" text-anchor="middle">2024</text></g>
+                  <g class="line-g"><circle class="chart-dot" cx="358" cy="12.4" r="6"/><text class="val-label" x="336" y="34" text-anchor="end">78,5 тыс.</text><text class="axis-label" x="358" y="160" text-anchor="middle">2025</text></g>
+                </svg>
+              </div>
+            </div>
+            <div class="stat-panel glass-deep" data-reveal style="--d:.1s">
+              <div class="stat-panel__head">
+                <span class="stat-panel__ic"><svg viewBox="0 0 24 24" fill="none" stroke="#62bae3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>
+                <h3>География<small>регионов России</small></h3>
+              </div>
+              <p class="stat-big"><b data-count="89">0</b><span>регионов —<br>вся страна</span></p>
+              <div class="bars" role="img" aria-label="Диаграмма: 38 регионов в 2022, 80 в 2023, 89 в 2024 и 2025">
+                <div class="bars__col"><span class="bars__val">38</span><div class="bars__bar" style="--h:43"></div><span class="bars__year">2022</span></div>
+                <div class="bars__col"><span class="bars__val">80</span><div class="bars__bar" style="--h:90"></div><span class="bars__year">2023</span></div>
+                <div class="bars__col"><span class="bars__val">89</span><div class="bars__bar" style="--h:100"></div><span class="bars__year">2024</span></div>
+                <div class="bars__col"><span class="bars__val">89</span><div class="bars__bar" style="--h:100"></div><span class="bars__year">2025</span></div>
+              </div>
+            </div>
+            <div class="stat-panel glass-deep" data-reveal style="--d:.2s">
+              <div class="stat-panel__head">
+                <span class="stat-panel__ic"><svg viewBox="0 0 24 24" fill="none" stroke="#62bae3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/><circle cx="12" cy="11" r="1.4"/></svg></span>
+                <h3>Базовые площадки<small>количество</small></h3>
+              </div>
+              <p class="stat-big"><b data-count="68">0</b><span>площадок<br>в 2025 году</span></p>
+              <div class="bars" role="img" aria-label="Диаграмма: 12 площадок в 2022, 45 в 2023, 53 в 2024, 68 в 2025">
+                <div class="bars__col"><span class="bars__val">12</span><div class="bars__bar" style="--h:18"></div><span class="bars__year">2022</span></div>
+                <div class="bars__col"><span class="bars__val">45</span><div class="bars__bar" style="--h:66"></div><span class="bars__year">2023</span></div>
+                <div class="bars__col"><span class="bars__val">53</span><div class="bars__bar" style="--h:78"></div><span class="bars__year">2024</span></div>
+                <div class="bars__col"><span class="bars__val">68</span><div class="bars__bar" style="--h:100"></div><span class="bars__year">2025</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════ ДЛЯ КОГО ═══════ -->
+      <section class="sec" id="audience">
+        <header class="sec-head sec-head--center" data-reveal>
+          <span class="sec-overline"><span class="n">05</span>Для кого</span>
+          <h2 class="sec-title">Диктант — для всех. Правда, для всех</h2>
+          <p class="sec-lead">Вопросы адаптированы под три возрастные категории — каждому будет интересно и по силам.</p>
+        </header>
+        <div class="aud-grid">
+          <article class="aud-card glass" data-reveal>
+            <span class="aud-card__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5v6"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></span>
+            <h3>Школьники 5–11 классов</h3>
+            <p>Свой вариант вопросов: об основных событиях истории, героях, культуре и праздниках народов России.</p>
+            <span class="chip">от 11 лет</span>
+          </article>
+          <article class="aud-card glass" data-reveal style="--d:.1s">
+            <span class="aud-card__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4a2 2 0 0 0-2-2H6.5A2.5 2.5 0 0 0 4 4.5Zm0 0A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg></span>
+            <h3>Студенты вузов и СПО</h3>
+            <p>Коллективное участие всей группой или вузом — студенческие варианты глубже и острее.</p>
+            <span class="chip">вузы · колледжи</span>
+          </article>
+          <article class="aud-card glass" data-reveal style="--d:.2s">
+            <span class="aud-card__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m17 8 2 2 4-4"/></svg></span>
+            <h3>Взрослые и пенсионеры</h3>
+            <p>Личное участие из дома, с работы или с базовой площадки. Крупные кнопки и спокойный темп — удобно с любого устройства.</p>
+            <span class="chip">без ограничений</span>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════ ИНФОРМАЦИЯ / ФОРМАТ ═══════ -->
+      <section class="sec" id="format">
+        <header class="sec-head" data-reveal>
+          <span class="sec-overline"><span class="n">06</span>Информация о диктанте</span>
+          <h2 class="sec-title">Как всё <em>устроено</em></h2>
+          <p class="sec-lead">Содержание Диктанта в 2026 году структурировано по шести тематическим блокам — от истории до гражданской идентичности.</p>
+        </header>
+        <div class="format">
+          <div class="topics glass" data-reveal>
+            <h3>Тематические блоки 2026 года</h3>
+            <p>Из них состоит каждый вариант диктанта</p>
+            <div class="topics__cloud">
+              <span class="topic">История</span>
+              <span class="topic topic--gold">Культура</span>
+              <span class="topic topic--red">Год единства народов России</span>
+              <span class="topic topic--sky">Право</span>
+              <span class="topic topic--green">Гражданская идентичность</span>
+              <span class="topic">Религии</span>
+            </div>
+            <div class="topics__grid">
+              <div class="mini-fact"><b>ежегодно</b><span>диктант проводится каждый год</span></div>
+              <div class="mini-fact"><b>30</b><span>максимальное количество баллов</span></div>
+              <div class="mini-fact"><b>40 мин</b><span>на прохождение теста</span></div>
+            </div>
+          </div>
+          <div class="cert-show glass" data-reveal style="--d:.12s">
+            <span class="sticker sticker--sky cert-show__s1">Баллы —<br>на почте</span>
+            <div class="cert-show__frame" data-reveal="zoom">
+              <a href="assets/img/certificate.webp" target="_blank" rel="noopener" aria-label="Открыть сертификат участника в полном размере">
+                <img src="assets/img/certificate-sm.webp" alt="Образец сертификата участника диктанта 2026 года" loading="lazy">
+              </a>
+            </div>
+            <span class="sticker sticker--gold cert-show__s2">именной<br>PDF</span>
+            <h3>Каждый участник получит итоговый сертификат</h3>
+            <p>С именем, возрастной категорией и набранными баллами — приходит на почту сразу после регистрации результатов.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════ ПРИЗЫ ═══════ -->
+      <section class="sec" id="prizes">
+        <header class="sec-head sec-head--center" data-reveal>
+          <span class="sec-overline"><span class="n">07</span>Награды</span>
+          <h2 class="sec-title">Призы <span class="grad">абсолютным победителям</span></h2>
+          <p class="sec-lead">Максимальные 30 баллов — и вы среди победителей сезона.</p>
+        </header>
+        <div class="prizes">
+          <article class="prize-card glass" data-reveal>
+            <span class="place">награда</span>
+            <span class="prize-card__medal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg></span>
+            <h3>Диплом</h3>
+            <p>Официальный диплом абсолютного победителя Всероссийского гражданско-патриотического диктанта.</p>
+          </article>
+          <article class="prize-card glass" data-reveal style="--d:.1s">
+            <span class="place">приглашение</span>
+            <span class="prize-card__medal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/></svg></span>
+            <h3>Награждение в Президентской академии</h3>
+            <p>Приглашение на торжественную церемонию награждения в Президентскую академию с экскурсией по её историческому кампусу.</p>
+          </article>
+          <article class="prize-card glass" data-reveal style="--d:.2s">
+            <span class="place">мерч</span>
+            <span class="prize-card__medal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12M2 7h20v5H2zM12 22V7"/><path d="M12 7c-2.5 0-4.5-1.3-4.5-3S9.5 1 11 2.5 12 7 12 7Zm0 0c2.5 0 4.5-1.3 4.5-3S14.5 1 13 2.5 12 7 12 7Z"/></svg></span>
+            <h3>Набор мерча</h3>
+            <p>Фирменный набор сувенирной продукции проекта — памятные вещи, которые приятно использовать каждый день.</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════ ОРГАНИЗАТОРЫ И ПАРТНЁРЫ ═══════ -->
+      <section class="sec" id="organizers">
+        <header class="sec-head" data-reveal>
+          <span class="sec-overline"><span class="n">08</span>Команда проекта</span>
+          <h2 class="sec-title">Организаторы <em>диктанта</em></h2>
+        </header>
+        <div class="logos-grid" style="margin-bottom:44px">
+          <a class="logo-tile glass" href="https://ranepa.ru" target="_blank" rel="noopener" data-reveal>
+            <img src="assets/img/logo-ranepa.png" alt="Российская академия народного хозяйства и государственной службы при Президенте РФ">
+            <span>Президентская академия (РАНХиГС)</span>
+          </a>
+          <a class="logo-tile glass" href="https://nota-theology.ru" target="_blank" rel="noopener" data-reveal style="--d:.1s">
+            <img src="assets/img/logo-nota.png" alt="Научно-образовательная теологическая ассоциация">
+            <span>Научно-образовательная теологическая ассоциация (НОТА)</span>
+          </a>
+          <div class="logo-tile glass" data-reveal style="--d:.2s">
+            <img src="assets/img/logo-ums.png" alt="Учебно-методический совет по государственному и муниципальному управлению">
+            <span>Учебно-методический совет по государственному и муниципальному управлению (УМС ГМУ)</span>
+          </div>
+        </div>
+        <header class="sec-head" data-reveal style="margin-bottom:26px">
+          <h2 class="sec-title" style="font-size:clamp(22px,3vw,32px)">Партнёры <span class="grad">диктанта</span></h2>
+        </header>
+        <div class="logos-grid logos-grid--4">
+          <a class="logo-tile glass" href="https://www.minobrnauki.gov.ru/" target="_blank" rel="noopener" data-reveal>
+            <img src="assets/img/logo-minobr.png" alt="Министерство науки и высшего образования Российской Федерации">
+            <span>Минобрнауки России</span>
+          </a>
+          <a class="logo-tile glass" href="https://edu.gov.ru/" target="_blank" rel="noopener" data-reveal style="--d:.08s">
+            <img src="assets/img/logo-minpros.png" alt="Министерство просвещения Российской Федерации">
+            <span>Минпросвещения России</span>
+          </a>
+          <a class="logo-tile glass" href="https://fadn.gov.ru/" target="_blank" rel="noopener" data-reveal style="--d:.16s">
+            <img src="assets/img/logo-fadn.png" alt="Федеральное агентство по делам национальностей">
+            <span>ФАДН России</span>
+          </a>
+          <a class="logo-tile glass" href="https://varmsu.ru/" target="_blank" rel="noopener" data-reveal style="--d:.24s">
+            <img src="assets/img/logo-varmsu.png" alt="Всероссийская ассоциация развития местного самоуправления">
+            <span>ВАРМСУ</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- ═══════ ПОЧЁТНЫЕ ГОСТИ ═══════ -->
+      <section class="sec" id="guests">
+        <header class="sec-head" data-reveal>
+          <span class="sec-overline"><span class="n">09</span>Почётные гости диктанта · 2022–2026</span>
+          <h2 class="sec-title">С нами пишут диктант <span class="grad">известные люди страны</span></h2>
+        </header>
+        <div class="guests">
+          <div class="guest glass" data-reveal><span class="guest__ava"><img src="assets/img/guests/ashirov.webp" alt="Денис Аширов" loading="lazy"></span><span><span class="guest__name">Аширов Денис Валерьевич</span><span class="guest__role">Заместитель руководителя Федерального агентства по делам молодёжи</span></span></div>
+          <div class="guest glass" data-reveal style="--d:.06s"><span class="guest__ava"><img src="assets/img/guests/barinov.webp" alt="Игорь Баринов" loading="lazy"></span><span><span class="guest__name">Баринов Игорь Вячеславович</span><span class="guest__role">Руководитель Федерального агентства по делам национальностей</span></span></div>
+          <div class="guest glass" data-reveal><span class="guest__ava"><img src="assets/img/guests/boyko.webp" alt="Сергей Бойко" loading="lazy"></span><span><span class="guest__name">Бойко Сергей Николаевич</span><span class="guest__role">Герой Российской Федерации, директор Департамента государственной молодёжной политики и воспитательной деятельности Минобрнауки</span></span></div>
+          <div class="guest glass" data-reveal style="--d:.06s"><span class="guest__ava"><img src="assets/img/guests/zanko.webp" alt="Ольга Занко" loading="lazy"></span><span><span class="guest__name">Занко Ольга Николаевна</span><span class="guest__role">Заместитель председателя Комитета Государственной Думы по развитию гражданского общества, вопросам общественных и религиозных объединений</span></span></div>
+          <div class="guest glass" data-reveal><span class="guest__ava"><img src="assets/img/guests/zakharova.webp" alt="Мария Захарова" loading="lazy"></span><span><span class="guest__name">Захарова Мария Владимировна</span><span class="guest__role">Директор Департамента информации и печати МИД РФ</span></span></div>
+          <div class="guest glass" data-reveal style="--d:.06s"><span class="guest__ava"><img src="assets/img/guests/koneva.webp" alt="Наталия Конева" loading="lazy"></span><span><span class="guest__name">Конева Наталия Ивановна</span><span class="guest__role">Президент Фонда памяти полководцев Победы, дочь дважды Героя Советского Союза Маршала Советского Союза Ивана Конева</span></span></div>
+          <div class="guest glass" data-reveal><span class="guest__ava"><img src="assets/img/guests/kuznetsov.webp" alt="Михаил Кузнецов" loading="lazy"></span><span><span class="guest__name">Кузнецов Михаил Михайлович</span><span class="guest__role">Руководитель исполкома «Народный фронт “За Россию”»</span></span></div>
+          <div class="guest glass" data-reveal style="--d:.06s"><span class="guest__ava"><img src="assets/img/guests/nikitin.webp" alt="Андрей Никитин" loading="lazy"></span><span><span class="guest__name">Никитин Андрей Сергеевич</span><span class="guest__role">Министр транспорта Российской Федерации, экс-губернатор Новгородской области</span></span></div>
+          <div class="guest glass" data-reveal><span class="guest__ava"><img src="assets/img/guests/petrova.webp" alt="Ольга Петрова" loading="lazy"></span><span><span class="guest__name">Петрова Ольга Викторовна</span><span class="guest__role">Заместитель Министра науки и высшего образования Российской Федерации</span></span></div>
+          <div class="guest glass" data-reveal style="--d:.06s"><span class="guest__ava"><img src="assets/img/guests/svyatenko.webp" alt="Инна Святенко" loading="lazy"></span><span><span class="guest__name">Святенко Инна Юрьевна</span><span class="guest__role">Заместитель Председателя Совета Федерации</span></span></div>
+          <div class="guest glass" data-reveal><span class="guest__ava"><img src="assets/img/guests/sponyakov.webp" alt="Илья Споняков" loading="lazy"></span><span><span class="guest__name">Споняков Илья Дмитриевич</span><span class="guest__role">Герой Российской Федерации, советник Министра культуры Российской Федерации</span></span></div>
+          <div class="guest glass" data-reveal style="--d:.06s"><span class="guest__ava"><img src="assets/img/guests/stepyko.webp" alt="Дмитрий Степыко" loading="lazy"></span><span><span class="guest__name">Степыко Дмитрий Геннадьевич</span><span class="guest__role">Заместитель директора ФГБУ «Роспатриотцентр»</span></span></div>
+          <div class="guest glass" data-reveal><span class="guest__ava"><img src="assets/img/guests/shits.webp" alt="Иван Шиц" loading="lazy"></span><span><span class="guest__name">Шиц Иван Александрович</span><span class="guest__role">Герой Российской Федерации, председатель Совета общественного движения участников специальной военной операции «Войсковое братство “СВОи”»</span></span></div>
+        </div>
+      </section>
+
+      <!-- ═══════ МЕДИА ═══════ -->
+      <section class="sec" id="media">
+        <header class="sec-head" data-reveal>
+          <span class="sec-overline"><span class="n">10</span>Медиа диктанта</span>
+          <h2 class="sec-title">Как это было <em>в прошлые сезоны</em></h2>
+          <p class="sec-lead">Торжественные открытия, гимн в исполнении почётного караула и тысячи людей, которые в одну минуту берут в руки телефоны и начинают вспоминать историю.</p>
+        </header>
+        <div class="carousel" data-reveal>
+          <div class="carousel__viewport">
+            <div class="carousel__track">
+              <figure class="slide" data-caption="Лейтенант Иван Шиц, Герой Российской Федерации, обращается к участникам открытия диктанта"><img src="assets/img/media/m04.webp" alt="Почётный гость выступает на открытии диктанта" loading="lazy"><span class="slide__zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></span></figure>
+              <figure class="slide" data-caption="Наталия Конева, президент Фонда памяти полководцев Победы, на церемонии открытия"><img src="assets/img/media/m03.webp" alt="Наталия Конева выступает на торжественном открытии" loading="lazy"><span class="slide__zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></span></figure>
+              <figure class="slide" data-caption="Ректор Президентской академии и епископ Кирилл с именными грамотами участников"><img src="assets/img/media/m06.webp" alt="Награждение участников диктанта" loading="lazy"><span class="slide__zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></span></figure>
+              <figure class="slide" data-caption="Участники пишут диктант онлайн со смартфонов — прямо из зала"><img src="assets/img/media/m23.webp" alt="Студенты проходят диктант со смартфонов" loading="lazy"><span class="slide__zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></span></figure>
+              <figure class="slide" data-caption="Так выглядит прохождение диктанта: 40 минут и 30 баллов"><img src="assets/img/media/m24.webp" alt="Смартфон с запущенным тестом диктанта" loading="lazy"><span class="slide__zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></span></figure>
+              <figure class="slide" data-caption="Участники центральной площадки представляют разные народы России"><img src="assets/img/media/m12.webp" alt="Участники с флагами на групповом фото" loading="lazy"><span class="slide__zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></span></figure>
+              <figure class="slide" data-caption="Дипломы и благодарственные письма базовых площадок"><img src="assets/img/media/m07.webp" alt="Дипломы диктанта на столе награждения" loading="lazy"><span class="slide__zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></span></figure>
+              <figure class="slide" data-caption="Награждение призёров и волонтёров проекта в Президентской академии"><img src="assets/img/media/m08.webp" alt="Группа участников с дипломами" loading="lazy"><span class="slide__zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></span></figure>
+              <figure class="slide" data-caption="Гимн в исполнении роты почётного караула открывает диктант"><img src="assets/img/media/m05.webp" alt="Почётный караул на открытии диктанта" loading="lazy"><span class="slide__zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></span></figure>
+              <figure class="slide" data-caption="Актовый зал Президентской академии в минуты диктанта"><img src="assets/img/media/m14.webp" alt="Полный зал участников" loading="lazy"><span class="slide__zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></span></figure>
+              <figure class="slide" data-caption="Студенты и школьники слушают инструктаж перед стартом"><img src="assets/img/media/m15.webp" alt="Участники в актовом зале" loading="lazy"><span class="slide__zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></span></figure>
+              <figure class="slide" data-caption="Школьники за очным прохождением на базовой площадке"><img src="assets/img/media/m11.webp" alt="Школьники пишут диктант в классе" loading="lazy"><span class="slide__zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></span></figure>
+              <figure class="slide" data-caption="Центральная сцена церемонии открытия"><img src="assets/img/media/m16.webp" alt="Сцена церемонии открытия диктанта" loading="lazy"><span class="slide__zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></span></figure>
+              <figure class="slide" data-caption="Участники старшего поколения — самые азартные"><img src="assets/img/media/m01.webp" alt="Участники аплодируют в зале" loading="lazy"><span class="slide__zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></span></figure>
+              <figure class="slide" data-caption="Почётные гости и организаторы диктанта"><img src="assets/img/media/m19.webp" alt="Почётные гости на первом ряду" loading="lazy"><span class="slide__zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></span></figure>
+              <figure class="slide" data-caption="Пресс-конференция оргкомитета проекта"><img src="assets/img/media/m21.webp" alt="Члены оргкомитета на пресс-конференции" loading="lazy"><span class="slide__zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></span></figure>
+            </div>
+          </div>
+          <div class="carousel__ui">
+            <div class="carousel__btns">
+              <button class="car-btn" data-car="prev" aria-label="Предыдущее фото"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button>
+              <button class="car-btn" data-car="next" aria-label="Следующее фото"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+            </div>
+            <div class="carousel__bar" aria-hidden="true"><i></i></div>
+            <span class="carousel__count"><b>01</b> / 16</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════ НОВОСТИ (превью) ═══════ -->
+      <section class="sec" id="news">
+        <header class="sec-head" data-reveal>
+          <span class="sec-overline"><span class="n">11</span>Новости</span>
+          <h2 class="sec-title">Что нового <span class="grad">в проекте</span></h2>
+        </header>
+        <div class="news-grid" id="news-preview"></div>
+        <div class="btn-row" style="margin-top:30px" data-reveal>
+          <a class="btn btn--blue" href="news.html">Все новости
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+        </div>
+      </section>
+
+      <!-- ═══════ FAQ ═══════ -->
+      <section class="sec" id="faq">
+        <header class="sec-head" data-reveal>
+          <span class="sec-overline"><span class="n">12</span>Вопросы и ответы</span>
+          <h2 class="sec-title">Спрашивали? <em>Отвечаем</em></h2>
+        </header>
+        <div class="faq">
+          <div class="faq-item glass" data-reveal>
+            <button class="faq-item__q" aria-expanded="false"><h3>Зачем участвовать во Всероссийском гражданско-патриотическом диктанте «Моя любовь, душа моя — Россия!»?</h3><span class="faq-item__plus" aria-hidden="true"></span></button>
+            <div class="faq-item__a"><div class="faq-item__a-in"><p>Вы можете проверить свои знания, выразить свою гражданскую позицию и внести личный вклад в сохранение культурного и исторического наследия страны.</p></div></div>
+          </div>
+          <div class="faq-item glass" data-reveal style="--d:.06s">
+            <button class="faq-item__q" aria-expanded="false"><h3>Кто может участвовать?</h3><span class="faq-item__plus" aria-hidden="true"></span></button>
+            <div class="faq-item__a"><div class="faq-item__a-in"><p>Принять участие могут все желающие старше 11 лет, в том числе из-за рубежа.</p></div></div>
+          </div>
+          <div class="faq-item glass" data-reveal style="--d:.12s">
+            <button class="faq-item__q" aria-expanded="false"><h3>Когда я могу ответить на вопросы диктанта?</h3><span class="faq-item__plus" aria-hidden="true"></span></button>
+            <div class="faq-item__a"><div class="faq-item__a-in"><p>Диктант начнётся 6 ноября в 10:00 по московскому времени и будет доступен для прохождения до 23:59 по московскому времени 8 ноября.</p></div></div>
+          </div>
+          <div class="faq-item glass" data-reveal style="--d:.18s">
+            <button class="faq-item__q" aria-expanded="false"><h3>Как подготовиться к диктанту?</h3><span class="faq-item__plus" aria-hidden="true"></span></button>
+            <div class="faq-item__a"><div class="faq-item__a-in"><p>Все необходимые материалы собраны в специальном <a href="materials.html">разделе для подготовки</a> — видеолекции, статьи и тренировочные тесты.</p></div></div>
+          </div>
+          <div class="faq-item glass" data-reveal style="--d:.24s">
+            <button class="faq-item__q" aria-expanded="false"><h3>Мне не пришёл сертификат/диплом о прохождении. Что делать?</h3><span class="faq-item__plus" aria-hidden="true"></span></button>
+            <div class="faq-item__a"><div class="faq-item__a-in"><p>Сертификат/диплом направляется всем, кто полностью и верно заполнил регистрационную форму после прохождения. Если вы всё сделали правильно, проверьте папки «спам», «неразобранные рассылки» или «нежелательная почта». Если там нет документа, обратитесь на электронную почту <a href="mailto:diktant-russia@ranepa.ru">diktant-russia@ranepa.ru</a>.</p></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════ КОНТАКТЫ ═══════ -->
+      <section class="sec" id="contacts">
+        <header class="sec-head" data-reveal>
+          <span class="sec-overline"><span class="n">13</span>Контакты</span>
+          <h2 class="sec-title">Остались вопросы? <span class="grad">Мы рядом</span></h2>
+        </header>
+        <div class="contacts">
+          <div class="contact-main" data-reveal>
+            <h3>Почта организационного комитета</h3>
+            <p>Пишите — отвечаем в рабочие дни. Перед письмом загляните в блок «Вопросы и ответы»: возможно, ответ уже там.</p>
+            <a class="contact-mail" href="mailto:diktant-russia@ranepa.ru">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 6L22 7"/></svg>
+              diktant-russia@ranepa.ru</a>
+          </div>
+          <div class="contact-people">
+            <div class="contact-person glass" data-reveal style="--d:.08s">
+              <span class="contact-person__ava">БА</span>
+              <span><b>Борисенков Алексей Александрович</b><span>руководитель Организационного комитета проекта</span></span>
+            </div>
+            <div class="contact-person glass" data-reveal style="--d:.16s">
+              <span class="contact-person__ava">ТГ</span>
+              <span><b>Теплых Галина Ивановна</b><span>соруководитель Организационного комитета проекта</span></span>
+            </div>
+            <div class="contact-person glass" data-reveal style="--d:.24s">
+              <span class="contact-person__ava">МА</span>
+              <span><b>Макаров Андрей Викторович</b><span>администратор проекта</span>
+              <a href="mailto:makarov-anv@ranepa.ru">makarov-anv@ranepa.ru</a></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════ ФУТЕР ═══════ -->
+      <footer class="footer">
+        <div class="footer__panel">
+          <div class="footer__grid">
+            <div class="footer__brand">
+              <img src="assets/img/logo-diktant-white.png" alt="«Моя любовь, душа моя — Россия!»">
+              <p>Всероссийский гражданско-патриотический диктант. Проект Президентской академии, Научно-образовательной теологической ассоциации и УМС ГМУ.</p>
+            </div>
+            <nav aria-label="Карта сайта">
+              <h4>Разделы</h4>
+              <div class="footer__nav">
+                <a href="index.html">Главная</a>
+                <a href="materials.html">Материалы для подготовки</a>
+                <a href="news.html">Новости</a>
+                <a href="test.html">Пройти диктант</a>
+                <a href="test.html?mode=training">Тренировочные тесты</a>
+              </div>
+            </nav>
+            <div>
+              <h4>Контакты</h4>
+              <div class="footer__contacts">
+                <span class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 6L22 7"/></svg><a href="mailto:diktant-russia@ranepa.ru">diktant-russia@ranepa.ru</a></span>
+                <span class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span>Президентская академия (РАНХиГС), г. Москва</span></span>
+                <span class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Диктант-2026: 6–8 ноября, онлайн</span></span>
+              </div>
+            </div>
+          </div>
+          <div class="footer__bottom">
+            <span>© <span data-year>2026</span> Всероссийский гражданско-патриотический диктант «Моя любовь, душа моя — Россия!»</span>
+            <span class="footer__logos">
+              <a href="https://ranepa.ru" target="_blank" rel="noopener" aria-label="Президентская академия"><img src="assets/img/logo-ranepa.png" alt="РАНХиГС" style="background:#fff;border-radius:8px;padding:4px 8px;height:30px"></a>
+              <a href="https://nota-theology.ru" target="_blank" rel="noopener" aria-label="НОТА"><img src="assets/img/logo-nota-white.png" alt="НОТА"></a>
+            </span>
+          </div>
+        </div>
+      </footer>
+
+    </div><!-- /container -->
+  </main>
+</div><!-- /app -->
+
+<!-- плавающая CTA -->
+<div class="float-cta">
+  <a class="btn btn--primary" href="test.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+    <span class="fcta-txt">Принять участие</span></a>
+</div>
+
+<!-- лайтбокс -->
+<div class="lightbox" role="dialog" aria-modal="true" aria-label="Просмотр фотографии">
+  <button class="lightbox__close" aria-label="Закрыть">✕</button>
+  <button class="lightbox__nav lightbox__nav--prev" aria-label="Предыдущее"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button>
+  <figure><img src="" alt=""><figcaption></figcaption></figure>
+  <button class="lightbox__nav lightbox__nav--next" aria-label="Следующее"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+</div>
+
+<script src="assets/js/news-data.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+/* превью трёх последних новостей */
+(() => {
+  const box = document.getElementById('news-preview');
+  if (!box || !window.NEWS_DATA) return;
+  box.innerHTML = window.NEWS_DATA.slice(0, 3).map((n, i) => `
+    <article class="news-card glass" data-reveal style="--d:${i * .08}s">
+      <div class="news-card__img"><span class="news-card__date">${n.date}</span><img src="${n.cover}" alt="" loading="lazy"></div>
+      <div class="news-card__body">
+        <h3><a href="article.html?id=${n.id}">${n.title}</a></h3>
+        <p>${n.excerpt}</p>
+        <span class="news-card__more">Читать<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>
+      </div>
+    </article>`).join('');
+  box.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('is-in'));
+})();
+</script>
+</body>
+</html>
