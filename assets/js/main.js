@@ -79,8 +79,20 @@
         };
         requestAnimationFrame(step);
       });
-    }, { threshold: .6 });
+    /* запускаем, как только цифра поднимается над нижней кромкой экрана –
+       на мобильных большой порог 0.6 мог вообще не наступить,
+       и число оставалось «0» */
+    }, { threshold: .01, rootMargin: '0px 0px -8% 0px' });
     $$('[data-count]').forEach(el => counterIO.observe(el));
+    /* страховка: если через 6 с видимое число ещё «0» – ставим финальное */
+    setTimeout(() => {
+      $$('[data-count]').forEach(el => {
+        if (el.textContent.trim() === '0') {
+          const r = el.getBoundingClientRect();
+          if (r.top < innerHeight && r.bottom > 0) setFinal(el);
+        }
+      });
+    }, 6000);
   } else {
     $$('[data-count]').forEach(setFinal);
   }
