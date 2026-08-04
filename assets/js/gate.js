@@ -4,32 +4,56 @@
    Разметка:
      <a class="btn" data-gate="start" href="test.html">Принять участие</a>
    До 05.11.2026 10:00 (мск, время сервера):
-     – кнопка становится серой и неактивной;
-     – href снимается, под кнопкой появляется подпись из конфига;
-     – вся конструкция оборачивается в span.gate-wrap.
+     – кнопка становится серой и не ведёт никуда;
+     – по нажатию на неё рядом всплывает подпись из конфига
+       («Диктант начинается 5 ноября в 10:00 по московскому времени»);
+     – повторное нажатие / клик вне кнопки / 6 секунд – скрывают её.
    После старта: кнопка красная и ведёт на страницу прохождения.
    ============================================================ */
 (() => {
   'use strict';
-  const wrap = (el, captionText) => {
-    const w = document.createElement('span');
-    w.className = 'gate-wrap';
-    el.replaceWith(w);
-    w.appendChild(el);
-    const cap = document.createElement('span');
-    cap.className = 'gate-caption';
-    cap.textContent = captionText;
-    w.appendChild(cap);
-  };
+  const HIDE_MS = 6000;
+
+  const closeAll = except =>
+    document.querySelectorAll('.gate-caption.is-show')
+      .forEach(c => { if (c !== except) c.classList.remove('is-show'); });
 
   const lock = el => {
     el.classList.add('is-locked');
     el.dataset.href = el.getAttribute('href') || '';
     el.removeAttribute('href');
     el.setAttribute('aria-disabled', 'true');
-    el.setAttribute('tabindex', '-1');
-    wrap(el, window.DIKTANT.CONFIG.gateCaption);
+    el.setAttribute('tabindex', '0');
+
+    const w = document.createElement('span');
+    w.className = 'gate-wrap';
+    el.replaceWith(w);
+    w.appendChild(el);
+
+    const cap = document.createElement('span');
+    cap.className = 'gate-caption';
+    cap.setAttribute('role', 'status');
+    cap.textContent = window.DIKTANT.CONFIG.gateCaption;
+    w.appendChild(cap);
+
+    let timer;
+    const onTap = e => {
+      e.preventDefault(); e.stopPropagation();
+      const show = !cap.classList.contains('is-show');
+      closeAll(cap);
+      cap.classList.toggle('is-show', show);
+      clearTimeout(timer);
+      if (show) timer = setTimeout(() => cap.classList.remove('is-show'), HIDE_MS);
+    };
+    el.addEventListener('click', onTap);
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') onTap(e);
+    });
   };
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.gate-wrap')) closeAll(null);
+  });
 
   const apply = () => {
     const cfg = window.DIKTANT.CONFIG;
@@ -47,7 +71,6 @@
     document.querySelectorAll('[data-gate="training"]').forEach(box => {
       if (window.DIKTANT.status.trainingOpen()) {
         box.classList.add('is-open-training');
-        /* карточки становятся ссылками на тренировочный тест своей категории */
         box.querySelectorAll('[data-cat]').forEach(card => {
           card.classList.add('is-link');
           card.setAttribute('role', 'link');

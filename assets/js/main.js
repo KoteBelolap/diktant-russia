@@ -63,20 +63,34 @@
   }, { threshold: .6 });
   $$('[data-count]').forEach(el => counterIO.observe(el));
 
-  /* ---------- Обратный отсчёт до старта (05.11.2026 10:00 МСК, время сервера) ---------- */
+  /* ---------- Обратный отсчёт до старта (05.11.2026 10:00 МСК, время сервера) ----------
+     Механика: до старта – тикающий отсчёт; со старта и до 08.11 23:59 (мск) –
+     таймер полностью скрыт; после окончания – вместо него фраза-итог. */
   const TARGET = window.DIKTANT ? Date.parse(window.DIKTANT.CONFIG.startDate) : Date.parse('2026-11-05T10:00:00+03:00');
+  const ENDAT = window.DIKTANT ? Date.parse(window.DIKTANT.CONFIG.endDate) : Date.parse('2026-11-08T23:59:59+03:00');
   const nowMs = () => window.DIKTANT ? window.DIKTANT.now() : Date.now();
   const cdCells = { d: $('[data-cd="d"]'), h: $('[data-cd="h"]'), m: $('[data-cd="m"]'), s: $('[data-cd="s"]') };
   if (cdCells.d) {
     const plural = (n, f) => f[(n % 10 === 1 && n % 100 !== 11) ? 0 : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? 1 : 2];
-    const labels = $('.countdown');
+    const cdBox = $('.countdown');
+    const cdEnded = $('.countdown__ended');
     const setCell = (key, val) => {
       const el = cdCells[key];
       if (el.textContent !== String(val)) { el.textContent = val; el.classList.remove('tick'); void el.offsetWidth; el.classList.add('tick'); }
     };
     const tickCd = () => {
-      let diff = Math.max(0, TARGET - nowMs());
-      if (diff === 0) { labels?.classList.add('is-live'); }
+      const t = nowMs();
+      if (cdBox) {
+        if (t >= TARGET && t <= ENDAT) { cdBox.hidden = true; return; } /* диктант идёт – таймер скрыт */
+        cdBox.hidden = false;
+        if (t > ENDAT) { /* диктант завершён – только финальная фраза */
+          cdBox.classList.add('is-ended');
+          if (cdEnded) cdEnded.hidden = false;
+          return;
+        }
+        cdBox.classList.remove('is-ended');
+      }
+      const diff = Math.max(0, TARGET - t);
       const d = Math.floor(diff / 864e5);
       const h = Math.floor(diff % 864e5 / 36e5);
       const m = Math.floor(diff % 36e5 / 6e4);

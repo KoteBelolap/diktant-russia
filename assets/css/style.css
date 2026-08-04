@@ -1474,3 +1474,70 @@ html { scroll-padding-top: 96px; }
 
 /* атрибут hidden всегда скрывает (иначе display-классы перебивают) */
 [hidden] { display: none !important; }
+
+/* награды: иконка-здание (картинка с прозрачным фоном) */
+.prize-card__medal--img { width: 76px !important; height: 76px !important; border-radius: 50% !important; }
+.prize-card__medal--img img { width: 62px; height: auto; object-fit: contain; filter: none; }
+
+/* ============================================================
+   ПРАВКИ 04.08.2026 — раунд 2 (фидбек заказчика)
+   ============================================================ */
+
+/* Верхняя полоса разделов — просто сверху страницы, не «прилипает» */
+.topnav { position: static; }
+.topnav .btn { flex: 0 0 auto; white-space: nowrap; }
+
+/* Плавающая CTA: надпись «Принять участие» видна на любой версии */
+.float-cta .btn span.fcta-txt { display: inline !important; }
+.float-cta .btn { padding: 15px 26px !important; white-space: nowrap; }
+
+/* Серая кнопка: подпись показывается ТОЛЬКО по нажатию (всплывашка) */
+.btn.is-locked { pointer-events: auto; cursor: not-allowed; }
+.gate-wrap { position: relative; max-width: none; }
+.gate-caption {
+  display: none; position: absolute; top: calc(100% + 10px); left: 0; z-index: 90;
+  width: max-content; max-width: 270px; padding: 11px 15px; border-radius: 14px;
+  background: rgba(255,255,255,.94); border: var(--glass-brd); box-shadow: var(--shadow-2);
+  font-size: 12.5px; line-height: 1.45; font-weight: 650; color: var(--navy-800) !important;
+  opacity: 1 !important; text-align: left;
+}
+.gate-caption.is-show { display: block; animation: gatePop .28s var(--ease-out); }
+@keyframes gatePop { from { opacity: 0; transform: translateY(6px); } }
+.float-cta .gate-wrap { position: static; align-items: flex-end; }
+.float-cta .gate-caption { top: auto; bottom: calc(100% + 10px); left: auto; right: 0; max-width: 240px; text-align: right; }
+
+/* Цель и задачи: одинаковая жирность, аккуратная ширина */
+.aim-inline p { font-weight: 600; }
+.tasks-h { font-family: var(--font-d); font-size: clamp(17px, 2vw, 21px); font-weight: 700; color: var(--navy-900); margin: 0 0 16px; }
+.task-card { min-height: 0; }
+.aim-inline, .tasks-h, .tasks-grid { max-width: 1200px; margin-inline: auto; }
+.tasks-h { width: 100%; }
+
+/* Отсчёт: текст «Старт…» под таймером; состояния таймера */
+.countdown { grid-template-columns: 1fr !important; text-align: center; justify-items: center; gap: 14px; }
+.countdown__grid { justify-content: center; }
+.countdown__note { font-weight: 700; font-size: 12.5px; letter-spacing: .04em; color: var(--ink-55); margin: 0; }
+.countdown__ended { font-family: var(--font-d); font-weight: 600; font-size: clamp(15px, 1.8vw, 19px); color: var(--navy-900); margin: 0; }
+.countdown.is-ended .countdown__grid,
+.countdown.is-ended .countdown__label,
+.countdown.is-ended .countdown__note { display: none; }
+
+/* Организаторы и партнёры: логотипы заметно крупнее */
+.logos-grid .logo-tile img { height: 92px !important; }
+.logos-grid--4 .logo-tile img { height: 72px !important; }
+.logo-tile { min-height: 170px; }
+@media (max-width: 767px) {
+  .logos-grid .logo-tile img { height: 62px !important; }
+  .logos-grid--4 .logo-tile img { height: 50px !important; }
+  .logo-tile { min-height: 138px; }
+}
+
+/* Тонкий футер: только строка копирайта (дальше – панель Академии) */
+.footer__panel--slim { padding: 26px 18px; text-align: center; }
+.footer__panel--slim span { position: relative; font-size: 13.5px; font-weight: 600; color: rgba(217,240,252,.78); }
+
+/* Контакты: роль + должность мелким */
+.contact-person .cp-role { display: block; font-size: 13px; font-weight: 800; color: var(--blue-700); margin-top: 3px; }
+.contact-person .cp-pos { display: block; font-size: 12px; font-weight: 550; color: var(--ink-55); line-height: 1.45; margin-top: 4px; }
+
+/* Иконка награждения: чёрный контур в золотом круге, как остальные иконки */

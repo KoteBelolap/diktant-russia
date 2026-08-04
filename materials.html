@@ -4,12 +4,13 @@
 <meta charset="UTF-8">
 <script>document.documentElement.classList.add('js')</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Материалы для подготовки – Диктант «Моя любовь, душа моя – Россия!» – 2026</title>
+<title>Гражданско-патриотический диктант</title>
 <meta name="description" content="Статьи и тренировочные тесты для подготовки ко Всероссийскому гражданско-патриотическому диктанту 2026 года.">
 <meta property="og:title" content="Материалы для подготовки – Диктант 2026">
 <meta property="og:description" content="Статьи и тренировочные тесты для подготовки к диктанту 2026 года.">
 <meta property="og:image" content="assets/img/og.webp">
 <meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="preload" href="assets/fonts/unbounded-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/manrope-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
@@ -69,26 +70,7 @@
           <span class="sec-overline">Статьи</span>
           <h2 class="sec-title">Читайте <em>и готовьтесь</em></h2>
         </header>
-        <div class="res-grid">
-          <article class="res-card glass">
-            <div class="res-card__body">
-              <h3>Заголовок статьи</h3>
-              <p>Текст статьи</p>
-            </div>
-          </article>
-          <article class="res-card glass">
-            <div class="res-card__body">
-              <h3>Заголовок статьи</h3>
-              <p>Текст статьи</p>
-            </div>
-          </article>
-          <article class="res-card glass">
-            <div class="res-card__body">
-              <h3>Заголовок статьи</h3>
-              <p>Текст статьи</p>
-            </div>
-          </article>
-        </div>
+        <div class="res-grid" id="articles-grid"></div>
       </section>
 
       <!-- ═══════ ТРЕНИРОВОЧНЫЕ ТЕСТЫ (скрыты до включения) ═══════ -->
@@ -137,36 +119,8 @@
 
       <!-- ═══════ ФУТЕР ═══════ -->
       <footer class="footer">
-        <div class="footer__panel">
-          <div class="footer__grid">
-            <div class="footer__brand">
-              <img src="assets/img/logo-diktant-white.png" alt="«Моя любовь, душа моя – Россия!»">
-              <p>Всероссийский гражданско-патриотический диктант. Проект Президентской академии, Научно-образовательной теологической ассоциации и УМС ГМУ.</p>
-            </div>
-            <nav aria-label="Карта сайта">
-              <h4>Разделы</h4>
-              <div class="footer__nav">
-                <a href="index.html">Главная</a>
-                <a href="materials.html">Материалы для подготовки</a>
-                <a href="news.html">Новости</a>
-              </div>
-            </nav>
-            <div>
-              <h4>Контакты</h4>
-              <div class="footer__contacts">
-                <span class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 6L22 7"/></svg><a href="mailto:diktant-russia@ranepa.ru">diktant-russia@ranepa.ru</a></span>
-                <span class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span>Президентская академия (РАНХиГС), г. Москва</span></span>
-                <span class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Диктант-2026: 5–8 ноября, онлайн</span></span>
-              </div>
-            </div>
-          </div>
-          <div class="footer__bottom">
-            <span>© <span data-year>2026</span> Всероссийский гражданско-патриотический диктант «Моя любовь, душа моя – Россия!»</span>
-            <span class="footer__logos">
-              <a href="https://ranepa.ru" target="_blank" rel="noopener" aria-label="Президентская академия"><img src="assets/img/logo-ranepa.png" alt="РАНХиГС" style="background:#fff;border-radius:8px;padding:4px 8px;height:30px"></a>
-              <a href="https://nota-theology.ru" target="_blank" rel="noopener" aria-label="НОТА"><img src="assets/img/logo-nota-white.png" alt="НОТА"></a>
-            </span>
-          </div>
+        <div class="footer__panel footer__panel--slim">
+          <span>© <span data-year>2026</span> Всероссийский гражданско-патриотический диктант «Моя любовь, душа моя – Россия!»</span>
         </div>
       </footer>
 
@@ -177,6 +131,35 @@
 <script src="assets/js/config.js"></script>
 <script src="assets/js/gate.js"></script>
 <script src="assets/js/typograf.js"></script>
+<script src="assets/js/news-data.js"></script>
 <script src="assets/js/main.js"></script>
+<script>
+/* Сетка статей: из CMS (ARTICLES_DATA) или плашка «Статей пока нет» */
+(() => {
+  const box = document.getElementById('articles-grid');
+  if (!box || !window.ARTICLES_DATA) return;
+  const data = window.ARTICLES_DATA;
+  if (!data.length) {
+    box.classList.remove('res-grid');
+    box.innerHTML = `
+      <p class="empty-note glass">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4a2 2 0 0 0-2-2H6.5A2.5 2.5 0 0 0 4 4.5Zm0 0A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>
+        <span>Статей пока нет – материалы для подготовки появятся здесь позже</span>
+      </p>`;
+    return;
+  }
+  box.innerHTML = data.map(a => `
+    <article class="res-card glass">
+      ${a.cover ? `<div class="res-card__img"><img src="${a.cover}" alt="" loading="lazy"></div>` : ''}
+      <div class="res-card__body">
+        <span class="news-row__date">${a.date || ''}</span>
+        <h3>${a.title}</h3>
+        <p>${a.excerpt || ''}</p>
+        <a class="btn btn--glass btn--sm" href="article.html?id=${a.id}">Читать статью
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+      </div>
+    </article>`).join('');
+})();
+</script>
 </body>
 </html>
