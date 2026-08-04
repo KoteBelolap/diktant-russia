@@ -12,8 +12,25 @@
     "orientation": "landscape"
   },
   "fonts": {
-    "family": "Manrope ExtraBold (совместима: Montserrat ExtraBold, Arial Narrow Bold)",
-    "note": "Шрифт хранить рядом с шаблоном и встраивать в PDF, чтобы результат не зависел от сервера."
+    "note": "Шрифты по макету дизайнера. TTF-файлы лежат в папке fonts/ рядом с шаблоном и подключены в certificate-template.html через @font-face – при генерации PDF применяются именно они, результат не зависит от сервера.",
+    "fio": {
+      "family": "Unbounded Medium",
+      "file": "fonts/Unbounded-Medium.ttf",
+      "designSize": "40 px при 150 dpi",
+      "printSizePt": 19
+    },
+    "score": {
+      "family": "Unbounded Medium",
+      "file": "fonts/Unbounded-Medium.ttf",
+      "designSize": "100 px при 150 dpi",
+      "printSizePt": 48
+    },
+    "regnum": {
+      "family": "Manrope SemiBold",
+      "file": "fonts/Manrope-SemiBold.ttf",
+      "designSize": "15 px при 150 dpi",
+      "printSizePt": 7
+    }
   },
   "fields": [
     {
@@ -26,9 +43,10 @@
         "hPx": 132,
         "color": "#0d2a66",
         "sizePt": 19,
-        "weight": 800,
+        "weight": 500,
         "caps": true,
-        "letterSpacingEm": 0.035
+        "letterSpacingEm": 0.035,
+        "family": "Unbounded Medium"
       },
       "coverPlaceholder": {
         "xPx": 2227,
@@ -48,9 +66,10 @@
         "hPx": 124,
         "color": "#0d2a66",
         "sizePt": 19,
-        "weight": 800,
+        "weight": 500,
         "caps": true,
-        "letterSpacingEm": 0.035
+        "letterSpacingEm": 0.035,
+        "family": "Unbounded Medium"
       },
       "coverPlaceholder": {
         "xPx": 2227,
@@ -70,9 +89,10 @@
         "hPx": 129,
         "color": "#0d2a66",
         "sizePt": 19,
-        "weight": 800,
+        "weight": 500,
         "caps": true,
-        "letterSpacingEm": 0.035
+        "letterSpacingEm": 0.035,
+        "family": "Unbounded Medium"
       },
       "coverPlaceholder": {
         "xPx": 2227,
@@ -92,7 +112,8 @@
         "hPx": 311,
         "color": "#ffffff",
         "sizePt": 48,
-        "weight": 800
+        "weight": 500,
+        "family": "Unbounded Medium"
       },
       "coverPlaceholder": {
         "xPx": 248,
@@ -113,8 +134,9 @@
         "hPx": 55,
         "color": "#ffffff",
         "sizePt": 7,
-        "weight": 700,
-        "letterSpacingEm": 0.1
+        "weight": 600,
+        "letterSpacingEm": 0.1,
+        "family": "Manrope SemiBold"
       },
       "coverPlaceholder": {
         "xPx": 280,

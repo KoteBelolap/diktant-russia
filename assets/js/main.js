@@ -34,38 +34,62 @@
     $$('.drawer .nav__link').forEach(l => l.addEventListener('click', closeDrawer));
   }
 
-  /* ---------- Секция появилась (запуск графиков) ---------- */
-  const inViewIO = new IntersectionObserver(entries => {
-    entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in-view'); inViewIO.unobserve(en.target); } });
-  }, { threshold: .25 });
-  $$('[data-inview]').forEach(el => inViewIO.observe(el));
+  /* ---------- Секция появилась (запуск графиков) ----------
+     Класс 'anim' (скрытое исходное состояние графиков) ставится ТОЛЬКО если
+     IntersectionObserver поддержан и движение не отключено – иначе графики
+     сразу отрисовываются в финальном состоянии и «пустых» панелей не бывает. */
+  if ('IntersectionObserver' in window && !REDUCED) {
+    const inViewIO = new IntersectionObserver(entries => {
+      entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in-view'); inViewIO.unobserve(en.target); } });
+    }, { threshold: .25 });
+    $$('[data-inview]').forEach(el => { el.classList.add('anim'); inViewIO.observe(el); });
+    /* страховка: если по какой-то причине колбэк IO не дошёл –
+       через 6 с принудительно показываем уже видимые панели */
+    setTimeout(() => {
+      $$('[data-inview].anim:not(.in-view)').forEach(el => {
+        const r = el.getBoundingClientRect();
+        if (r.top < innerHeight * .9 && r.bottom > 0) el.classList.add('in-view');
+      });
+    }, 6000);
+  }
 
   /* ---------- Счётчики ---------- */
   const fmt = n => n.toLocaleString('ru-RU');
-  const counterIO = new IntersectionObserver(entries => {
-    entries.forEach(en => {
-      if (!en.isIntersecting) return;
-      counterIO.unobserve(en.target);
-      const el = en.target;
-      const target = parseFloat(el.dataset.count);
-      const dec = el.dataset.count.includes('.') || el.dataset.count.includes(',') ? 1 : 0;
-      const dur = REDUCED ? 0 : 1600;
-      const t0 = performance.now();
-      const step = t => {
-        const p = dur ? Math.min(1, (t - t0) / dur) : 1;
-        const e = 1 - Math.pow(1 - p, 3);
-        const v = target * e;
-        el.textContent = dec ? v.toFixed(1).replace('.', ',') : fmt(Math.round(v));
-        if (p < 1) requestAnimationFrame(step);
-      };
-      requestAnimationFrame(step);
-    });
-  }, { threshold: .6 });
-  $$('[data-count]').forEach(el => counterIO.observe(el));
+  const setFinal = el => {
+    const target = parseFloat(el.dataset.count);
+    const dec = el.dataset.count.includes('.') || el.dataset.count.includes(',') ? 1 : 0;
+    el.textContent = dec ? target.toFixed(1).replace('.', ',') : fmt(Math.round(target));
+  };
+  if ('IntersectionObserver' in window) {
+    const counterIO = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        counterIO.unobserve(en.target);
+        const el = en.target;
+        const target = parseFloat(el.dataset.count);
+        const dec = el.dataset.count.includes('.') || el.dataset.count.includes(',') ? 1 : 0;
+        const dur = REDUCED ? 0 : 1600;
+        const t0 = performance.now();
+        const step = t => {
+          const p = dur ? Math.min(1, (t - t0) / dur) : 1;
+          const e = 1 - Math.pow(1 - p, 3);
+          const v = target * e;
+          el.textContent = dec ? v.toFixed(1).replace('.', ',') : fmt(Math.round(v));
+          if (p < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      });
+    }, { threshold: .6 });
+    $$('[data-count]').forEach(el => counterIO.observe(el));
+  } else {
+    $$('[data-count]').forEach(setFinal);
+  }
 
-  /* ---------- Обратный отсчёт до старта (05.11.2026 10:00 МСК, время сервера) ----------
-     Механика: до старта – тикающий отсчёт; со старта и до 08.11 23:59 (мск) –
-     таймер полностью скрыт; после окончания – вместо него фраза-итог. */
+  /* ---------- Обратный отсчёт (05.11.2026 10:00 – 08.11.2026 23:59 МСК, время сервера) ----------
+     Механика трёх фаз:
+       1) до старта – отсчёт до начала («До начала … осталось»);
+       2) со старта и до 08.11 23:59 (мск) – отсчёт до конца («До конца … осталось»);
+       3) после окончания – вместо таймера фраза-итог. */
   const TARGET = window.DIKTANT ? Date.parse(window.DIKTANT.CONFIG.startDate) : Date.parse('2026-11-05T10:00:00+03:00');
   const ENDAT = window.DIKTANT ? Date.parse(window.DIKTANT.CONFIG.endDate) : Date.parse('2026-11-08T23:59:59+03:00');
   const nowMs = () => window.DIKTANT ? window.DIKTANT.now() : Date.now();
@@ -74,6 +98,9 @@
     const plural = (n, f) => f[(n % 10 === 1 && n % 100 !== 11) ? 0 : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? 1 : 2];
     const cdBox = $('.countdown');
     const cdEnded = $('.countdown__ended');
+    const cdLabel = $('[data-cd-label]');
+    const LABEL_BEFORE = 'До начала Всероссийского гражданско-патриотического диктанта осталось:';
+    const LABEL_RUNS = 'До конца Всероссийского гражданско-патриотического диктанта осталось:';
     const setCell = (key, val) => {
       const el = cdCells[key];
       if (el.textContent !== String(val)) { el.textContent = val; el.classList.remove('tick'); void el.offsetWidth; el.classList.add('tick'); }
@@ -81,16 +108,18 @@
     const tickCd = () => {
       const t = nowMs();
       if (cdBox) {
-        if (t >= TARGET && t <= ENDAT) { cdBox.hidden = true; return; } /* диктант идёт – таймер скрыт */
-        cdBox.hidden = false;
         if (t > ENDAT) { /* диктант завершён – только финальная фраза */
+          cdBox.hidden = false;
           cdBox.classList.add('is-ended');
           if (cdEnded) cdEnded.hidden = false;
           return;
         }
+        cdBox.hidden = false;
         cdBox.classList.remove('is-ended');
       }
-      const diff = Math.max(0, TARGET - t);
+      const toEnd = t >= TARGET; /* диктант идёт – считаем до конца */
+      if (cdLabel) cdLabel.textContent = toEnd ? LABEL_RUNS : LABEL_BEFORE;
+      const diff = Math.max(0, (toEnd ? ENDAT : TARGET) - t);
       const d = Math.floor(diff / 864e5);
       const h = Math.floor(diff % 864e5 / 36e5);
       const m = Math.floor(diff % 36e5 / 6e4);
@@ -141,12 +170,21 @@
     next?.addEventListener('click', () => go(index + 1));
 
     /* drag */
+    /* ВАЖНО: setPointerCapture только после реального драга (>6px).
+       Если захватывать указатель сразу на pointerdown, браузер
+       перенацеливает событие click на viewport – и клик по слайду
+       (открытие лайтбокса) никогда не срабатывает. */
+    $$('img', track).forEach(im => { im.draggable = false; });
     let down = false, startX = 0, startPos = 0, moved = false;
-    vp.addEventListener('pointerdown', e => { down = true; moved = false; startX = e.clientX; startPos = pos; vp.setPointerCapture(e.pointerId); track.style.transition = 'none'; });
+    vp.addEventListener('pointerdown', e => { down = true; moved = false; startX = e.clientX; startPos = pos; track.style.transition = 'none'; });
     vp.addEventListener('pointermove', e => {
       if (!down) return;
       const dx = e.clientX - startX;
-      if (Math.abs(dx) > 6) moved = true;
+      if (!moved && Math.abs(dx) > 6) {
+        moved = true;
+        try { vp.setPointerCapture(e.pointerId); } catch (_) { /* не критично */ }
+      }
+      if (!moved) return;
       pos = Math.max(-60, Math.min(maxPos + 60, startPos - dx));
       track.style.transform = `translateX(${-pos}px)`;
     });

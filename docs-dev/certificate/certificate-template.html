@@ -22,6 +22,14 @@
     regnum – 6 цифр ID с добивкой нулями (ник без префикса «ПА/НОТА-26/» –
              он нанесён на фоне)
 
+  ШРИФТЫ (по макету дизайнера; файлы лежат рядом в папке fonts/,
+  подключены через @font-face – при генерации PDF применяются именно они):
+    ФИО:               Unbounded Medium, кегль 40 px при 150 dpi (≈19 pt)
+    Итоговый балл:     Unbounded Medium, кегль 100 px при 150 dpi (≈48 pt)
+    Регистрационный №: Manrope SemiBold, кегль 15 px при 150 dpi (≈7 pt)
+  Перенос на сервер: скопируйте папку fonts/ рядом с шаблоном
+  (пути в @font-face относительные) либо замените src на URL из MEDIALibrary.
+
   ДЕМО: по умолчанию показаны демонстрационные значения, а поверх
   плейсхолдеров фона («Фамилия Имя Отчество», «XX», «XXXXXX») лежат маски
   в цвет фона. Для боя плейсхолдеры отсутствуют в чистом фоне – маски
@@ -30,6 +38,17 @@
 -->
 <style>
   @page { size: 297mm 210mm; margin: 0; }
+  /* ── Шрифты макета (файлы рядом, в папке fonts/) ── */
+  @font-face {
+    font-family: 'Unbounded Cert';
+    src: url('fonts/Unbounded-Medium.ttf') format('truetype');
+    font-weight: 500; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: 'Manrope Cert SB';
+    src: url('fonts/Manrope-SemiBold.ttf') format('truetype');
+    font-weight: 600; font-style: normal; font-display: swap;
+  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 297mm; height: 210mm; }
   body { font-family: 'Manrope', 'Arial Narrow', Arial, sans-serif; }
@@ -42,16 +61,19 @@
   .cover--navy  { background: #0d2a66; }   /* левая панель */
   .clean .cover { display: none; }
 
-  .field { position: absolute; font-weight: 800; text-transform: uppercase; }
-  /* ФИО: три строки, тёмно-синее по светлому */
-  .field--fio { color: #0d2a66; font-size: 19pt; letter-spacing: .035em; line-height: 1; left: 115mm; width: 118mm; }
+  .field { position: absolute; text-transform: uppercase; }
+  /* ФИО: три строки, тёмно-синее по светлому; шрифт макета – Unbounded Medium */
+  .field--fio { font-family: 'Unbounded Cert', 'Unbounded', 'Arial', sans-serif; font-weight: 500;
+    color: #0d2a66; font-size: 19pt; letter-spacing: .035em; line-height: 1; left: 115mm; width: 118mm; }
   .field--fio1 { top: 81.2mm; }
   .field--fio2 { top: 92.2mm; }
   .field--fio3 { top: 102.6mm; }
-  /* балл: белое по тёмно-синему, крупно */
-  .field--score { color: #ffffff; font-size: 48pt; line-height: 1; letter-spacing: .01em; left: 13.2mm; top: 166mm; }
-  /* регистрационный номер: 6 цифр после напечатанного «ПА/НОТА-26/» */
-  .field--regnum { color: #ffffff; font-size: 7pt; font-weight: 700; letter-spacing: .1em; left: 14.94mm; top: 197.2mm; }
+  /* итоговый балл: белое по тёмно-синему, крупно; Unbounded Medium */
+  .field--score { font-family: 'Unbounded Cert', 'Unbounded', 'Arial', sans-serif; font-weight: 500;
+    color: #ffffff; font-size: 48pt; line-height: 1; letter-spacing: .01em; left: 13.2mm; top: 166mm; }
+  /* регистрационный номер: 6 цифр после напечатанного «ПА/НОТА-26/»; Manrope SemiBold */
+  .field--regnum { font-family: 'Manrope Cert SB', 'Manrope', 'Arial', sans-serif; font-weight: 600;
+    color: #ffffff; font-size: 7pt; letter-spacing: .1em; left: 14.94mm; top: 197.2mm; }
 
   /* маски поверх плейсдолеров фона (пиксельные координаты → мм, см. fields.json) */
   .cover--fio1 { left: 113.4mm; top: 80.6mm; width: 62mm; height: 11.3mm; }

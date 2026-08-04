@@ -23,6 +23,7 @@
     el.dataset.href = el.getAttribute('href') || '';
     el.removeAttribute('href');
     el.setAttribute('aria-disabled', 'true');
+    el.setAttribute('role', 'button'); /* iOS: ссылка без href + cursor:pointer (CSS) → click срабатывает по тапу */
     el.setAttribute('tabindex', '0');
 
     const w = document.createElement('span');

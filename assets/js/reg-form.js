@@ -277,10 +277,16 @@ window.RegForm = (() => {
     let chosen = null, activeIdx = -1, items = [];
 
     const eduTypes = new Set(['Школы', 'Колледжи, техникумы', 'Президентская академия и её филиалы', 'Вузы']);
+    const isOtherType = () => typeSel.value === 'Иные организации';
     const syncOrgVisibility = () => {
-      const need = eduTypes.has(typeSel.value);
-      fwOrg.hidden = !need;
-      if (!need) { chosen = null; orgMiss.checked = false; orgCustomWrap.hidden = true; orgSelected.classList.remove('is-show'); orgInput.value = ''; }
+      const isEdu = eduTypes.has(typeSel.value);
+      const isOther = isOtherType();
+      fwOrg.hidden = !isEdu;
+      /* «Иные организации» – сразу поле ручного ввода названия;
+         учебные – ручной ввод только по галочке «нет в списке» */
+      orgCustomWrap.hidden = !(isOther || (isEdu && orgMiss.checked));
+      if (!isEdu) { chosen = null; orgMiss.checked = false; orgSelected.classList.remove('is-show'); orgInput.value = ''; orgInput.disabled = false; }
+      if (!isOther && !isEdu) orgCustom.value = '';
     };
     typeSel.addEventListener('change', () => { syncOrgVisibility(); clearError(typeSel.closest('.f-field')); if (!fwOrg.hidden) orgInput.focus(); });
     syncOrgVisibility();
@@ -329,9 +335,10 @@ window.RegForm = (() => {
     });
     document.addEventListener('pointerdown', e => { if (!e.target.closest('.org-box')) closeDrop(); });
     orgMiss.addEventListener('change', () => {
-      orgCustomWrap.hidden = !orgMiss.checked;
+      orgCustomWrap.hidden = !(isOtherType() || orgMiss.checked);
       orgInput.disabled = orgMiss.checked;
       if (orgMiss.checked) { chosen = null; orgSelected.classList.remove('is-show'); closeDrop(); }
+      if (!orgMiss.checked && !isOtherType()) orgCustom.value = '';
     });
     regionSel.addEventListener('change', renderDrop);
 
@@ -353,7 +360,8 @@ window.RegForm = (() => {
         email: $(`#${u}-email`, form).value.trim(),
         region: regionSel.value || '',
         orgType: typeSel.value || '',
-        org: fwOrg.hidden ? '' : (orgMiss.checked ? orgCustom.value.trim() : (chosen ? chosen.n : '')),
+        org: isOtherType() ? orgCustom.value.trim()
+          : (fwOrg.hidden ? '' : (orgMiss.checked ? orgCustom.value.trim() : (chosen ? chosen.n : ''))),
         category: radioValue('category'),
         score: typeof preset.score === 'number' ? preset.score : null,
         total: typeof preset.total === 'number' ? preset.total : null
@@ -377,6 +385,8 @@ window.RegForm = (() => {
       if (!fwOrg.hidden) {
         if (orgMiss.checked) { if (!orgCustom.value.trim()) fail(orgCustomWrap, 'Введите наименование организации'); }
         else if (!chosen) fail(fwOrg, 'Начните вводить название и выберите организацию из списка');
+      } else if (isOtherType() && !orgCustom.value.trim()) {
+        fail(orgCustomWrap, 'Введите наименование организации');
       }
       if (!d.category) fail($(`#${u}-w-category`, form), 'Выберите возрастную категорию');
       if (!$(`#${u}-consent`, form).checked) fail($(`#${u}-w-consent`, form), 'Необходимо согласие на обработку персональных данных');
