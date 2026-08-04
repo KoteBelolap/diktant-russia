@@ -1345,7 +1345,17 @@ html { scroll-padding-top: 96px; }
 /* ---------- Инфо о тестовой части: равные высоты ---------- */
 .format { align-items: stretch; }
 .topics, .cert-show { height: 100%; }
-.topics__grid { grid-template-columns: 1fr 1fr !important; margin-top: auto; }
+/* Карточка «Тематические блоки» – flex, чтобы ниже работали auto-отступы */
+.topics { display: flex; flex-direction: column; }
+.topics__grid { grid-template-columns: 1fr 1fr !important; margin-top: 22px; }
+/* В две колонки карточка растягивается высокой карточкой сертификата –
+   свободное место делим поровну над и под плитками; translateY на половину
+   нижнего padding делает зазор «плитки → нижняя граница карточки» равным
+   зазору «облако тем → плитки» в точности. Размеры карточки не меняются. */
+@media (min-width: 1024px) {
+  .topics__grid { margin-top: auto; margin-bottom: auto;
+    transform: translateY(calc(clamp(24px,3vw,36px) / 2)); }
+}
 .cert-show__frame a { cursor: zoom-in; }
 
 /* ---------- Новости: полоса на главной ---------- */
