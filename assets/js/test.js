@@ -98,8 +98,16 @@
     flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 8 2a5.6 5.6 0 0 0 3-.8V14a5.6 5.6 0 0 1-3 .8c-3 0-5-2-8-2a6 6 0 0 0-4 1.3"/></svg>'
   };
 
-  /* если гейт закрыт на «скоро», страница сама «оживёт» в момент старта */
-  setInterval(() => { if (!state.cat && !state.done && gateState() === 'open' && !scr.start.hidden) return; if (!state.cat && !state.done && scr.run.hidden && scr.result.hidden) init(); }, 30000);
+  /* если гейт закрыт на «скоро», страница сама «оживёт» в момент старта:
+     следим раз в секунду – 05.11.2026 в 10:00:00 тест открывается сам,
+     без перезагрузки страницы; на 08.11 23:59 закрывается так же */
+  let lastGate = gateState();
+  setInterval(() => {
+    const g = gateState();
+    if (g === lastGate) return;
+    lastGate = g;
+    if (!state.cat && !state.done && scr.run.hidden && scr.result.hidden) init();
+  }, 1000);
 
   /* ---------- подписи тренировочного режима ---------- */
   if (MODE === 'training') {

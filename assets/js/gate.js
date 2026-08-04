@@ -56,6 +56,19 @@
     if (!e.target.closest('.gate-wrap')) closeAll(null);
   });
 
+  /* разблокировка: наступил старт – кнопка снова красная и кликабельная */
+  const unlock = el => {
+    el.classList.remove('is-locked');
+    const target = el.dataset.href || window.DIKTANT.CONFIG.testUrl;
+    el.setAttribute('href', target);
+    el.removeAttribute('aria-disabled');
+    el.removeAttribute('role');
+    const w = el.closest('.gate-wrap');
+    const cap = w ? w.querySelector('.gate-caption') : null;
+    if (cap) cap.remove();
+    if (w) w.replaceWith(el);
+  };
+
   const apply = () => {
     const cfg = window.DIKTANT.CONFIG;
     const started = window.DIKTANT.status.started();
@@ -95,4 +108,15 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
   else apply();
+
+  /* живой переход: 05.11.2026 10:00 (мск, время сервера) – кнопки сами
+     активируются без перезагрузки страницы */
+  (() => {
+    const iv = setInterval(() => {
+      if (!window.DIKTANT || !window.DIKTANT.status.started()) return;
+      clearInterval(iv);
+      document.querySelectorAll('[data-gate="start"].is-locked').forEach(unlock);
+      /* тренировочные карточки включатся при следующем заходе на страницу */
+    }, 1000);
+  })();
 })();

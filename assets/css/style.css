@@ -1591,3 +1591,16 @@ html { scroll-padding-top: 96px; }
    без него iOS Safari не посылает click по тапу на ссылку без href,
    и уведомление о дате старта не показывается */
 .btn.is-locked { cursor: pointer; }
+
+/* ============================================================
+   ПРАВКИ 04.08 (четвёртый раунд)
+   ============================================================ */
+
+/* Партнёры: логотипы крупнее, подписи убраны из разметки –
+   названия есть на самих логотипах; плитки ниже без строки подписи */
+.logos-grid--4 .logo-tile img { height: 110px !important; }
+.logos-grid--4 .logo-tile { min-height: 172px; padding: 22px 18px !important; }
+@media (max-width: 767px) {
+  .logos-grid--4 .logo-tile img { height: 74px !important; }
+  .logos-grid--4 .logo-tile { min-height: 132px; padding: 16px 12px !important; }
+}
