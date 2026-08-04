@@ -1390,7 +1390,7 @@ html { scroll-padding-top: 96px; }
 @media (max-width: 767px) {
   .guests { grid-template-columns: 1fr 1fr; }
   .guest { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; }
-  .guest__role { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  /* должность показываем целиком, без многоточия */
 }
 @media (max-width: 420px) { .guest__name { font-size: 13px !important; } .guest__role { font-size: 11px !important; } }
 
