@@ -1620,3 +1620,18 @@ html { scroll-padding-top: 96px; }
   .logos-grid--4 .logo-tile img { height: 74px !important; }
   .logos-grid--4 .logo-tile { min-height: 132px; padding: 16px 12px !important; }
 }
+
+/* ---------- Логотипы партнёров крупнее в 1,7 раза (110px→187px / 74px→126px) ----------
+   Широкий логотип ФАДН (1,78:1) в высоте 187px требует 333px ширины – в узкую
+   4-колоночную плитку он физически не влезает и увеличение бы «съелось».
+   Поэтому партнёры везде в 2 колонки (≤680px – одна, как и было).
+   Организаторы (.logos-grid) не менялись. */
+@media (min-width: 1141px) {
+  .logos-grid--4 { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+.logos-grid--4 .logo-tile img { height: 187px !important; max-width: 100%; }
+.logos-grid--4 .logo-tile { min-height: 232px; }
+@media (max-width: 767px) {
+  .logos-grid--4 .logo-tile img { height: 126px !important; }
+  .logos-grid--4 .logo-tile { min-height: 158px; }
+}
