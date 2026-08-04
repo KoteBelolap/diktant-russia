@@ -1,5 +1,5 @@
 /* ============================================================
-   «Моя любовь, душа моя — Россия!» · основной скрипт
+   «Моя любовь, душа моя – Россия!» – основной скрипт
    ============================================================ */
 (() => {
   'use strict';
@@ -34,24 +34,7 @@
     $$('.drawer .nav__link').forEach(l => l.addEventListener('click', closeDrawer));
   }
 
-  /* ---------- Ревил-анимации ---------- */
-  const revealIO = new IntersectionObserver(entries => {
-    entries.forEach(en => {
-      if (en.isIntersecting) { en.target.classList.add('is-in'); revealIO.unobserve(en.target); }
-    });
-  }, { threshold: .12, rootMargin: '0px 0px -6% 0px' });
-  $$('[data-reveal]').forEach(el => revealIO.observe(el));
-
-  /* Элементы, добавленные в DOM динамически (лента новостей, карточки материалов) */
-  new MutationObserver(muts => {
-    muts.forEach(m => m.addedNodes.forEach(node => {
-      if (node.nodeType !== 1) return;
-      if (node.matches && node.matches('[data-reveal]')) revealIO.observe(node);
-      if (node.querySelectorAll) node.querySelectorAll('[data-reveal]').forEach(el => revealIO.observe(el));
-    }));
-  }).observe(document.body, { childList: true, subtree: true });
-
-  /* Секция появилась (запуск графиков) */
+  /* ---------- Секция появилась (запуск графиков) ---------- */
   const inViewIO = new IntersectionObserver(entries => {
     entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in-view'); inViewIO.unobserve(en.target); } });
   }, { threshold: .25 });
@@ -80,8 +63,9 @@
   }, { threshold: .6 });
   $$('[data-count]').forEach(el => counterIO.observe(el));
 
-  /* ---------- Обратный отсчёт до 06.11.2026 10:00 МСК ---------- */
-  const TARGET = new Date('2026-11-06T10:00:00+03:00').getTime();
+  /* ---------- Обратный отсчёт до старта (05.11.2026 10:00 МСК, время сервера) ---------- */
+  const TARGET = window.DIKTANT ? Date.parse(window.DIKTANT.CONFIG.startDate) : Date.parse('2026-11-05T10:00:00+03:00');
+  const nowMs = () => window.DIKTANT ? window.DIKTANT.now() : Date.now();
   const cdCells = { d: $('[data-cd="d"]'), h: $('[data-cd="h"]'), m: $('[data-cd="m"]'), s: $('[data-cd="s"]') };
   if (cdCells.d) {
     const plural = (n, f) => f[(n % 10 === 1 && n % 100 !== 11) ? 0 : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? 1 : 2];
@@ -91,7 +75,7 @@
       if (el.textContent !== String(val)) { el.textContent = val; el.classList.remove('tick'); void el.offsetWidth; el.classList.add('tick'); }
     };
     const tickCd = () => {
-      let diff = Math.max(0, TARGET - Date.now());
+      let diff = Math.max(0, TARGET - nowMs());
       if (diff === 0) { labels?.classList.add('is-live'); }
       const d = Math.floor(diff / 864e5);
       const h = Math.floor(diff % 864e5 / 36e5);

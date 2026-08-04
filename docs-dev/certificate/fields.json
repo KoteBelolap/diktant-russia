@@ -1,0 +1,133 @@
+{
+  "template": "Сертификат участника диктанта-2026",
+  "background": {
+    "file": "certificate-bg.jpg",
+    "source": "Сертификат Диктант v3 ИТОГ (3).pdf (стр. 1, экспорт 300 dpi)",
+    "widthPx": 5834,
+    "heightPx": 4125,
+    "printSizeMm": [
+      297,
+      210
+    ],
+    "orientation": "landscape"
+  },
+  "fonts": {
+    "family": "Manrope ExtraBold (совместима: Montserrat ExtraBold, Arial Narrow Bold)",
+    "note": "Шрифт хранить рядом с шаблоном и встраивать в PDF, чтобы результат не зависел от сервера."
+  },
+  "fields": [
+    {
+      "id": "fio1",
+      "label": "Фамилия (капсом)",
+      "text": {
+        "xPx": 2260,
+        "yPx": 1621,
+        "wPx": 1140,
+        "hPx": 132,
+        "color": "#0d2a66",
+        "sizePt": 19,
+        "weight": 800,
+        "caps": true,
+        "letterSpacingEm": 0.035
+      },
+      "coverPlaceholder": {
+        "xPx": 2227,
+        "yPx": 1611,
+        "wPx": 1218,
+        "hPx": 165,
+        "color": "#fbfcf7"
+      }
+    },
+    {
+      "id": "fio2",
+      "label": "Имя (капсом)",
+      "text": {
+        "xPx": 2260,
+        "yPx": 1833,
+        "wPx": 1140,
+        "hPx": 124,
+        "color": "#0d2a66",
+        "sizePt": 19,
+        "weight": 800,
+        "caps": true,
+        "letterSpacingEm": 0.035
+      },
+      "coverPlaceholder": {
+        "xPx": 2227,
+        "yPx": 1824,
+        "wPx": 1218,
+        "hPx": 153,
+        "color": "#fbfcf7"
+      }
+    },
+    {
+      "id": "fio3",
+      "label": "Отчество (капсом; пусто, если нет отчества)",
+      "text": {
+        "xPx": 2260,
+        "yPx": 2039,
+        "wPx": 1140,
+        "hPx": 129,
+        "color": "#0d2a66",
+        "sizePt": 19,
+        "weight": 800,
+        "caps": true,
+        "letterSpacingEm": 0.035
+      },
+      "coverPlaceholder": {
+        "xPx": 2227,
+        "yPx": 2029,
+        "wPx": 1218,
+        "hPx": 159,
+        "color": "#fbfcf7"
+      }
+    },
+    {
+      "id": "score",
+      "label": "Итоговый балл (0–30 целым числом)",
+      "text": {
+        "xPx": 260,
+        "yPx": 3271,
+        "wPx": 740,
+        "hPx": 311,
+        "color": "#ffffff",
+        "sizePt": 48,
+        "weight": 800
+      },
+      "coverPlaceholder": {
+        "xPx": 248,
+        "yPx": 3250,
+        "wPx": 787,
+        "hPx": 373,
+        "color": "#0d2a66"
+      }
+    },
+    {
+      "id": "regnum",
+      "label": "Регистрационный номер целиком, включая префикс «ПА/НОТА-26/» (в бою фон идёт без строки-плейсхолдера)",
+      "format": "«ПА/НОТА-26/» + ID участника, дополненный нулями слева до 6 знаков",
+      "text": {
+        "xPx": 292,
+        "yPx": 3872,
+        "wPx": 686,
+        "hPx": 55,
+        "color": "#ffffff",
+        "sizePt": 7,
+        "weight": 700,
+        "letterSpacingEm": 0.1
+      },
+      "coverPlaceholder": {
+        "xPx": 280,
+        "yPx": 3862,
+        "wPx": 720,
+        "hPx": 102,
+        "color": "#0d2a66"
+      }
+    }
+  ],
+  "notes": [
+    "coverPlaceholder актуален только для демонстрационного фона: в бою фон поставляется оргкомитетом без слов-плейсхолдеров («Фамилия Имя Отчество», «XX», «XXXXXX»), и маскирование не требуется.",
+    "Если у участника нет отчества, поле fio3 пустое – вёрстка не сдвигается, строки фиксированы.",
+    "При ФИО длиннее ~24 символов в строке уменьшать sizePt до влезания (скрипт генерации следит за переполнением)."
+  ]
+}

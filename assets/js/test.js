@@ -1,8 +1,20 @@
 /* ============================================================
-   Механизм прохождения теста.
-   Демо-банк вопросов: на боевой версии вопросы подгружаются
-   с сервера РАНХиГС после старта диктанта (06.11.2026, 10:00 МСК),
-   структура вопроса сохранена: type single|multi, points, tag.
+   Механика прохождения диктанта (тестовая часть).
+   ------------------------------------------------------------
+   – Старт/окончание считаются ОТ ВРЕМЕНИ СЕРВЕРА (см. config.js):
+     до 05.11.2026 10:00 мск показываем экран ожидания,
+     после 08.11.2026 23:59 мск – экран завершения.
+   – 30 вопросов из банка ~50: случайная выборка + перемешивание
+     вопросов и вариантов (не повторяется у соседей – антисписывание).
+   – Правильных ответов в JS нет: на боевом сервере вопросы
+     приходят без них (GET /api/test), а балл считает сервер
+     (POST /api/test/submit). Демо-режим: локальный банк
+     question-bank-demo.js (ТОЛЬКО для превью).
+   – Кнопка «Назад» браузера возвращает к выбору категории
+     (History API), кнопка «Назад» интерфейса – к предыдущему
+     вопросу, а с первого вопроса – к выбору категории.
+   – Повторное прохождение с одного устройства разрешено;
+     дубли участников отсеиваются при регистрации (reg-form.js).
    ============================================================ */
 (() => {
   'use strict';
@@ -10,123 +22,167 @@
   const $$ = (s, c = document) => [...c.querySelectorAll(s)];
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const BANKS = {
-    school: {
-      title: 'Школьник 5–11 класс',
-      questions: [
-        { type: 'single', tag: 'История', q: 'В каком году народное ополчение под предводительством Минина и Пожарского освободило Москву?',
-          opts: ['1380 году', '1612 году', '1812 году', '1945 году'], right: [1], points: 3 },
-        { type: 'single', tag: 'Культура', q: 'Кто написал роман в стихах «Евгений Онегин»?',
-          opts: ['М. Ю. Лермонтов', 'А. С. Пушкин', 'Н. В. Гоголь', 'И. С. Тургенев'], right: [1], points: 3 },
-        { type: 'multi', tag: 'Год единства народов России', q: 'Какие из этих народов относятся к коренным народам России? Выберите все верные варианты.',
-          opts: ['Татары', 'Буряты', 'Чуваши', 'Якуты'], right: [0, 1, 2, 3], points: 3 },
-        { type: 'single', tag: 'Право', q: 'Как называется основной закон Российской Федерации?',
-          opts: ['Гражданский кодекс', 'Конституция', 'Русская правда', 'Указ Президента'], right: [1], points: 3 },
-        { type: 'single', tag: 'История', q: 'Когда Россия отмечает День народного единства?',
-          opts: ['12 июня', '9 мая', '4 ноября', '1 сентября'], right: [2], points: 3 },
-        { type: 'multi', tag: 'Гражданская идентичность', q: 'Какие ценности входят в перечень традиционных российских духовно-нравственных ценностей? Выберите все верные варианты.',
-          opts: ['Патриотизм', 'Историческая память', 'Взаимопомощь и взаимоуважение', 'Стремление к личной выгоде любой ценой'], right: [0, 1, 2], points: 3 },
-        { type: 'single', tag: 'Религии', q: 'Какая религия традиционно исповедуется народами Поволжья наряду с православием?',
-          opts: ['Ислам', 'Индуизм', 'Синтоизм', 'Католицизм'], right: [0], points: 3 },
-        { type: 'single', tag: 'Культура', q: 'Какой русский композитор написал балет «Лебединое озеро»?',
-          opts: ['С. С. Прокофьев', 'П. И. Чайковский', 'Д. Д. Шостакович', 'Н. А. Римский-Корсаков'], right: [1], points: 3 },
-        { type: 'multi', tag: 'Право', q: 'Какие цвета имеет Государственный флаг Российской Федерации? Выберите все верные варианты.',
-          opts: ['Белый', 'Синий', 'Красный', 'Зелёный'], right: [0, 1, 2], points: 3 },
-        { type: 'single', tag: 'История', q: 'Как зовут первого космонавта планеты, гражданина СССР?',
-          opts: ['Герман Титов', 'Алексей Леонов', 'Юрий Гагарин', 'Валентина Терешкова'], right: [2], points: 3 }
-      ]
-    },
-    student: {
-      title: 'Студент вуза или СПО',
-      questions: [
-        { type: 'single', tag: 'История', q: 'Смутное время завершилось избранием на царство представителя династии:',
-          opts: ['Рюриковичей', 'Романовых', 'Годуновых', 'Шуйских'], right: [1], points: 3 },
-        { type: 'multi', tag: 'Год единства народов России', q: 'В каких республиках России буддизм является традиционной религией? Выберите все верные варианты.',
-          opts: ['Тыва', 'Калмыкия', 'Бурятия', 'Мордовия'], right: [0, 1, 2], points: 3 },
-        { type: 'single', tag: 'Право', q: 'Какая статья Конституции РФ провозглашает человека, его права и свободы высшей ценностью?',
-          opts: ['Статья 1', 'Статья 2', 'Статья 7', 'Статья 15'], right: [1], points: 3 },
-        { type: 'single', tag: 'Культура', q: 'Икона «Троица» — шедевр, созданный:',
-          opts: ['Феофаном Греком', 'Андреем Рублёвым', 'Ильёй Репиным', 'Карлом Брюлловым'], right: [1], points: 3 },
-        { type: 'single', tag: 'Гражданская идентичность', q: 'В каком году был утверждён перечень традиционных российских духовно-нравственных ценностей?',
-          opts: ['2012 году', '2018 году', '2022 году', '2025 году'], right: [2], points: 3 },
-        { type: 'multi', tag: 'История', q: 'Кто из перечисленных полководцев — герои Отечественной войны 1812 года? Выберите все верные варианты.',
-          opts: ['М. И. Кутузов', 'П. И. Багратион', 'А. В. Суворов', 'М. Б. Барклай-де-Толли'], right: [0, 1, 3], points: 3 },
-        { type: 'single', tag: 'Религии', q: 'Какая конфигурация власти и религии закреплена Конституцией РФ?',
-          opts: ['Государственная религия — православие', 'Светское государство, свобода совести', 'Теократическое государство', 'Запрет религиозных объединений'], right: [1], points: 3 },
-        { type: 'single', tag: 'Культура', q: 'Эпос «Олонхо», включённый в список шедевров наследия ЮНЕСКО, принадлежит культуре народа:',
-          opts: ['Карел', 'Якутов (саха)', 'Удмуртов', 'Ханты'], right: [1], points: 3 },
-        { type: 'multi', tag: 'Право', q: 'Что относится к государственным символам Российской Федерации? Выберите все верные варианты.',
-          opts: ['Государственный флаг', 'Государственный герб', 'Государственный гимн', 'Государственная печать с портретом президента'], right: [0, 1, 2], points: 3 },
-        { type: 'single', tag: 'Гражданская идентичность', q: 'Общероссийская гражданская идентичность в первую очередь формируется на основе:',
-          opts: ['единой территории проживания', 'общих ценностей, истории и культуры многонационального народа', 'единого вероисповедания', 'единого этнического происхождения'], right: [1], points: 3 }
-      ]
-    },
-    adult: {
-      title: 'Закончил(а) обучение',
-      questions: [
-        { type: 'single', tag: 'История', q: 'Кузьма Минин, призвавший к созданию народного ополчения, был уроженцем города:',
-          opts: ['Москвы', 'Нижнего Новгорода', 'Ярославля', 'Смоленска'], right: [1], points: 3 },
-        { type: 'multi', tag: 'Гражданская идентичность', q: 'Какие из ценностей названы в указе Президента РФ традиционными духовно-нравственными? Выберите все верные варианты.',
-          opts: ['Служение Отечеству', 'Крепкая семья', 'Приоритет духовного над материальным', 'Безразличие к судьбе страны'], right: [0, 1, 2], points: 3 },
-        { type: 'single', tag: 'Право', q: 'Когда была принята действующая Конституция Российской Федерации?',
-          opts: ['12 декабря 1993 года', '25 декабря 1991 года', '9 мая 1995 года', '12 июня 1990 года'], right: [0], points: 3 },
-        { type: 'single', tag: 'Год единства народов России', q: 'Какой год объявлен в России Годом единства народов России?',
-          opts: ['2024 год', '2025 год', '2026 год', '2027 год'], right: [2], points: 3 },
-        { type: 'single', tag: 'Культура', q: 'Роман «Война и мир» написал:',
-          opts: ['Ф. М. Достоевский', 'Л. Н. Толстой', 'А. П. Чехов', 'И. А. Гончаров'], right: [1], points: 3 },
-        { type: 'multi', tag: 'История', q: 'Какие события произошли в 1945 году? Выберите все верные варианты.',
-          opts: ['Подписание акта о безоговорочной капитуляции Германии', 'Парад Победы на Красной площади 24 июня', 'Первый полёт человека в космос', 'Прорыв блокады Ленинграда'], right: [0, 1], points: 3 },
-        { type: 'single', tag: 'Религии', q: 'К традиционным религиям народов России НЕ относится:',
-          opts: ['Православие', 'Ислам', 'Буддизм', 'Синтоизм'], right: [3], points: 3 },
-        { type: 'single', tag: 'Право', q: 'Кто, согласно Конституции РФ, является единственным источником власти в России?',
-          opts: ['Государственная Дума', 'Президент', 'Многонациональный народ России', 'Правительство'], right: [2], points: 3 },
-        { type: 'multi', tag: 'Культура', q: 'Какие художественные промыслы — российские? Выберите все верные варианты.',
-          opts: ['Хохлома', 'Гжель', 'Дымковская игрушка', 'Майолика Делфт'], right: [0, 1, 2], points: 3 },
-        { type: 'single', tag: 'История', q: 'Город-герой, выдержавший 900-дневную блокаду в годы Великой Отечественной войны:',
-          opts: ['Сталинград', 'Севастополь', 'Ленинград', 'Брест'], right: [2], points: 3 }
-      ]
-    }
-  };
-
   const shell = $('#test-app');
   if (!shell) return;
 
-  const DURATION = 40 * 60; // 40 минут
+  const D = window.DIKTANT;
   const params = new URLSearchParams(location.search);
   const MODE = params.get('mode') === 'training' ? 'training' : 'main';
 
-  const state = { cat: null, q: 0, answers: [], left: DURATION, timer: null, done: false, locked: false };
+  const DURATION = 40 * 60;        /* 40 минут (ТЗ) */
+  const QUESTIONS_PER_TEST = 30;   /* 30 вопросов из банка (ТЗ) */
+
+  const CAT_META = {
+    school:  'Школьник 5–11 класс',
+    student: 'Студент вуза или СПО',
+    adult:   'Закончил(а) обучение'
+  };
+
+  const state = {
+    cat: null, qs: [], q: 0, answers: [],
+    left: DURATION, timer: null, done: false, locked: false,
+    demo: true, attemptId: null
+  };
+
+  const esc = s => String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 
   /* ---------- защита от копирования (ТЗ 1.4) ---------- */
   document.addEventListener('contextmenu', e => { if ($('#test-app .q-card')) e.preventDefault(); });
   document.addEventListener('copy', e => { if ($('#test-app .q-card')) e.preventDefault(); });
-  /* защита от случайного ухода со страницы во время теста */
   addEventListener('beforeunload', e => { if (state.cat && !state.done) { e.preventDefault(); e.returnValue = ''; } });
 
-  /* повторное прохождение (демо cookie-защиты) */
-  const passed = localStorage.getItem('diktant_completed_' + MODE);
-  if (passed && MODE === 'main') {
-    const w = $('#dup-warn');
-    if (w) { w.hidden = false; $('b', w).textContent = passed; }
+  /* ---------- экраны ---------- */
+  const scr = { gate: $('#test-gate'), start: $('#test-start'), run: $('#test-run'), result: $('#test-result') };
+  function show(name) {
+    Object.entries(scr).forEach(([k, el]) => { if (el) el.hidden = k !== name; });
   }
 
-  const esc = s => s.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+  /* ---------- гейт дат (от времени сервера) ---------- */
+  function gateState() {
+    if (MODE === 'training') {
+      return D.status.trainingOpen() ? 'open' : 'soon';
+    }
+    if (!D.status.started()) return 'soon';
+    if (!D.status.ongoing()) return 'closed';
+    return 'open';
+  }
 
-  /* ---------- рендер: выбор категории ---------- */
-  $$('.test-cat').forEach(btn => btn.addEventListener('click', () => start(btn.dataset.cat)));
+  function renderGate() {
+    const g = gateState();
+    if (g === 'open') { show('start'); return true; }
+    show('gate');
+    const box = $('#gate-panel');
+    if (g === 'soon') {
+      box.innerHTML = MODE === 'training' ? `
+        <span class="gate-panel__icon">${icons.clock}</span>
+        <h1>Тренировочные тесты появятся позже</h1>
+        <p>Мы готовим для Вас учебные вопросы. Следите за новостями проекта.</p>
+        <div class="btn-row" style="justify-content:center"><a class="btn btn--blue" href="index.html">На главную</a></div>`
+      : `
+        <span class="gate-panel__icon">${icons.clock}</span>
+        <h1>Тестирование откроется 5 ноября в 10:00 по московскому времени</h1>
+        <p>Проверка знаний будет доступна <b>с 5 ноября 10:00 до 8 ноября 23:59 по московскому времени</b>. Возвращайтесь – мы Вас ждём!</p>
+        <div class="btn-row" style="justify-content:center"><a class="btn btn--blue" href="index.html">На главную</a></div>`;
+    } else { /* closed */
+      box.innerHTML = `
+        <span class="gate-panel__icon">${icons.flag}</span>
+        <h1>Диктант-2026 завершён</h1>
+        <p>Тестирование завершилось 8 ноября в 23:59 по московскому времени. Спасибо всем участникам! Итоги сезона и церемония награждения – в новостях проекта.</p>
+        <div class="btn-row" style="justify-content:center"><a class="btn btn--blue" href="index.html">На главную</a></div>`;
+    }
+    return false;
+  }
 
-  function start(cat) {
+  const icons = {
+    clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
+    flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 8 2a5.6 5.6 0 0 0 3-.8V14a5.6 5.6 0 0 1-3 .8c-3 0-5-2-8-2a6 6 0 0 0-4 1.3"/></svg>'
+  };
+
+  /* если гейт закрыт на «скоро», страница сама «оживёт» в момент старта */
+  setInterval(() => { if (!state.cat && !state.done && gateState() === 'open' && !scr.start.hidden) return; if (!state.cat && !state.done && scr.run.hidden && scr.result.hidden) init(); }, 30000);
+
+  /* ---------- подписи тренировочного режима ---------- */
+  if (MODE === 'training') {
+    const crumb = $('#crumb-mode'); if (crumb) crumb.textContent = 'Тренировочный тест';
+    const t = $('#start-title'); if (t) t.textContent = 'Тренировочный тест: выберите категорию';
+    const l = $('#start-lead'); if (l) l.innerHTML = 'Тренировка повторяет формат основного диктанта – то же время и типы вопросов, но <strong>без регистрации</strong> и с неограниченным числом попыток. Вопросы здесь учебные.';
+  }
+
+  /* ---------- загрузка вопросов: сервер → демо ---------- */
+  async function loadQuestions(cat) {
+    /* бой: сервер отдаёт 30 вопросов без правильных ответов */
+    try {
+      const r = await fetch('/api/test?cat=' + encodeURIComponent(cat), { headers: { 'Accept': 'application/json' } });
+      if (r.ok) {
+        const data = await r.json();
+        if (data && Array.isArray(data.questions) && data.questions.length) {
+          state.demo = false;
+          state.attemptId = data.attemptId || null;
+          return data.questions;
+        }
+      }
+    } catch { /* статичное демо – сеть недоступна */ }
+    /* демо: локальный банк (вопросы+ответы), случайная выборка и перемешивание */
+    state.demo = true;
+    const bankKey = MODE === 'training' ? 'training' : cat;
+    const pool = [...(window.QUESTION_BANK_DEMO[bankKey] || [])];
+    shuffle(pool);
+    const picked = pool.slice(0, Math.min(QUESTIONS_PER_TEST, pool.length));
+    return picked.map(q => {
+      const order = q.opts.map((o, i) => i);
+      shuffle(order);
+      return {
+        ...q,
+        opts: order.map(i => q.opts[i]),
+        right: (q.right || []).map(i => order.indexOf(i))
+      };
+    });
+  }
+
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  /* ---------- старт теста ---------- */
+  $$('.test-cat').forEach(btn => btn.addEventListener('click', () => begin(btn.dataset.cat)));
+
+  const urlCat = params.get('cat');
+  if (MODE === 'training' && urlCat && CAT_META[urlCat]) {
+    /* прямая ссылка из карточки тренировочного теста */
+    setTimeout(() => begin(urlCat), 0);
+  }
+
+  async function begin(cat) {
+    if (gateState() !== 'open') { renderGate(); return; }
     state.cat = cat;
+    state.qs = await loadQuestions(cat);
+    if (!state.qs.length) return;
     state.q = 0;
-    state.answers = BANKS[cat].questions.map(() => []);
-    $('#test-start').hidden = true;
-    $('#test-run').hidden = false;
+    state.answers = state.qs.map(() => []);
+    state.done = false; state.locked = false;
     state.left = DURATION;
+
+    show('run');
+    history.pushState({ diktant: 'run' }, '', location.href);
     tickTimer();
+    clearInterval(state.timer);
     state.timer = setInterval(tickTimer, 1000);
     renderQ();
-    scrollTo({ top: $('#test-run').offsetTop - 20, behavior: REDUCED ? 'auto' : 'smooth' });
+    scrollTo({ top: Math.max(0, scr.run.offsetTop - 24), behavior: REDUCED ? 'auto' : 'smooth' });
   }
+
+  /* браузерная кнопка «Назад» → экран выбора категории */
+  addEventListener('popstate', () => {
+    if (!state.cat || state.done) return;
+    clearInterval(state.timer);
+    state.cat = null;
+    show('start');
+    scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
+  });
 
   function tickTimer() {
     const t = $('#timer');
@@ -138,20 +194,20 @@
     state.left--;
   }
 
-  /* ---------- рендер вопроса ---------- */
+  /* ---------- рендер вопроса (в т.ч. фото/видео) ---------- */
   function renderQ() {
-    const bank = BANKS[state.cat];
-    const q = bank.questions[state.q];
-    const total = bank.questions.length;
+    const q = state.qs[state.q];
+    const total = state.qs.length;
     $('#hud-q').textContent = 'Вопрос ' + (state.q + 1) + ' / ' + total;
-    $('#hud-bar').style.width = ((state.q) / total * 100) + '%';
+    $('#hud-bar').style.width = (state.q / total * 100) + '%';
 
     const card = $('#q-card');
     card.style.animation = 'none'; void card.offsetWidth;
     card.style.animation = REDUCED ? '' : 'dropIn .45s cubic-bezier(.22,1,.36,1)';
 
     card.innerHTML = `
-      <span class="chip q-card__tag">${esc(q.tag)}${q.type === 'multi' ? ' · несколько ответов' : ''}</span>
+      <span class="chip q-card__tag">${esc(q.tag || '')}${q.type === 'multi' ? ' – несколько ответов' : ''}</span>
+      ${q.media ? mediaMarkup(q.media) : ''}
       <h2>${esc(q.q)}</h2>
       <div class="q-opts" role="${q.type === 'multi' ? 'group' : 'radiogroup'}" aria-label="Варианты ответов">
         ${q.opts.map((o, i) => `
@@ -183,28 +239,53 @@
     updateNav();
   }
 
-  function updateNav() {
-    const total = BANKS[state.cat].questions.length;
-    $('#q-prev').disabled = state.q === 0;
-    const last = state.q === total - 1;
-    $('#q-next').textContent = last ? 'К результату' : 'Далее';
+  function mediaMarkup(m) {
+    if (m.kind === 'video') {
+      return `<div class="q-media q-media--video">
+        <video controls preload="metadata" playsinline ${m.poster ? `poster="${esc(m.poster)}"` : ''} aria-label="${esc(m.alt || 'Видео к вопросу')}">
+          <source src="${esc(m.src)}" type="video/mp4">
+          Ваш браузер не поддерживает видео. Скачайте файл: <a href="${esc(m.src)}">mp4</a>.
+        </video>
+        ${m.alt ? `<p class="q-media__cap">${esc(m.alt)}</p>` : ''}
+      </div>`;
+    }
+    return `<div class="q-media">
+      <img src="${esc(m.src)}" alt="${esc(m.alt || 'Изображение к вопросу')}" loading="lazy">
+      ${m.alt ? `<p class="q-media__cap">${esc(m.alt)}</p>` : ''}
+    </div>`;
   }
 
-  $('#q-prev').addEventListener('click', () => nav(-1));
+  function updateNav() {
+    const total = state.qs.length;
+    const prev = $('#q-prev');
+    prev.disabled = false;
+    prev.innerHTML = state.q === 0
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m6 6-6-6 6-6"/></svg>К выбору категории'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m6 6-6-6 6-6"/></svg>Назад';
+    const last = state.q === total - 1;
+    $('#q-next').innerHTML = (last ? 'К результату' : 'Далее') + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>';
+  }
+
+  $('#q-prev').addEventListener('click', () => {
+    if (state.q === 0) {                       /* первый вопрос → к выбору категории (через историю) */
+      history.back();
+      return;
+    }
+    nav(-1);
+  });
   $('#q-next').addEventListener('click', () => nav(1));
   $('#q-finish').addEventListener('click', () => {
     const empty = state.answers.filter(a => !a.length).length;
-    const box = $('#finish-modal');
     $('#finish-modal-text').textContent = empty
       ? 'Вы ответили не на все вопросы (' + empty + ' без ответа). Завершить тест и подсчитать баллы?'
       : 'Завершить тест и подсчитать баллы?';
-    box.hidden = false;
+    $('#finish-modal').hidden = false;
   });
   $('#finish-cancel').addEventListener('click', () => $('#finish-modal').hidden = true);
   $('#finish-ok').addEventListener('click', () => { $('#finish-modal').hidden = true; finish(false); });
 
   function nav(d) {
-    const total = BANKS[state.cat].questions.length;
+    const total = state.qs.length;
     if (d > 0 && state.q === total - 1) { $('#q-finish').click(); return; }
     state.q = Math.max(0, Math.min(total - 1, state.q + d));
     renderQ();
@@ -212,35 +293,70 @@
 
   function cleardone() { clearInterval(state.timer); state.done = true; state.locked = true; }
 
-  /* ---------- результаты ---------- */
-  function finish(byTime) {
+  /* ---------- результат: балл считает сервер (или демо-вариант) ---------- */
+  async function finish(byTime) {
     if (state.done) return;
     cleardone();
-    const bank = BANKS[state.cat];
-    let score = 0;
-    const review = bank.questions.map((q, i) => {
-      const a = [...state.answers[i]].sort().join(',');
-      const r = [...q.right].sort().join(',');
-      const ok = a === r;
-      if (ok) score += q.points;
-      return { q: q.q, ok, points: q.points, rightTxt: q.right.map(x => q.opts[x]).join('; ') };
-    });
-    const max = bank.questions.reduce((s, q) => s + q.points, 0);
 
-    if (MODE === 'main') {
-      localStorage.setItem('diktant_completed_main', new Date().toLocaleDateString('ru-RU'));
-      localStorage.setItem('diktant_score', score);
+    let score, max;
+    if (state.demo) {
+      /* демо: считаем локально (в бою этого кода нет – балл с сервера) */
+      score = 0;
+      state.qs.forEach((q, i) => {
+        const a = [...state.answers[i]].sort().join(',');
+        const r = [...q.right].sort().join(',');
+        if (a === r) score++;
+      });
+      max = state.qs.length;
+    } else {
+      try {
+        const r = await fetch('/api/test/submit', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ attemptId: state.attemptId, cat: state.cat, answers: state.answers })
+        });
+        const data = await r.json();
+        score = data.score; max = data.max;
+      } catch {
+        score = 0; max = state.qs.length;   /* крайний случай */
+      }
     }
 
-    $('#test-run').hidden = true;
-    const res = $('#test-result');
-    res.hidden = false;
+    history.replaceState({ diktant: 'result' }, '', location.href);
+    show('result');
+    renderResult(score, max, byTime);
+  }
 
+  /* ---------- формулировки вердиктов (шкала 30 / 25–29 / 15–24 / 0–14) ---------- */
+  function verdict(score, total) {
+    const m = (MODE === 'main');
+    if (score === total) return {
+      title: 'Абсолютный победитель!',
+      sub: m
+        ? 'Невероятно: максимальный результат! Заполните регистрационную форму – диплом и приглашение на награждение уже почти Ваши.'
+        : 'Блестяще! В боевом диктанте такой результат приносит диплом абсолютного победителя.' };
+    if (score >= Math.ceil(total * 25 / 30)) return {
+      title: 'Отличный результат!',
+      sub: m
+        ? 'Знания на высоком уровне. Заполните регистрационную форму, чтобы получить сертификат с Вашими баллами.'
+        : 'Уверенный уровень! До максимума совсем немного – загляните в материалы для подготовки.' };
+    if (score >= Math.ceil(total * 15 / 30)) return {
+      title: 'Хорошая работа!',
+      sub: m
+        ? 'Достойный результат. Заполните регистрационную форму, чтобы получить сертификат участника.'
+        : 'Крепкая база. Материалы для подготовки помогут добить до максимума.' };
+    return {
+      title: 'Есть куда расти',
+      sub: m
+        ? 'Главное – участие! Заполните регистрационную форму: сертификат участника ждёт Вас, а подготовиться к следующему сезону помогут материалы.'
+        : 'Загляните в материалы для подготовки – следующая попытка будет сильнее.' };
+  }
+
+  function renderResult(score, max, byTime) {
     const C = 2 * Math.PI * 88;
     const ring = $('#ring-fg');
     ring.style.strokeDasharray = C;
     ring.style.strokeDashoffset = C;
-    setTimeout(() => { ring.style.strokeDashoffset = C * (1 - score / max); }, 60);
+    setTimeout(() => { ring.style.strokeDashoffset = C * (1 - (max ? score / max : 0)); }, 60);
 
     const scoreEl = $('#result-score');
     const dur = REDUCED ? 0 : 1400, t0 = performance.now();
@@ -251,32 +367,36 @@
     })(t0);
     $('#result-max').textContent = 'из ' + max;
 
-    const tier = $('#result-title');
-    const sub = $('#result-sub');
-    const ratio = score / max;
-    if (ratio === 1) { tier.textContent = 'Абсолютный победитель!'; sub.textContent = MODE === 'main' ? 'Невероятно: максимальный результат! Заполните регистрационную форму — диплом и приглашение на награждение уже почти ваши.' : 'Блестяще! В боевом диктанте такой результат приносит диплом абсолютного победителя.'; }
-    else if (ratio >= .8) { tier.textContent = 'Отличный результат!'; sub.textContent = MODE === 'main' ? 'Знания на высоком уровне. Заполните регистрационную форму, чтобы получить сертификат с вашими баллами.' : 'Уверенный уровень! До максимума чуть-чуть — загляните в материалы для подготовки.'; }
-    else if (ratio >= .5) { tier.textContent = 'Хорошая работа!'; sub.textContent = MODE === 'main' ? 'Достойный результат. Заполните регистрационную форму, чтобы получить сертификат участника.' : 'Крепкая база, а разбор ошибок ниже поможет добить до максимума.'; }
-    else { tier.textContent = 'Есть куда расти'; sub.textContent = MODE === 'main' ? 'Главное — участие! Заполните регистрационную форму: сертификат участника ждёт вас, а до следующего года помогут материалы для подготовки.' : 'Посмотрите разбор ниже и загляните в материалы для подготовки — следующая попытка будет сильнее.'; }
+    const v = verdict(score, max);
+    $('#result-title').textContent = v.title;
+    $('#result-sub').textContent = v.sub;
+    $('#result-note').textContent = byTime
+      ? 'Время вышло – показан результат по уже данным ответам.'
+      : 'Верных ответов: ' + score + ' из ' + max + '.';
 
+    /* основной режим: регистрационная форма – сразу под результатом (ТЗ) */
+    const regHost = $('#result-reg');
     if (MODE === 'main') {
-      $('#result-cta-primary').innerHTML = 'Получить сертификат<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>';
-      $('#result-cta-primary').setAttribute('href', 'register.html?score=' + score);
+      regHost.hidden = false;
+      if (!regHost.dataset.mounted && window.RegForm) {
+        regHost.dataset.mounted = '1';
+        window.RegForm.mount(regHost, { score, total: max, category: state.cat === 'adult' ? 'adult' : state.cat });
+      }
     } else {
-      $('#result-cta-primary').innerHTML = 'Пройти ещё раз<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>';
-      $('#result-cta-primary').setAttribute('href', 'test.html?mode=training');
+      regHost.hidden = true;
     }
 
-    $('#result-review').innerHTML = review.map((r, i) => `
-      <div class="review-row ${r.ok ? 'ok' : 'bad'}">
-        <span class="st">${r.ok
-          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m4 12.5 5.5 5.5L20 6.5"/></svg>'
-          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 6l12 12M18 6 6 18"/></svg>'}</span>
-        <div>${i + 1}. ${esc(r.q)}
-          ${r.ok ? '<small>+ ' + r.points + ' балл(а)</small>' : '<small>Верный ответ: ' + esc(r.rightTxt) + '</small>'}
-        </div>
-      </div>`).join('');
-
-    res.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
+    scr.result.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
   }
+
+  /* «Пройти ещё раз» в тренировке и на экране результата */
+  $$('[data-restart]').forEach(b => b.addEventListener('click', () => {
+    state.done = false; state.cat = null;
+    show('start');
+    scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
+  }));
+
+  /* ---------- первичная инициализация ---------- */
+  function init() { renderGate(); }
+  init();
 })();

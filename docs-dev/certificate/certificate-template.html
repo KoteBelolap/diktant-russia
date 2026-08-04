@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Шаблон сертификата участника диктанта</title>
+<!--
+  ШАБЛОН СЕРТИФИКАТА УЧАСТНИКА (ТЗ: «фон сертификата загружается как jpg,
+  тексты формируются скриптом (разметка html + css)»).
+
+  Как работает генерация в бою:
+  1. Сервер подставляет в span[data-field] значения участника
+     (ФИО, балл, регистрационный номер) из JSON (см. fields.json).
+  2. Страница печатается в PDF размером ровно 297×210 мм
+     (@page ниже) – например, Chromium: --print-to-pdf --no-pdf-header-footer.
+  3. Фон – certificate-bg.jpg (300 dpi, 5834×4125 px) подложен через object-fit:cover.
+
+  ПЕРЕМЕННЫЕ ДАННЫХ (data-field):
+    fio1 – фамилия (капсом)
+    fio2 – имя (капсом)
+    fio3 – отчество (капсом; если нет отчества – пустая строка)
+    score – итоговый балл 0–30
+    regnum – 6 цифр ID с добивкой нулями (ник без префикса «ПА/НОТА-26/» –
+             он нанесён на фоне)
+
+  ДЕМО: по умолчанию показаны демонстрационные значения, а поверх
+  плейсхолдеров фона («Фамилия Имя Отчество», «XX», «XXXXXX») лежат маски
+  в цвет фона. Для боя плейсхолдеры отсутствуют в чистом фоне – маски
+  выключаются параметром ?clean любым способом: сервер просто НЕ рендерит
+  div.cover, либо добавьте ?clean для скрытия масок стилем.
+-->
+<style>
+  @page { size: 297mm 210mm; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 297mm; height: 210mm; }
+  body { font-family: 'Manrope', 'Arial Narrow', Arial, sans-serif; }
+  .cert { position: relative; width: 297mm; height: 210mm; overflow: hidden; }
+  .cert__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+  /* маски-заплатки в цвет фона (только для демо-файла с плейсхолдерами) */
+  .cover { position: absolute; display: flex; align-items: center; }
+  .cover--light { background: #fbfcf7; }   /* правая часть */
+  .cover--navy  { background: #0d2a66; }   /* левая панель */
+  .clean .cover { display: none; }
+
+  .field { position: absolute; font-weight: 800; text-transform: uppercase; }
+  /* ФИО: три строки, тёмно-синее по светлому */
+  .field--fio { color: #0d2a66; font-size: 19pt; letter-spacing: .035em; line-height: 1; left: 115mm; width: 118mm; }
+  .field--fio1 { top: 81.2mm; }
+  .field--fio2 { top: 92.2mm; }
+  .field--fio3 { top: 102.6mm; }
+  /* балл: белое по тёмно-синему, крупно */
+  .field--score { color: #ffffff; font-size: 48pt; line-height: 1; letter-spacing: .01em; left: 13.2mm; top: 166mm; }
+  /* регистрационный номер: 6 цифр после напечатанного «ПА/НОТА-26/» */
+  .field--regnum { color: #ffffff; font-size: 7pt; font-weight: 700; letter-spacing: .1em; left: 14.94mm; top: 197.2mm; }
+
+  /* маски поверх плейсдолеров фона (пиксельные координаты → мм, см. fields.json) */
+  .cover--fio1 { left: 113.4mm; top: 80.6mm; width: 62mm; height: 11.3mm; }
+  .cover--fio2 { left: 113.4mm; top: 91.8mm; width: 62mm; height: 10.7mm; }
+  .cover--fio3 { left: 113.4mm; top: 102.2mm; width: 62mm; height: 10mm; }
+  .cover--score { left: 12.6mm; top: 164.6mm; width: 40mm; height: 19mm; }
+  .cover--regnum { left: 14.2mm; top: 196.2mm; width: 36mm; height: 5.2mm; }
+</style>
+</head>
+<body>
+  <!-- добавьте class="clean" для боевого чистого фона без плейсхолдеров -->
+  <div class="cert" id="cert">
+    <img class="cert__bg" src="certificate-bg.jpg" alt="">
+
+    <!-- маски на плейсхолдеры исходного макета (демо) -->
+    <div class="cover cover--light cover--fio1"></div>
+    <div class="cover cover--light cover--fio2"></div>
+    <div class="cover cover--light cover--fio3"></div>
+    <div class="cover cover--navy cover--score"></div>
+    <div class="cover cover--navy cover--regnum"></div>
+
+    <!-- переменные данные: сервер подставляет значения внутрь span -->
+    <span class="field field--fio field--fio1" data-field="fio1">Иванова</span>
+    <span class="field field--fio field--fio2" data-field="fio2">Мария</span>
+    <span class="field field--fio field--fio3" data-field="fio3">Сергеевна</span>
+    <span class="field field--score" data-field="score">27</span>
+    <span class="field field--regnum" data-field="regnum">ПА/НОТА-26/000001</span>
+  </div>
+<script>
+  /* демо-режим ?clean – без масок (когда фон чистый) */
+  if (location.search.includes('clean')) document.getElementById('cert').classList.add('clean');
+  /* демо-заполнение из JSON-подобного параметра:
+     ?fio1=Иванова&fio2=Мария&fio3=Сергеевна&score=27&regnum=000001 */
+  const p = new URLSearchParams(location.search);
+  document.querySelectorAll('[data-field]').forEach(el => {
+    const v = p.get(el.dataset.field);
+    if (v !== null) el.textContent = el.dataset.field === 'regnum' ? ('ПА/НОТА-26/' + v) : v.toUpperCase();
+  });
+</script>
+</body>
+</html>
