@@ -1559,7 +1559,13 @@ html { scroll-padding-top: 96px; }
 .float-cta .btn span.fcta-txt { display: inline !important; }
 .float-cta .btn { padding: 15px 26px !important; white-space: nowrap; }
 
-/* ============ 20. Служебное ============ */
+/* ============ 20. Заголовок раздела «Материалы для подготовки» ============ */
+/* Акцентное слово заголовка («уверенного») – красным цветом палитры
+   диктанта. Оформлено как <em> по образцу .sec-title em: курсив
+   сброшен, меняется только цвет. */
+.page-hero h1 em { font-style: normal; color: var(--red-600); }
+
+/* ============ 21. Служебное ============ */
 /* атрибут hidden всегда скрывает (иначе display-классы его перебивают) */
 [hidden] { display: none !important; }
 /* атрибут data-reveal оставлен в разметке как якорь, анимация отключена намеренно */
