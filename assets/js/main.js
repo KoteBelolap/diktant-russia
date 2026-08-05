@@ -156,6 +156,10 @@
     const next = $('[data-car="next"]', car);
     const bar = $('.carousel__bar i', car);
     const cnt = $('.carousel__count b', car);
+    /* общее число в счётчике ставим из разметки слайдов –
+       при добавлении/удалении фото знаменатель не рассинхронизируется */
+    const total = $('.car-total', car);
+    if (total) total.textContent = String(slides.length).padStart(2, '0');
     let index = 0, pos = 0, maxPos = 0, slideW = 0;
 
     const measure = () => {
