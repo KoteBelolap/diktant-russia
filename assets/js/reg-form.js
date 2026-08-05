@@ -18,12 +18,12 @@
         Регистрационный номер: «ПА/НОТА-26/» + ID участника,
         дополненный нулями слева до 6 знаков.
      3) Список организаций для поиска:
-        GET /api/orgs?q=…&region=…  → [{n, r, s?} ×7]
+        GET /api/orgs?q=…&region=…  → [{n, r, s?} ×40]
         Поиск глобальный: сервер ищет по всем субъектам, регион
         участника получает бонус релевантности (иногородние студенты).
         Записи без графы «регион» (филиалы РАНХиГС и т.п.), чьё название
         этот регион упоминает, приравниваются к своим – подробности
-        в блоке «маркеры региона» ниже.
+        в блоке «маркеры региона» ниже. Выдача – топ-40 (с 05.08.2026).
         Источник данных и в демо, и в бою – официальный справочник
         в Excel (docs-dev/reference/orgs-source.xlsx, колонки
         FullName / ShortName / RegionName). В демо он заранее
@@ -212,7 +212,8 @@ window.RegForm = (() => {
      «без региона» и 0 у чужих). Дополнение (запрос заказчика
      05.08.2026): записи без графы «регион» (все филиалы РАНХиГС
      и др.), в названии которых встречается регион участника,
-     приравниваются к своим (см. «маркеры региона» ниже).
+     приравниваются к своим (см. «маркеры региона» ниже); выдача
+     расширена с топ-7 до топ-40, окно списка прокручивается.
      У вариантов не из своего региона
      показываем подпись, откуда организация.
      В бою этот блок заменяется GET /api/orgs?q=…&region=… –
@@ -319,6 +320,10 @@ window.RegForm = (() => {
       for (const mk of markers) if (sameStem(st, mk)) return true;
     return false;
   }
+  /* верхняя граница выдачи (запрос заказчика 05.08.2026: топ-7 →
+     топ-40; окно списка с прокруткой – max-height у .org-drop) */
+  const DROP_LIMIT = 40;
+
   /* --- скоринг одной записи (изначальная формула, не менялась;
          к ней добавлено только правило «маркеров региона» выше) --- */
   function scoreOrg(o, qToks, region) {
@@ -411,7 +416,7 @@ window.RegForm = (() => {
       const score = scoreOrg(o, qToks, region);
       if (score > 0) scored.push({ o, score });
     });
-    return scored.sort((a, b) => b.score - a.score).slice(0, 7);
+    return scored.sort((a, b) => b.score - a.score).slice(0, DROP_LIMIT);
   }
   /* Стартовый поиск по маленькому пулу региона (до прихода all.json) */
   function similarity(query, region, pool) {
@@ -422,7 +427,7 @@ window.RegForm = (() => {
       const score = scoreOrg(o, qToks, region);
       if (score > 0) scored.push({ o, score });
     }
-    return scored.sort((a, b) => b.score - a.score).slice(0, 7);
+    return scored.sort((a, b) => b.score - a.score).slice(0, DROP_LIMIT);
   }
   const escH = s => s.replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
   function highlight(name, qToks) {
