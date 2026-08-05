@@ -166,14 +166,22 @@ site/
     │   ├── reg-form.js     Единый модуль регистрации (та же форма на test+register):
     │   │                   валидация, поиск организации, дубль-проверка, успех
     │   ├── register.js     Прослойка register.html (score из URL)
-    │   ├── orgs-data.js    Демо-справочник организаций (~690 шт.)
     │   └── question-bank-demo.js  ⚠ КАРАНТИН: демо-банк вопросов С ОТВЕТАМИ,
     │                             только для превью, в бой не выкладывать
+    ├── data/
+    │   └── orgs/           Справочник организаций, собранный из Excel:
+    │                       r01.json…r89.json (по субъектам РФ), none.json
+    │                       (записи без региона – подмешиваются в поиск),
+    │                       foreign.json, manifest.json. Сборка: tools/xlsx-to-orgs.py
     ├── img/            Логотипы (обновлённый флаг в волне), фото баннера, медиа (25 JPG),
     │                   гости, цитаты, контакты, сертификат, og
     ├── fonts/          Unbounded + Manrope, variable woff2, кириллица + latin
     ├── docs/           Согласия ОПД (DOCX из ТЗ)
     └── favicon.png
+
+tools/
+└── xlsx-to-orgs.py   Конвертер справочника: Excel (FullName/ShortName/RegionName)
+                      → assets/data/orgs/*.json. Исходник: docs-dev/reference/orgs-source.xlsx
 ```
 
 ## 2. Реализовано по ТЗ и правкам (август 2026)
@@ -238,7 +246,7 @@ python3 -m http.server 8901    # из каталога site/
 | Время старта | часы устройства | `<meta name="server-time">` от Битрикса |
 | Вопросы теста | `question-bank-demo.js` ⚠ (удалить!) | `GET /api/test?cat=` — 30 из банка, без ответов |
 | Балл | считает браузер | `POST /api/test/submit` |
-| Организации | `orgs-data.js` (~690) | `GET /api/orgs?q=&region=` (полный справочник) |
+| Организации | `assets/data/orgs/*.json` – полный официальный справочник (~66 тыс.) из `docs-dev/reference/orgs-source.xlsx`, сборка `tools/xlsx-to-orgs.py`; страница подгружает только файл выбранного региона | `GET /api/orgs?q=&region=` (тот же Excel, импортированный в Битрикс) |
 | Дубль-чек | localStorage-журнал | `POST /api/check-duplicate` |
 | Регистрация + reg. номер | имитация, номер 000001… | `POST /api/register` → `ПА/НОТА-26/XXXXXX` |
 | Сертификат | демо-PDF из пакета | печать шаблона сервером, письмо за 48 ч |

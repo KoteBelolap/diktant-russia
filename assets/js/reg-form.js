@@ -19,8 +19,14 @@
         дополненный нулями слева до 6 знаков.
      3) Список организаций для поиска:
         GET /api/orgs?q=…&region=…  → [{n, r, s?} ×7]
-        В демо поиск работает локально по assets/js/orgs-data.js
-        (240 тыс. организаций, выборка Росстата).
+        Источник данных и в демо, и в бою – официальный справочник
+        в Excel (docs-dev/reference/orgs-source.xlsx, колонки
+        FullName / ShortName / RegionName). В демо он заранее
+        разложен конвертером tools/xlsx-to-orgs.py в файлы
+        assets/data/orgs/rNN.json (NN = номер региона в списке
+        REGIONS ниже) и подгружается ЗДЕСЬ только для выбранного
+        региона; в бою тот же Excel импортируется в 1С-Битрикс
+        и отдаётся тем же endpoint'ом.
    Если сервер недоступен (статичное демо), форма работает
    в демонстрационном режиме: данные не покидают браузер,
    регистрационный номер генерируется последовательно.
@@ -185,17 +191,43 @@ window.RegForm = (() => {
     }
     return prev[b.length];
   }
-  let ORGS = null;
-  function orgIndex() {
-    if (ORGS) return ORGS;
-    ORGS = (window.ORGS_DATA || []).map(o => ({ ...o, _t: tokenize(o.n + ' ' + (o.s || '')) }));
-    return ORGS;
+  /* ---------- подгрузка справочника организаций ----------
+     Полная база (~66 тыс. орг.) не влезает в одну сборку JS, да и
+     не нужна: человеку требуются организации СВОЕГО региона.
+     Поэтому конвертер tools/xlsx-to-orgs.py заранее раскладывает
+     Excel-справочник в файлы assets/data/orgs/rNN.json, где NN –
+     номер региона в массиве REGIONS (r01 = REGIONS[0] и т.д.).
+     Файл none.json (записи выгрузки без указанного региона –
+     это обычные школы-филиалы) подмешиваем в поиск любого региона,
+     чтобы филиалы тоже находились.
+     В бою этот блок заменяется GET /api/orgs?q=…&region=… –
+     контракт ответа тот же: [{n, r, s?}]. */
+  const ORG_DIR = 'assets/data/orgs/';
+  const orgCache = {};            /* имя файла -> Promise<записи> */
+  const loadFile = f =>
+    orgCache[f] = orgCache[f] || fetch(ORG_DIR + f + '.json')
+      .then(r => { if (!r.ok) throw new Error(f + ': ' + r.status); return r.json(); })
+      .then(d => d.items.map(([n, s]) => ({ n, s, _t: tokenize(n + ' ' + (s || '')) })));
+  /* Загрузить организации региона: свой файл + записи без региона.
+     Возвращает Promise массива [{n, s, r, _t}]. Кэш на страницу. */
+  function loadRegionOrgs(region) {
+    const slug = 'r' + String(REGIONS.indexOf(region) + 1).padStart(2, '0');
+    return Promise.all([loadFile(slug), loadFile('none')])
+      .then(([mine, stray]) =>
+        mine.map(o => ({ ...o, r: region })).concat(stray.map(o => ({ ...o, r: '' }))));
   }
-  function similarity(query, region) {
+  /* Тихий прогрев кэша, как только выбран регион – к моменту ввода
+     названия данные обычно уже на месте. */
+  function prefetchRegionOrgs(region) {
+    if (REGIONS.indexOf(region) < 0) return;
+    loadFile('r' + String(REGIONS.indexOf(region) + 1).padStart(2, '0')).catch(() => {});
+    loadFile('none').catch(() => {});
+  }
+  function similarity(query, region, pool) {
     const qToks = tokenize(query);
     if (!qToks.length) return [];
     const scored = [];
-    for (const o of orgIndex()) {
+    for (const o of pool) {
       let exact = 0, fuzzy = 0, partial = 0;
       for (const qt of qToks) {
         let hit = false;
@@ -275,6 +307,9 @@ window.RegForm = (() => {
     const orgCustom = $(`#${u}-org-custom`, form);
     const orgMiss = $(`#${u}-org-miss`, form);
     let chosen = null, activeIdx = -1, items = [];
+    let orgPool = null;       /* загруженные организации региона */
+    let orgPoolRegion = null; /* для какого региона загружены */
+    let dropReq = 0;          /* счётчик запросов (защита от гонок сети) */
 
     const eduTypes = new Set(['Школы', 'Колледжи, техникумы', 'Президентская академия и её филиалы', 'Вузы']);
     const isOtherType = () => typeSel.value === 'Иные организации';
@@ -303,20 +338,43 @@ window.RegForm = (() => {
     $(`#${u}-org-selected-clear`, form).addEventListener('click', () => {
       chosen = null; orgInput.value = ''; orgSelected.classList.remove('is-show'); orgInput.focus();
     });
-    function renderDrop() {
-      if (chosen || orgInput.disabled) { closeDrop(); return; }
-      const q = orgInput.value.trim();
-      if (q.length < 3) { closeDrop(); return; }
-      items = similarity(q, regionSel.value);
-      const qToks = tokenize(q);
-      orgDrop.innerHTML = items.length
-        ? items.map((it, i) => `
+    /* служебные состояния выпадающего окна (не варианты выбора) */
+    function dropNote(html) { orgDrop.innerHTML = '<div class="org-none">' + html + '</div>'; orgDrop.classList.add('is-open'); }
+    function showItems(list, qToks) {
+      items = list;
+      orgDrop.innerHTML = list.length
+        ? list.map((it, i) => `
           <button type="button" class="org-opt" data-i="${i}" role="option">
-            <span>${highlight(it.o.n, qToks)}</span>${it.o.r ? '<small>' + escH(it.o.r) + '</small>' : ''}
+            <span>${highlight(it.o.n, qToks)}</span>${it.o.s ? '<small>' + escH(it.o.s) + '</small>' : ''}
           </button>`).join('')
         : '<div class="org-none">Ничего не нашлось. Попробуйте изменить запрос или включите переключатель «Моей организации нет в списке» ниже.</div>';
       $$('.org-opt', orgDrop).forEach(b => b.addEventListener('click', () => choose(items[+b.dataset.i])));
       orgDrop.classList.add('is-open');
+    }
+    function renderDrop() {
+      if (chosen || orgInput.disabled) { closeDrop(); return; }
+      const q = orgInput.value.trim();
+      if (q.length < 3) { closeDrop(); return; }
+      const region = regionSel.value;
+      if (!region) {   /* без региона не знаем, какой файл поднять */
+        dropNote('Сначала выберите регион проживания выше – так найдём Вашу организацию быстрее.');
+        return;
+      }
+      if (orgPool && orgPoolRegion === region) {   /* база уже в памяти – ищем мгновенно */
+        showItems(similarity(q, region, orgPool), tokenize(q));
+        return;
+      }
+      /* первый ввод после выбора региона: поднимаем его файл */
+      const myReq = ++dropReq;
+      dropNote('Загружаю справочник организаций региона…');
+      loadRegionOrgs(region).then(pool => {
+        if (myReq !== dropReq) return;   /* пришёл более свежий ввод */
+        orgPool = pool; orgPoolRegion = region;
+        showItems(similarity(q, region, pool), tokenize(q));
+      }).catch(() => {
+        if (myReq !== dropReq) return;
+        dropNote('Не удалось загрузить справочник. Проверьте интернет и обновите страницу – или впишите название вручную: переключатель «Моей организации нет в списке» ниже.');
+      });
     }
     let deb;
     orgInput.addEventListener('input', () => { chosen = null; orgSelected.classList.remove('is-show'); clearTimeout(deb); deb = setTimeout(renderDrop, 140); });
@@ -340,7 +398,16 @@ window.RegForm = (() => {
       if (orgMiss.checked) { chosen = null; orgSelected.classList.remove('is-show'); closeDrop(); }
       if (!orgMiss.checked && !isOtherType()) orgCustom.value = '';
     });
-    regionSel.addEventListener('change', renderDrop);
+    /* смена региона: забываем ранее выбранную организацию из другого
+       региона, сбрасываем пул и сразу тихо подгружаем новый файл */
+    regionSel.addEventListener('change', () => {
+      if (orgPoolRegion !== regionSel.value) { orgPool = null; orgPoolRegion = null; }
+      if (chosen && chosen.r && chosen.r !== regionSel.value) {
+        chosen = null; orgInput.value = ''; orgSelected.classList.remove('is-show');
+      }
+      prefetchRegionOrgs(regionSel.value);
+      renderDrop();
+    });
 
     /* --- валидация --- */
     function setError(w, msg) { w.classList.add('has-error'); const e = $('.f-error', w); if (e) e.textContent = msg; }
