@@ -534,16 +534,32 @@ window.RegForm = (() => {
     }
 
     const eduTypes = new Set(['Школы', 'Колледжи, техникумы', 'Президентская академия и её филиалы', 'Вузы']);
-    const isOtherType = () => typeSel.value === 'Иные организации';
+    /* Поиск по справочнику открыт и для типа «Иные организации»
+       (запрос заказчика 05.08.2026: информация о диктанте рассылается
+       по консульствам – их сотрудники тоже должны находить свою
+       организацию; генконсульства России и школы при посольствах в
+       справочнике уже есть – категория none. Чего в справочнике нет –
+       ручной ввод по той же галочке «Моей организации нет в списке»).
+       Отличие от учебных типов – только подписи поля. */
+    const ORG_UI = {
+      edu: { label: 'Образовательная организация', ph: 'Начните вводить: «школа 74 краснодар»…' },
+      any: { label: 'Наименование организации', ph: 'Начните вводить название организации…' }
+    };
+    const orgLabel = fwOrg.querySelector(`label[for="${u}-org"]`);
     const syncOrgVisibility = () => {
-      const isEdu = eduTypes.has(typeSel.value);
-      const isOther = isOtherType();
-      fwOrg.hidden = !isEdu;
-      /* «Иные организации» – сразу поле ручного ввода названия;
-         учебные – ручной ввод только по галочке «нет в списке» */
-      orgCustomWrap.hidden = !(isOther || (isEdu && orgMiss.checked));
-      if (!isEdu) { chosen = null; orgMiss.checked = false; orgSelected.classList.remove('is-show'); orgInput.value = ''; orgInput.disabled = false; }
-      if (!isOther && !isEdu) orgCustom.value = '';
+      const isOther = typeSel.value === 'Иные организации';
+      const hasSearch = isOther || eduTypes.has(typeSel.value);
+      const ui = isOther ? ORG_UI.any : ORG_UI.edu;
+      fwOrg.hidden = !hasSearch;
+      /* ручной ввод (для всех типов с поиском) – по галочке
+         «Моей организации нет в списке» */
+      orgCustomWrap.hidden = !(hasSearch && orgMiss.checked);
+      orgLabel.textContent = ui.label;
+      orgInput.placeholder = ui.ph;
+      if (!hasSearch) {
+        chosen = null; orgMiss.checked = false; orgSelected.classList.remove('is-show');
+        orgInput.value = ''; orgInput.disabled = false; orgCustom.value = '';
+      }
     };
     typeSel.addEventListener('change', () => { syncOrgVisibility(); clearError(typeSel.closest('.f-field')); if (!fwOrg.hidden) orgInput.focus(); });
     syncOrgVisibility();
@@ -626,10 +642,10 @@ window.RegForm = (() => {
     });
     document.addEventListener('pointerdown', e => { if (!e.target.closest('.org-box')) closeDrop(); });
     orgMiss.addEventListener('change', () => {
-      orgCustomWrap.hidden = !(isOtherType() || orgMiss.checked);
+      orgCustomWrap.hidden = !orgMiss.checked;
       orgInput.disabled = orgMiss.checked;
       if (orgMiss.checked) { chosen = null; orgSelected.classList.remove('is-show'); closeDrop(); }
-      if (!orgMiss.checked && !isOtherType()) orgCustom.value = '';
+      else orgCustom.value = '';
     });
     /* смена региона: забываем ранее выбранную организацию из другого
        региона, сбрасываем пул и сразу тихо подгружаем новый файл */
@@ -660,8 +676,8 @@ window.RegForm = (() => {
         email: $(`#${u}-email`, form).value.trim(),
         region: regionSel.value || '',
         orgType: typeSel.value || '',
-        org: isOtherType() ? orgCustom.value.trim()
-          : (fwOrg.hidden ? '' : (orgMiss.checked ? orgCustom.value.trim() : (chosen ? chosen.n : ''))),
+        org: fwOrg.hidden ? ''
+          : (orgMiss.checked ? orgCustom.value.trim() : (chosen ? chosen.n : '')),
         category: radioValue('category'),
         score: typeof preset.score === 'number' ? preset.score : null,
         total: typeof preset.total === 'number' ? preset.total : null
@@ -685,8 +701,6 @@ window.RegForm = (() => {
       if (!fwOrg.hidden) {
         if (orgMiss.checked) { if (!orgCustom.value.trim()) fail(orgCustomWrap, 'Введите наименование организации'); }
         else if (!chosen) fail(fwOrg, 'Начните вводить название и выберите организацию из списка');
-      } else if (isOtherType() && !orgCustom.value.trim()) {
-        fail(orgCustomWrap, 'Введите наименование организации');
       }
       if (!d.category) fail($(`#${u}-w-category`, form), 'Выберите возрастную категорию');
       if (!$(`#${u}-consent`, form).checked) fail($(`#${u}-w-consent`, form), 'Необходимо согласие на обработку персональных данных');
