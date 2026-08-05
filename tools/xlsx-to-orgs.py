@@ -24,10 +24,14 @@ docs-dev/reference/orgs-source.xlsx). Сайт не читает .xlsx
       REGIONS[NN-1]);
   assets/data/orgs/none.json             - записи без региона
       (в исходной выгрузке поле пустое; это обычные школы-
-      филиалы, их подмешиваем в поиск любого региона);
-  assets/data/orgs/foreign.json          - организации за
-      пределами РФ (в форме сейчас только 89 субъектов РФ,
-      поэтому в поиске не участвуют; файл сохранён на будущее);
+      филиалы). Сюда же влиты организации за пределами РФ:
+      по решению заказчика они «на всякий случай» участвуют
+      в поиске любого региона, как и записи без региона;
+  assets/data/orgs/all.json              - ВСЯ база одним файлом
+      в компактном виде [[name, short, regionIdx], ...], где
+      regionIdx 1..89 = номер региона в списке REGIONS, 0 = без
+      региона/зарубежье. Страница подгружает его в фоне, чтобы
+      искать по всей стране (свой регион выше в выдаче);
   assets/data/orgs/manifest.json         - служебная сводка:
       дата сборки, счётчики, какой файл за какой регион отвечает.
 
@@ -104,16 +108,17 @@ def clean(text):
 
 
 def canon_region(raw):
-    """RegionName из выгрузки -> (ключ файла, каноническое имя).
-    Ключи: 'r01'...'r89', 'none', 'foreign'."""
+    """RegionName из выгрузки -> ключ файла:
+    'r01'...'r89' для региона, 'none' – без региона И зарубежье
+    (заказчик решил: зарубежные школы идут в общий поиск)."""
     r = clean(raw)
     if not r or r.lower() == "none":
-        return "none", ""
+        return "none"
     r = REGION_ALIASES.get(r, r)
     if r == FOREIGN_LABEL or "за пределами" in r:
-        return "foreign", ""
+        return "none"
     if r in REGIONS:
-        return "r%02d" % (REGIONS.index(r) + 1), r
+        return "r%02d" % (REGIONS.index(r) + 1)
     sys.exit(f"Неизвестный регион в выгрузке: {raw!r}. "
              f"Добавьте его в REGION_ALIASES в этом скрипте.")
 
@@ -145,16 +150,33 @@ def main():
         short = clean(row[c_short])
         if short in ("-", "None"):
             short = ""
-        key, _ = canon_region(row[c_reg])
+        key = canon_region(row[c_reg])
         buckets.setdefault(key, set()).add((full, short))
 
     OUT.mkdir(parents=True, exist_ok=True)
-    manifest = {"version": 1,
+    manifest = {"version": 2,
                 "source": "docs-dev/reference/orgs-source.xlsx",
                 "note": "rNN.json = REGIONS[NN-1] из assets/js/reg-form.js; "
-                        "none.json подмешивается в поиск любого региона",
+                        "none.json (без региона + зарубежье) подмешивается в поиск "
+                        "любого региона; all.json – вся база для глобального поиска, "
+                        "regionIdx: 1..89 = REGIONS, 0 = none",
                 "regions": {}, "files": {}}
+    # Пересекающиеся дубли: многие школы-филиалы есть в выгрузке
+    # дважды – с регионом и без него. Региональная версия всегда
+    # информативнее (с ней работает пометка региона и бонус
+    # релевантности), поэтому из none такие копии убираем.
+    regional_pairs = set()
+    for key, pairs in buckets.items():
+        if key != "none":
+            regional_pairs |= pairs
+    before = len(buckets.get("none", set()))
+    buckets.get("none", set()).difference_update(regional_pairs)
+    print(f"Дедуп none: было {before}, совпало с региональными "
+          f"{before - len(buckets.get('none', set()))}, осталось "
+          f"{len(buckets.get('none', set()))}")
+
     total = 0
+    flat = []   # для all.json: (name, short, idx), idx 1..89 регион, 0 - без региона
     for key, pairs in sorted(buckets.items()):
         items = sorted(pairs, key=lambda p: p[0].lower())
         fname = key + ".json"
@@ -163,9 +185,16 @@ def main():
                       ensure_ascii=False, separators=(",", ":"))
         total += len(items)
         manifest["files"][fname] = len(items)
-        if key.startswith("r"):
-            rr = REGIONS[int(key[1:]) - 1]
-            manifest["regions"][rr] = fname
+        idx = int(key[1:]) if key.startswith("r") else 0
+        flat.extend((n, s, idx) for n, s in items)
+        if idx:
+            manifest["regions"][REGIONS[idx - 1]] = fname
+    flat.sort(key=lambda p: (p[2], p[0].lower()))
+    with open(OUT / "all.json", "w", encoding="utf-8") as f:
+        json.dump({"items": [[n, s, i] for n, s, i in flat]}, f,
+                  ensure_ascii=False, separators=(",", ":"))
+    manifest["files"]["all.json"] = len(flat)
+    manifest["total"] = total
     with open(OUT / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=1)
 

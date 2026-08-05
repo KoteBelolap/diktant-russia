@@ -1,7 +1,7 @@
 {
- "version": 1,
+ "version": 2,
  "source": "docs-dev/reference/orgs-source.xlsx",
- "note": "rNN.json = REGIONS[NN-1] из assets/js/reg-form.js; none.json подмешивается в поиск любого региона",
+ "note": "rNN.json = REGIONS[NN-1] из assets/js/reg-form.js; none.json (без региона + зарубежье) подмешивается в поиск любого региона; all.json – вся база для глобального поиска, regionIdx: 1..89 = REGIONS, 0 = none",
  "regions": {
   "Республика Адыгея": "r01.json",
   "Республика Алтай": "r02.json",
@@ -94,8 +94,7 @@
   "Ямало-Ненецкий автономный округ": "r89.json"
  },
  "files": {
-  "foreign.json": 159,
-  "none.json": 7707,
+  "none.json": 7840,
   "r01.json": 162,
   "r02.json": 160,
   "r03.json": 1643,
@@ -184,6 +183,8 @@
   "r86.json": 41,
   "r87.json": 367,
   "r88.json": 50,
-  "r89.json": 169
- }
+  "r89.json": 169,
+  "all.json": 66397
+ },
+ "total": 66397
 }

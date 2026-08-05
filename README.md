@@ -171,8 +171,9 @@ site/
     ├── data/
     │   └── orgs/           Справочник организаций, собранный из Excel:
     │                       r01.json…r89.json (по субъектам РФ), none.json
-    │                       (записи без региона – подмешиваются в поиск),
-    │                       foreign.json, manifest.json. Сборка: tools/xlsx-to-orgs.py
+    │                       (без региона + зарубежные – в поиске любого региона),
+    │                       all.json (вся база для глобального поиска фоном),
+    │                       manifest.json. Сборка: tools/xlsx-to-orgs.py
     ├── img/            Логотипы (обновлённый флаг в волне), фото баннера, медиа (25 JPG),
     │                   гости, цитаты, контакты, сертификат, og
     ├── fonts/          Unbounded + Manrope, variable woff2, кириллица + latin
@@ -262,7 +263,7 @@ python3 -m http.server 8901    # из каталога site/
 | Время старта | часы устройства | `<meta name="server-time">` от Битрикса |
 | Вопросы теста | `question-bank-demo.js` ⚠ (удалить!) | `GET /api/test?cat=` — 30 из банка, без ответов |
 | Балл | считает браузер | `POST /api/test/submit` |
-| Организации | `assets/data/orgs/*.json` – полный официальный справочник (~66 тыс.) из `docs-dev/reference/orgs-source.xlsx`, сборка `tools/xlsx-to-orgs.py`; страница подгружает только файл выбранного региона | `GET /api/orgs?q=&region=` (тот же Excel, импортированный в Битрикс) |
+| Организации | `assets/data/orgs/*.json` – полный официальный справочник (~66 тыс.) из `docs-dev/reference/orgs-source.xlsx`, сборка `tools/xlsx-to-orgs.py`; поиск глобальный (по всем субъектам, свой регион выше в выдаче): сначала файл региона + none, в фоне all.json + инвертированный индекс | `GET /api/orgs?q=&region=` (тот же Excel, импортированный в Битрикс; глобальный поиск с бонусом региона) |
 | Дубль-чек | localStorage-журнал | `POST /api/check-duplicate` |
 | Регистрация + reg. номер | имитация, номер 000001… | `POST /api/register` → `ПА/НОТА-26/XXXXXX` |
 | Сертификат | демо-PDF из пакета | печать шаблона сервером, письмо за 48 ч |

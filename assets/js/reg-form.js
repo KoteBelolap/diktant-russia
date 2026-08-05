@@ -19,14 +19,15 @@
         дополненный нулями слева до 6 знаков.
      3) Список организаций для поиска:
         GET /api/orgs?q=…&region=…  → [{n, r, s?} ×7]
+        Поиск глобальный: сервер ищет по всем субъектам, регион
+        участника получает бонус релевантности (иногородние студенты).
         Источник данных и в демо, и в бою – официальный справочник
         в Excel (docs-dev/reference/orgs-source.xlsx, колонки
         FullName / ShortName / RegionName). В демо он заранее
         разложен конвертером tools/xlsx-to-orgs.py в файлы
-        assets/data/orgs/rNN.json (NN = номер региона в списке
-        REGIONS ниже) и подгружается ЗДЕСЬ только для выбранного
-        региона; в бою тот же Excel импортируется в 1С-Битрикс
-        и отдаётся тем же endpoint'ом.
+        assets/data/orgs/ (см. блок «подгрузка справочника» ниже);
+        в бою тот же Excel импортируется в 1С-Битрикс и отдаётся
+        тем же endpoint'ом.
    Если сервер недоступен (статичное демо), форма работает
    в демонстрационном режиме: данные не покидают браузер,
    регистрационный номер генерируется последовательно.
@@ -193,28 +194,43 @@ window.RegForm = (() => {
   }
   /* ---------- подгрузка справочника организаций ----------
      Полная база (~66 тыс. орг.) не влезает в одну сборку JS, да и
-     не нужна: человеку требуются организации СВОЕГО региона.
-     Поэтому конвертер tools/xlsx-to-orgs.py заранее раскладывает
-     Excel-справочник в файлы assets/data/orgs/rNN.json, где NN –
-     номер региона в массиве REGIONS (r01 = REGIONS[0] и т.д.).
-     Файл none.json (записи выгрузки без указанного региона –
-     это обычные школы-филиалы) подмешиваем в поиск любого региона,
-     чтобы филиалы тоже находились.
+     не нужна сразу вся. Конвертер tools/xlsx-to-orgs.py раскладывает
+     Excel-справочник в файлы assets/data/orgs/:
+       rNN.json  – организации региона NN (NN = номер в списке REGIONS);
+       none.json – записи без региона + зарубежные школы (решение
+                   заказчика: подмешивать в поиск любого региона);
+       all.json  – вся база одним файлом [[name, short, regionIdx]].
+     СТРАТЕГИЯ ПОИСКА (запрос заказчика: иногородний студент живёт
+     в одном регионе, а учится в другом – его организация тоже должна
+     находиться): сначала ищем по файлу выбранного региона (быстрый
+     старт с малым трафиком), параллельно в фоне докачиваем all.json,
+     строим инвертированный индекс и дальше ищем ПО ВСЕМ СУБЪЕКТАМ –
+     выбранный регион получает бонус релевантности (+14 против +4
+     «без региона» и 0 у чужих). У вариантов не из своего региона
+     показываем подпись, откуда организация.
      В бою этот блок заменяется GET /api/orgs?q=…&region=… –
      контракт ответа тот же: [{n, r, s?}]. */
   const ORG_DIR = 'assets/data/orgs/';
-  const orgCache = {};            /* имя файла -> Promise<записи> */
+  const orgCache = {};            /* имя файла -> Promise<JSON> */
   const loadFile = f =>
     orgCache[f] = orgCache[f] || fetch(ORG_DIR + f + '.json')
-      .then(r => { if (!r.ok) throw new Error(f + ': ' + r.status); return r.json(); })
-      .then(d => d.items.map(([n, s]) => ({ n, s, _t: tokenize(n + ' ' + (s || '')) })));
-  /* Загрузить организации региона: свой файл + записи без региона.
-     Возвращает Promise массива [{n, s, r, _t}]. Кэш на страницу. */
+      .then(r => { if (!r.ok) throw new Error(f + ': ' + r.status); return r.json(); });
+
+  const mkOrg = (n, s, r) => ({ n, s, r, _t: tokenize(n + ' ' + (s || '')) });
+
+  /* Быстрый старт (малый трафик): организации выбранного региона
+     + записи без региона и зарубежные (none.json) */
   function loadRegionOrgs(region) {
     const slug = 'r' + String(REGIONS.indexOf(region) + 1).padStart(2, '0');
     return Promise.all([loadFile(slug), loadFile('none')])
       .then(([mine, stray]) =>
-        mine.map(o => ({ ...o, r: region })).concat(stray.map(o => ({ ...o, r: '' }))));
+        mine.items.map(([n, s]) => mkOrg(n, s, region))
+          .concat(stray.items.map(([n, s]) => mkOrg(n, s, ''))));
+  }
+  /* Вся база (догружается в фоне для глобального поиска) */
+  function loadAllOrgs() {
+    return loadFile('all').then(d =>
+      d.items.map(([n, s, i]) => mkOrg(n, s, i ? REGIONS[i - 1] : '')));
   }
   /* Тихий прогрев кэша, как только выбран регион – к моменту ввода
      названия данные обычно уже на месте. */
@@ -223,32 +239,104 @@ window.RegForm = (() => {
     loadFile('r' + String(REGIONS.indexOf(region) + 1).padStart(2, '0')).catch(() => {});
     loadFile('none').catch(() => {});
   }
+
+  /* --- скоринг одной записи (изначальная формула, не менялась) --- */
+  function scoreOrg(o, qToks, region) {
+    let exact = 0, fuzzy = 0, partial = 0;
+    for (const qt of qToks) {
+      let hit = false;
+      if (o._t.includes(qt)) { exact++; hit = true; continue; }
+      for (const t of o._t) {
+        if (t.startsWith(qt) || (qt.length >= 4 && t.includes(qt))) { partial++; hit = true; break; }
+      }
+      if (hit) continue;
+      if (qt.length >= 4) {
+        for (const t of o._t) { if (Math.abs(t.length - qt.length) <= 2 && lev(qt, t, 2) <= 2) { fuzzy++; break; } }
+      }
+    }
+    const cover = (exact + partial + fuzzy) / qToks.length;
+    if (!cover) return 0;
+    let score = exact * 10 + partial * 6 + fuzzy * 4 + cover * 12;
+    if (region) {
+      if (o.r === region) score += 14;   /* свой регион выше всех */
+      else if (!o.r) score += 4;         /* без региона/зарубежье – нейтрально выше чужих */
+    }
+    if (exact === qToks.length) score += 10;
+    return score;
+  }
+
+  /* --- глобальный поиск по инвертированному индексу ---
+     Индекс: Map токен -> id записей + отсортированный словарь (для
+     бинарного поиска префикса). Кандидатов (обычно единицы-тысячи)
+     даёт индекс за миллисекунды на всей базе; полный скоринг scoreOrg
+     считается только по ним – результаты совпадают с прежним полным
+     перебором, но без перебора 66 тыс. записей на каждую букву. */
+  function buildOrgIndex(pool) {
+    const map = new Map();
+    pool.forEach((o, id) => {
+      for (const t of o._t) {
+        let a = map.get(t);
+        if (!a) map.set(t, a = []);
+        if (a[a.length - 1] !== id) a.push(id);
+      }
+    });
+    const sorted = [...map.keys()].sort();
+    return { map, sorted };
+  }
+  function lowerBound(sorted, key) {
+    let lo = 0, hi = sorted.length;
+    while (lo < hi) { const mid = (lo + hi) >> 1; if (sorted[mid] < key) lo = mid + 1; else hi = mid; }
+    return lo;
+  }
+  function searchOrgs(query, region, pool, idx) {
+    const qToks = tokenize(query);
+    if (!qToks.length) return [];
+    /* 1) кандидаты из индекса: точный токен + префикс («шко») */
+    const cand = new Set();
+    const add = ids => ids && ids.forEach(id => cand.add(id));
+    for (const qt of qToks) {
+      add(idx.map.get(qt));
+      const lo = lowerBound(idx.sorted, qt);
+      for (let i = lo; i < idx.sorted.length && idx.sorted[i].startsWith(qt); i++) add(idx.map.get(idx.sorted[i]));
+    }
+    const long = qToks.filter(q => q.length >= 4);
+    if (long.length) {
+      /* подстрока внутри токена («аросла» → «красноярская») – один проход словаря */
+      idx.sorted.forEach(t => {
+        for (const qt of long) {
+          if (t.includes(qt) && !t.startsWith(qt)) { add(idx.map.get(t)); break; }
+        }
+      });
+      /* опечатки (fuzzy) имеет смысл искать по словарю только для токена,
+         который не сработал вообще нигде («хкола») – иначе все fuzzy-записи
+         и так придут через остальные токены запроса */
+      for (const qt of long) {
+        const lo = lowerBound(idx.sorted, qt);
+        const hasHit = idx.map.has(qt) ||
+          (lo < idx.sorted.length && idx.sorted[lo].startsWith(qt));
+        if (hasHit) continue;
+        for (const t of idx.sorted) {
+          if (Math.abs(t.length - qt.length) <= 2 && lev(qt, t, 2) <= 2) add(idx.map.get(t));
+        }
+      }
+    }
+    /* 2) полный скоринг кандидатов прежней формулой */
+    const scored = [];
+    cand.forEach(id => {
+      const o = pool[id];
+      const score = scoreOrg(o, qToks, region);
+      if (score > 0) scored.push({ o, score });
+    });
+    return scored.sort((a, b) => b.score - a.score).slice(0, 7);
+  }
+  /* Стартовый поиск по маленькому пулу региона (до прихода all.json) */
   function similarity(query, region, pool) {
     const qToks = tokenize(query);
     if (!qToks.length) return [];
     const scored = [];
     for (const o of pool) {
-      let exact = 0, fuzzy = 0, partial = 0;
-      for (const qt of qToks) {
-        let hit = false;
-        if (o._t.includes(qt)) { exact++; hit = true; continue; }
-        for (const t of o._t) {
-          if (t.startsWith(qt) || (qt.length >= 4 && t.includes(qt))) { partial++; hit = true; break; }
-        }
-        if (hit) continue;
-        if (qt.length >= 4) {
-          for (const t of o._t) { if (Math.abs(t.length - qt.length) <= 2 && lev(qt, t, 2) <= 2) { fuzzy++; break; } }
-        }
-      }
-      const cover = (exact + partial + fuzzy) / qToks.length;
-      if (!cover) continue;
-      let score = exact * 10 + partial * 6 + fuzzy * 4 + cover * 12;
-      if (region) {
-        if (o.r === region) score += 14;
-        else if (!o.r) score += 4;
-      }
-      if (exact === qToks.length) score += 10;
-      scored.push({ o, score, qt: qToks });
+      const score = scoreOrg(o, qToks, region);
+      if (score > 0) scored.push({ o, score });
     }
     return scored.sort((a, b) => b.score - a.score).slice(0, 7);
   }
@@ -307,9 +395,54 @@ window.RegForm = (() => {
     const orgCustom = $(`#${u}-org-custom`, form);
     const orgMiss = $(`#${u}-org-miss`, form);
     let chosen = null, activeIdx = -1, items = [];
-    let orgPool = null;       /* загруженные организации региона */
+    let orgPool = null;       /* стартовый пул: выбранный регион + none */
     let orgPoolRegion = null; /* для какого региона загружены */
+    let allPool = null;       /* глобальный пул: ВСЯ страна (all.json) */
+    let allIndex = null;      /* инвертированный индекс глобального пула */
+    let allLoading = null;    /* Promise фоновой догрузки all.json */
     let dropReq = 0;          /* счётчик запросов (защита от гонок сети) */
+
+    /* Фоновое включение глобального поиска: докачать all.json и
+       построить индекс. Запускаем после первого реального поиска,
+       чтобы не тратить трафик тем, кто комбобокс не открывает. */
+    function ensureGlobalOrgs() {
+      if (allIndex || allLoading) return;
+      allLoading = loadAllOrgs().then(pool => {
+        /* индекс строим частями по тикам – интерфейс не подмораживаем */
+        return new Promise(res => {
+          const map = new Map();
+          let pos = 0;
+          const CHUNK = 8000;
+          const step = () => {
+            const end = Math.min(pos + CHUNK, pool.length);
+            for (; pos < end; pos++) {
+              for (const t of pool[pos]._t) {
+                let a = map.get(t);
+                if (!a) map.set(t, a = []);
+                if (a[a.length - 1] !== pos) a.push(pos);
+              }
+            }
+            if (pos < pool.length) setTimeout(step, 0);
+            else res({ map, sorted: [...map.keys()].sort() });
+          };
+          step();
+        }).then(idx => {
+          allPool = pool; allIndex = idx;
+          /* выдача расширилась (теперь вся страна): если окно открыто –
+             пересчитаем подсказки по текущему запросу сразу, не дожидаясь
+             следующей буквы */
+          if (orgDrop.classList.contains('is-open') && orgInput.value.trim().length >= 3 && !chosen) renderDrop();
+        });
+      }).catch(() => { allLoading = null; });
+    }
+
+    /* единая точка поиска: по всей стране, если фон готов; иначе –
+       по стартовому пулу региона */
+    function findOrgs(q, region) {
+      if (allIndex) return searchOrgs(q, region, allPool, allIndex);
+      if (orgPool && orgPoolRegion === region) return similarity(q, region, orgPool);
+      return null;   /* региональный пул ещё не загружен */
+    }
 
     const eduTypes = new Set(['Школы', 'Колледжи, техникумы', 'Президентская академия и её филиалы', 'Вузы']);
     const isOtherType = () => typeSel.value === 'Иные организации';
@@ -340,12 +473,19 @@ window.RegForm = (() => {
     });
     /* служебные состояния выпадающего окна (не варианты выбора) */
     function dropNote(html) { orgDrop.innerHTML = '<div class="org-none">' + html + '</div>'; orgDrop.classList.add('is-open'); }
+    /* подпись под вариантом: короткое имя; у «чужих» регионов – ещё
+       пометка региона (запрос: иногородний студент должен находить свою
+       организацию и видеть, где она) */
+    const orgSubline = o => {
+      const tag = o.r && o.r !== regionSel.value ? o.r : '';
+      return o.s && tag ? o.s + ' · ' + tag : (tag || o.s || '');
+    };
     function showItems(list, qToks) {
       items = list;
       orgDrop.innerHTML = list.length
         ? list.map((it, i) => `
           <button type="button" class="org-opt" data-i="${i}" role="option">
-            <span>${highlight(it.o.n, qToks)}</span>${it.o.s ? '<small>' + escH(it.o.s) + '</small>' : ''}
+            <span>${highlight(it.o.n, qToks)}</span>${orgSubline(it.o) ? '<small>' + escH(orgSubline(it.o)) + '</small>' : ''}
           </button>`).join('')
         : '<div class="org-none">Ничего не нашлось. Попробуйте изменить запрос или включите переключатель «Моей организации нет в списке» ниже.</div>';
       $$('.org-opt', orgDrop).forEach(b => b.addEventListener('click', () => choose(items[+b.dataset.i])));
@@ -360,17 +500,21 @@ window.RegForm = (() => {
         dropNote('Сначала выберите регион проживания выше – так найдём Вашу организацию быстрее.');
         return;
       }
-      if (orgPool && orgPoolRegion === region) {   /* база уже в памяти – ищем мгновенно */
-        showItems(similarity(q, region, orgPool), tokenize(q));
+      const foundNow = findOrgs(q, region);
+      if (foundNow) {                   /* данные уже в памяти – ищем мгновенно */
+        showItems(foundNow, tokenize(q));
+        if (allIndex === null) ensureGlobalOrgs();
         return;
       }
-      /* первый ввод после выбора региона: поднимаем его файл */
+      /* первый ввод после выбора региона: поднимаем его файл,
+         а следом в фоне – всю базу страны */
       const myReq = ++dropReq;
       dropNote('Загружаю справочник организаций региона…');
       loadRegionOrgs(region).then(pool => {
         if (myReq !== dropReq) return;   /* пришёл более свежий ввод */
         orgPool = pool; orgPoolRegion = region;
-        showItems(similarity(q, region, pool), tokenize(q));
+        showItems(findOrgs(q, region), tokenize(q));
+        ensureGlobalOrgs();
       }).catch(() => {
         if (myReq !== dropReq) return;
         dropNote('Не удалось загрузить справочник. Проверьте интернет и обновите страницу – или впишите название вручную: переключатель «Моей организации нет в списке» ниже.');
