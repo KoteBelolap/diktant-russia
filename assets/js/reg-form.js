@@ -98,7 +98,7 @@ window.RegForm = (() => {
           <div class="f-field f-field--full">
             <label for="${u}-region">Регион проживания</label>
             <span class="f-select-wrap"><select class="f-select" id="${u}-region" required>
-              <option value="" selected disabled>Выберите из 89 субъектов Российской Федерации…</option>
+              <option value="" selected disabled>Выберите из ${REGIONS.length} субъектов Российской Федерации…</option>
               ${REGIONS.map(r => `<option>${r}</option>`).join('')}
             </select></span>
             <span class="f-error"></span>

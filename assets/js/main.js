@@ -13,6 +13,9 @@
                          показываем всё как есть
    - Счётчики............числа статистики добегают до значений,
                          когда секция попадает в экран
+   - Диаграммы...........высоты столбцов и геометрия линии
+                         пересчитываются из цифр в разметке:
+                         меняешь число - диаграмма следует сама
    - Обратный отсчёт.....3 фазы до старта/во время/после диктанта;
                          берёт время СЕРВЕРА из <meta name="server-time">,
                          без меты работает в демо-режиме от часов клиента
@@ -125,6 +128,75 @@
   } else {
     $$('[data-count]').forEach(setFinal);
   }
+
+  /* ---------- Диаграммы статистики: пересчёт из цифр ----------
+     Источник истины – ВИДИМЫЕ цифры в разметке (.bars__val у столбцов,
+     data-points у линейного графика). Высоты столбцов, геометрия линии
+     и подписи для скринридеров вычисляются из них при загрузке, поэтому
+     редактор меняет ТОЛЬКО число – диаграмма следует сама. Размеченные
+     в HTML значения остаются запасным вариантом на случай без JS. */
+  (() => {
+    const num = t => parseFloat(String(t).replace(/\s/g, '').replace(',', '.'));
+    const fmtRu = v => String(v).replace('.', ',');
+
+    /* столбчатые диаграммы: --h = доля максимума диаграммы в % */
+    $$('.bars').forEach(bars => {
+      const cols = $$('.bars__col', bars);
+      if (!cols.length) return;
+      const vals = cols.map(c => num($('.bars__val', c)?.textContent ?? 'NaN'));
+      if (vals.some(v => !isFinite(v))) return;
+      const max = Math.max(...vals) || 1;
+      cols.forEach((c, i) => $('.bars__bar', c)
+        ?.style.setProperty('--h', +(vals[i] / max * 100).toFixed(1)));
+      const unit = bars.dataset.unit;
+      if (unit) bars.setAttribute('aria-label', 'Диаграмма: ' + cols
+        .map((c, i) => `${$('.bars__val', c).textContent.trim()} ${unit} к ${$('.bars__year', c).textContent.trim()} году`)
+        .join(', '));
+    });
+
+    /* линейный график участников: пересобираем path, точки и подписи
+       из data-points="v1,v2,…" + data-years + data-unit.
+       Геометрия viewBox 400x170: x от 40 шагом 106, низ y=140,
+       максимум рисуем на y=12.4 (проектная высота пика). */
+    $$('svg.chart[data-points]').forEach(svg => {
+      const pts = (svg.dataset.points || '').split(',').map(num);
+      const years = (svg.dataset.years || '').split(',');
+      const unit = svg.dataset.unit ?? '';
+      if (pts.length < 2 || pts.some(v => !isFinite(v)) || years.length !== pts.length) return;
+      const NS = 'http://www.w3.org/2000/svg';
+      const X0 = 40, DX = 106, YB = 140, YTOP = 12.4;
+      const max = Math.max(...pts) || 1;
+      const X = i => X0 + DX * i;
+      const Y = v => +(YB - v / max * (YB - YTOP)).toFixed(2);
+      let d = `M${X(0)} ${Y(pts[0])}`;
+      for (let i = 1; i < pts.length; i++)
+        d += ` C ${X(i - 1) + 35} ${Y(pts[i - 1])}, ${X(i) - 35} ${Y(pts[i])}, ${X(i)} ${Y(pts[i])}`;
+      const line = $('path.line-path', svg), area = $('path.line-area', svg);
+      if (line) line.setAttribute('d', d);
+      if (area) area.setAttribute('d', `${d} L${X(pts.length - 1)} ${YB} L${X(0)} ${YB} Z`);
+      $$('.line-g', svg).forEach(g => g.remove());
+      const mk = (name, attrs, text) => {
+        const el = document.createElementNS(NS, name);
+        for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+        if (text != null) el.textContent = text;
+        return el;
+      };
+      pts.forEach((v, i) => {
+        const last = i === pts.length - 1;
+        const g = mk('g', { class: 'line-g' });
+        g.appendChild(mk('circle', { class: 'chart-dot', cx: X(i), cy: Y(v), r: last ? 6 : 5 }));
+        /* последняя точка у правого края: подпись смещаем влево-вниз */
+        g.appendChild(mk('text', last
+          ? { class: 'val-label', x: X(i) - 22, y: Y(v) + 21.6, 'text-anchor': 'end' }
+          : { class: 'val-label', x: X(i), y: Y(v) - 14.7, 'text-anchor': 'middle' },
+          fmtRu(v) + unit));
+        g.appendChild(mk('text', { class: 'axis-label', x: X(i), y: 160, 'text-anchor': 'middle' }, years[i]));
+        svg.appendChild(g);
+      });
+      svg.setAttribute('aria-label', 'График роста участников: ' +
+        pts.map((v, i) => `${fmtRu(v)} тысячи в ${years[i]}`).join(', '));
+    });
+  })();
 
   /* ---------- Обратный отсчёт (05.11.2026 10:00 – 08.11.2026 23:59 МСК, время сервера) ----------
      Механика трёх фаз:

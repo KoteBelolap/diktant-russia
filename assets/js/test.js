@@ -29,8 +29,10 @@
   const params = new URLSearchParams(location.search);
   const MODE = params.get('mode') === 'training' ? 'training' : 'main';
 
-  const DURATION = 40 * 60;        /* 40 минут (ТЗ) */
-  const QUESTIONS_PER_TEST = 30;   /* 30 вопросов из банка (ТЗ) */
+  /* Параметры ТЗ берутся из config.js (единый источник), значения
+     по умолчанию – на случай, если конфиг не подключён */
+  const DURATION = (window.DIKTANT?.CONFIG?.testDurationMin ?? 40) * 60;
+  const QUESTIONS_PER_TEST = window.DIKTANT?.CONFIG?.questionsPerTest ?? 30;
 
   const CAT_META = {
     school:  'Школьник 5–11 класс',
