@@ -209,7 +209,7 @@ window.RegForm = (() => {
         <label class="consent">
           <input type="checkbox" id="${u}-consent" required>
           <span class="consent__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
-          <p>Я выражаю своё согласие на <a href="assets/docs/Согласие на обработку персональных данных.docx" download>обработку</a> и <a href="assets/docs/Согласие на передачу персональных данных.docx" download>передачу</a> своих персональных данных в соответствии с Федеральным законом № 152-ФЗ «О персональных данных».</p>
+          <p>Я выражаю своё согласие на <a href="assets/docs/Согласие на обработку персональных данных.docx" download>обработку</a> и <a href="assets/docs/Согласие на обработку персональных данных, разрешенных субъектом для распространения.docx" download>распространение</a> своих персональных данных в соответствии с Федеральным законом № 152-ФЗ «О персональных данных».</p>
         </label>
         <span class="f-error" style="margin-top:10px"></span>
       </section>`;

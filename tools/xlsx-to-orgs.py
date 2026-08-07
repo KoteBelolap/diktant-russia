@@ -5,11 +5,26 @@
 КОНВЕРТЕР СПРАВОЧНИКА ОРГАНИЗАЦИЙ:  Excel (.xlsx) -> данные сайта
 ================================================================
 ЗАЧЕМ. Оргкомитет ведёт справочник образовательных организаций
-в Excel (колонки FullName / ShortName / RegionName – см. файл
-docs-dev/reference/orgs-source.xlsx). Сайт не читает .xlsx
-напрямую: этот скрипт превращает выгрузку в лёгкие JSON-файлы,
-которые страница регистрации подгружает ПО ВЫБРАННОМУ РЕГИОНУ
-(assets/js/reg-form.js), не качая всю базу целиком.
+в Excel (колонки FullName / ShortName / PostAddress / Email /
+OGRN / INN / KPP / RegionName – см. файл
+docs-dev/reference/orgs-source.xlsx, формат 08.08.2026). Сайт
+не читает .xlsx напрямую: этот скрипт превращает выгрузку
+в лёгкие JSON-файлы, которые страница регистрации подгружает
+ПО ВЫБРАННОМУ РЕГИОНУ (assets/js/reg-form.js), не качая всю
+базу целиком.
+
+ПРАВКА 08.08.2026 (запрос заказчика): организациям, в названии
+которых НЕЛЬЗЯ понять, к какому населённому пункту они относятся,
+в конец полного наименования дописывается населённый пункт
+из почтового адреса: «МБОУ "СОШ № 1" (г. Барнаул)». Пункт
+извлекается из колонки PostAddress (последний осмысленный
+маркер г./с./п./д./пгт/рп/станица/…; улицы, дома и индексы
+отбрасываются), а если адрес пуст/бесполезен – из RegionName
+(актуально только для городов федерального значения). «Упомянут
+ли пункт уже в названии» решается теми же основами (STEM_SUFFIXES),
+что и буст региона в assets/js/reg-form.js: общий корень от
+4 букв считается упоминанием («Зятьковская школа» уже говорит
+про с. Зятьково – скобка не нужна; см. locality_mentioned).
 
 КАК ЗАПУСТИТЬ (когда пришлют новую версию справочника):
   1) положить новый .xlsx в docs-dev/reference/orgs-source.xlsx
@@ -118,6 +133,141 @@ def clean(text):
     return SPACE_RE.sub(" ", JUNK_RE.sub(" ", str(text))).strip()
 
 
+# ----------------------------------------------------------------
+# НАСЕЛЁННЫЙ ПУНКТ ИЗ АДРЕСА (дописка «(г. Барнаул)» в конец
+# наименования – запрос заказчика 08.08.2026).
+# Адрес разбирается по запятым; берём ПОСЛЕДНЮЮ часть с маркером
+# типа «г.»/«с.»/«п.»/«д.»/«пгт»/«рп»/«село»/«город»/… – в почтовой
+# иерархии это самый глубокий пункт (ТиНАО: «г. Москва, п. Рязановское,
+# с. Остафьево» – организация стоит в с. Остафьево). Части, где после
+# маркера идёт цифра («д. 20» – дом, а не деревня), отбрасываются,
+# равно как округи/районы/поселения/улицы.
+# ----------------------------------------------------------------
+# этими части адреса начинаться не должны (городской округ, сельское
+# поселение, тер[ритория], мкр[айон], железная дорога):
+LOC_SKIP_RE = re.compile(
+    r"^(г\s*\.\s*о\s*\.|го\b|округ\b|с\s*\.\s*п\s*\.|поселение\b"
+    r"|сельсовет\b|тер\s*\.|мкр\b|ж/д\b)", re.IGNORECASE)
+# «говорящие» маркеры-СЛОВА (длинные формы), после них – пробел:
+LOC_LONG_RE = re.compile(
+    r"^(пос[её]лок\s+городского\s+типа|рабочий\s+пос[её]лок|пос[её]лок"
+    r"|деревня|станица|город|село|хутор|аул)\s+(\S.*)$", re.IGNORECASE)
+# короткие маркеры: обязательны точка или пробел («д.»/«д »), иначе
+# «дом 3»/«дорога» ловились бы как деревня:
+LOC_SHORT_RE = re.compile(
+    r"^(пгт|пос|рп|нп|кп|дп|ст|г|с|п|д|х)(?:\.\s*|\s+)(\S.*)$",
+    re.IGNORECASE)
+# всё, что идёт в адресе ПОСЛЕ населённого пункта (улица…дом), в имени
+# пункта не живёт – обрезаем; отрезается и первая цифра («д. 20»,
+# «ул. Ленина, 5»):
+LOC_CUT_RE = re.compile(
+    r"\s+(?:ул\.?|улица|проспект|пр-т|пр-кт|пр\.?|пер-?к?т?\.?|переулок"
+    r"|шоссе|ш\.?|б-р|бульвар|наб\.?|набережная|пл\.?|площадь|мкр\.?"
+    r"|мкрн\.?|проезд|пр-д|тупик|туп\.?|аллея|линия|дом|д\.?|здание"
+    r"|зд\.?|строение|стр\.?|корпус|корп\.?|литер|лит\.?|влд\.?"
+    r"|владение|офис|оф\.?|пом\.?|каб\.?|кв\.?|квартира|этаж|эт\.?"
+    r"|секция|участок|уч\.?)\b.*$|\s+\d.*$", re.IGNORECASE)
+# маркер -> канонический вид скобки: «город Курск» -> «г. Курск»
+LOC_PREFIX = {
+    "город": "г. ", "поселок": "п. ", "деревня": "д. ",
+    "станица": "ст. ", "село": "с. ", "хутор": "х. ", "аул": "аул ",
+    "поселок городского типа": "пгт ",
+    "рабочий поселок": "рп ",
+    "г": "г. ", "с": "с. ", "п": "п. ", "д": "д. ", "х": "х. ",
+    "пгт": "пгт ", "пос": "п. ", "рп": "рп ", "нп": "нп ",
+    "кп": "кп ", "дп": "дп ", "ст": "ст. "}
+
+TOKEN_RE = re.compile(r"[a-zа-яё0-9]+")
+# основные суффиксы прилагательных/существительных – ТЕ ЖЕ, что в
+# assets/js/reg-form.js (STEM_SUFFIXES): преобразования должны
+# совпадать, чтобы «упомянут ли пункт» отвечало как поиск сайта.
+STEM_SUFFIXES = ['ская', 'ский', 'ское', 'ской', 'цкий', 'ного',
+    'ный', 'ной', 'ная', 'ное', 'ний', 'ого', 'ия', 'ья', 'ье', 'ей',
+    'ея', 'ый', 'ий', 'ой', 'а', 'я', 'о', 'е', 'и', 'ы', 'ь']
+
+
+def stem_of(w):
+    """Порт reg-form.js:stemOf – снять один суффикс, оставив от 4 букв."""
+    for suf in STEM_SUFFIXES:
+        if w.endswith(suf) and len(w) - len(suf) >= 4:
+            return w[:-len(suf)]
+    return w
+
+
+def _lcp(a, b):
+    """Длина общего префикса (reg-form.js:lcpLen)."""
+    n = 0
+    while n < len(a) and n < len(b) and a[n] == b[n]:
+        n += 1
+    return n
+
+
+def _tokens(text):
+    return TOKEN_RE.findall(text.lower().replace("ё", "е"))
+
+
+def _title_case(name):
+    """«ПЕТУШКИ» -> «Петушки», «АРА-ИЛЯ» -> «Ара-Иля»; смешанный
+    регистр («Санкт-Петербург») не трогаем."""
+    letters = [c for c in name if c.isalpha()]
+    if letters and all(c.isupper() for c in letters):
+        return "-".join(" ".join(w.capitalize() for w in chunk.split())
+                        for chunk in name.split("-"))
+    return name
+
+
+def locality_from_text(text):
+    """Найти населённый пункт в строке (адрес или регион).
+    Возвращает пару (вид_скобки, имя_пункта) либо None."""
+    if not text:
+        return None
+    found = None
+    for part in str(text).split(","):
+        part = clean(part)
+        if not part or part[0].isdigit() or LOC_SKIP_RE.match(part):
+            continue
+        m = LOC_LONG_RE.match(part) or LOC_SHORT_RE.match(part)
+        if not m:
+            continue
+        marker = SPACE_RE.sub(" ", m.group(1).lower().replace("ё", "е"))
+        name = LOC_CUT_RE.sub(" ", m.group(2))
+        name = name.strip(" .,;\"«»()")
+        # «Ахтубинск -7» -> «Ахтубинск-7» (посёлки-ЗАТО носят номер)
+        name = re.sub(r"\s+-(?=\d)", "-", name)
+        if len(name) < 2 or not name[0].isalpha():
+            continue   # «д. 20» – это дом; «с.п. …» – сельское поселение
+        found = (LOC_PREFIX[marker] + _title_case(name),
+                 _title_case(name))
+    return found
+
+
+def locality_mentioned(full_name, loc_name):
+    """Название уже указывает на населённый пункт? Сравнение по
+    основам с общим префиксом от 4 букв: «Топольное» видно в
+    «Тополинской» («тополь»/«тополин»), «Москва» – в «Московском»
+    («москв»/«москов»), «Санкт-Петербург» – по «Санкт»/«Петербург»."""
+    loc_stems = set()
+    for t in _tokens(loc_name):
+        st = stem_of(t)
+        if len(st) >= 4:
+            loc_stems.add(st)
+    if not loc_stems:
+        return False
+    name_stems = {stem_of(t) for t in _tokens(full_name) if len(t) >= 2}
+    for ls in loc_stems:
+        for ns in name_stems:
+            if _lcp(ls, ns) >= 4:
+                return True
+    return False
+
+
+def locality_of(address, region):
+    """Населённый пункт организации: сначала из почтового адреса
+    (точнее), при неудаче – из RegionName (это сработает только у
+    городов федерального значения «г. Москва/Санкт-Петербург/…»)."""
+    return locality_from_text(address) or locality_from_text(region)
+
+
 def canon_region(raw):
     """RegionName из выгрузки -> ключ файла:
     'r01'...'r89' для региона, 'none' – без региона,
@@ -150,12 +300,15 @@ def main():
         c_full = header.index("FullName")
         c_short = header.index("ShortName")
         c_reg = header.index("RegionName")
+        c_addr = header.index("PostAddress")
     except ValueError:
         sys.exit(f"В первой строке жду колонки FullName / ShortName / "
-                 f"RegionName, а вижу: {header}")
+                 f"PostAddress / RegionName, а вижу: {header}")
 
     buckets = {}  # ключ -> {(full, short)}
     skipped = 0
+    n_appended = n_mentioned = n_noloc = 0
+    examples = []            # первые дописки – для глазного контроля
     for row in rows:
         full = clean(row[c_full])
         if not full:
@@ -164,11 +317,25 @@ def main():
         short = clean(row[c_short])
         if short in ("-", "None"):
             short = ""
+        region = clean(row[c_reg])
+        # запрос заказчика 08.08.2026: если по названию непонятно,
+        # к какому населённому пункту относится организация, – выписать
+        # его скобкой в конец: «МБОУ "СОШ № 1" (г. Барнаул)».
+        loc = locality_of(row[c_addr], region)
+        if loc is None:
+            n_noloc += 1
+        elif locality_mentioned(full, loc[1]):
+            n_mentioned += 1
+        else:
+            if len(examples) < 10:
+                examples.append((full, loc[0]))
+            full = f"{full} ({loc[0]})"
+            n_appended += 1
         key = canon_region(row[c_reg])
         buckets.setdefault(key, set()).add((full, short))
 
     OUT.mkdir(parents=True, exist_ok=True)
-    manifest = {"version": 3,
+    manifest = {"version": 4,
                 "source": "docs-dev/reference/orgs-source.xlsx",
                 "note": "rNN.json = REGIONS[NN-1] из assets/js/reg-form.js; "
                         "r90.json – зарубежье (90-й пункт REGIONS, «За пределами "
@@ -206,11 +373,14 @@ def main():
     total = 0
     flat = []   # для all.json: (name, short, idx), idx 1..89 регион, 0 - без региона/зарубежье
     for key, pairs in sorted(buckets.items()):
-        # сортировка детерминирована (05.08.2026): полное имя + короткое
-        # как тай-брейк. Без второго ключа порядок «близнецов» (одно
-        # полное имя, разные короткие) зависел от PYTHONHASHSEED через
-        # итерацию set → перегенерация на том же xlsx давала другие байты.
-        items = sorted(pairs, key=lambda p: (p[0].lower(), p[1].lower()))
+        # сортировка детерминирована: полное имя + короткое как основные
+        # ключи, а ИСХОДНЫЙ регистр – финальный тай-брейк (08.08.2026:
+        # в выгрузке встречаются «близнецы» с одинаковым именем в разном
+        # регистре – их ключи совпадают, и без последнего ключа порядок
+        # таких пар зависел от PYTHONHASHSEED → байты плясали между
+        # перегенерациями на том же xlsx).
+        items = sorted(pairs, key=lambda p: (p[0].lower(), p[1].lower(),
+                                             p[0], p[1]))
         fname = key + ".json"
         with open(OUT / fname, "w", encoding="utf-8") as f:
             json.dump({"items": [[n, s] for n, s in items]}, f,
@@ -226,16 +396,29 @@ def main():
         flat.extend((n, s, idx) for n, s in items)
         if idx:
             manifest["regions"][REGIONS[idx - 1]] = fname
-    flat.sort(key=lambda p: (p[2], p[0].lower()))
+    # ключи – как у файлов регионов (см. комментарий в цикле): иначе
+    # регистровые «близнецы» пляшут между перегенерациями
+    flat.sort(key=lambda p: (p[2], p[0].lower(), p[1].lower(), p[0], p[1]))
     with open(OUT / "all.json", "w", encoding="utf-8") as f:
         json.dump({"items": [[n, s, i] for n, s, i in flat]}, f,
                   ensure_ascii=False, separators=(",", ":"))
     manifest["files"]["all.json"] = len(flat)
     manifest["total"] = total
+    # сводка по дописке населённых пунктов (фича 08.08.2026) –
+    # в манифест, чтобы по JSON был виден объём переработки
+    manifest["locality"] = {"appended": n_appended,
+                            "alreadyMentioned": n_mentioned,
+                            "noLocalityFound": n_noloc}
     with open(OUT / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=1)
 
     print(f"Готово: {total} организаций (пропущено пустых строк: {skipped})")
+    print(f"Населённый пункт: дописан у {n_appended}, уже был в названии у "
+          f"{n_mentioned}, не найден в адресе у {n_noloc}")
+    if examples:
+        print("Контроль дописок (первые из добавленных):")
+        for full, bracket in examples:
+            print(f"  + {full}  ->  ({bracket})")
     print(f"Файлов: {len(buckets)} -> {OUT.relative_to(ROOT)}")
     for fname, cnt in sorted(manifest['files'].items(),
                              key=lambda kv: -kv[1])[:5]:

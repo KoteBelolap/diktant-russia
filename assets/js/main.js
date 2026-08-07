@@ -19,9 +19,13 @@
    - Обратный отсчёт.....3 фазы до старта/во время/после диктанта;
                          берёт время СЕРВЕРА из <meta name="server-time">,
                          без меты работает в демо-режиме от часов клиента
-   - Бегущая строка......лента партнёров в подвале hero
-   - Карусель + лайтбокс.фото прошлых сезонов: свайп, drag,
+   - Трансляция открытия.кнопка РУТУБ под таймером: адрес
+                         подставляется из CONFIG.broadcastUrl
+   - Карусель............фото и видео прошлых сезонов: свайп, drag,
                          счётчик "N из <слайдов>" ставится из DOM
+   - Лайтбокс............единый для слайдов карусели (со стрелками)
+                         и элементов [data-lightbox] (одиночно);
+                         умеет видео (data-kind="video")
    - FAQ-аккордеон.......вопросы-ответы
    - Плавающая CTA.......круглая кнопка "Участвовать" после hero
    - Топбар тень.........тень у верхней полосы при скролле
@@ -245,8 +249,16 @@
     tickCd(); setInterval(tickCd, 1000);
   }
 
-  /* ---------- Бегущая строка ---------- */
-  $$('.marquee__track').forEach(t => { if (!REDUCED) t.innerHTML += t.innerHTML; });
+  /* ---------- Трансляция открытия (РУТУБ) ---------- */
+  /* Адрес прямого эфира заказчик пришлёт позже: он вписывается ОДИН
+     раз в CONFIG.broadcastUrl (assets/js/config.js), а здесь
+     подставляется во все элементы [data-broadcast-link].
+     Сам iframe-плеер вставляется в #broadcast – готовый фрагмент
+     лежит комментарием в index.html. */
+  $$('[data-broadcast-link]').forEach(a => {
+    const url = window.DIKTANT && window.DIKTANT.CONFIG.broadcastUrl;
+    if (url) a.href = url;
+  });
 
   /* ---------- Карусель + лайтбокс ---------- */
   $$('.carousel').forEach(car => {
@@ -324,33 +336,88 @@
     measure();
     setTimeout(measure, 400);
 
-    /* лайтбокс */
-    const lb = $('.lightbox');
-    if (lb) {
-      const lbImg = $('img', lb), lbCap = $('figcaption', lb);
-      let cur = 0;
-      const openLb = i => {
-        cur = (i + slides.length) % slides.length;
-        const im = $('img', slides[cur]);
-        lbImg.src = im.src; lbImg.alt = im.alt;
-        lbCap.textContent = slides[cur].dataset.caption || im.alt || '';
-        lb.classList.add('is-open');
-        document.body.style.overflow = 'hidden';
-      };
-      const closeLb = () => { lb.classList.remove('is-open'); document.body.style.overflow = ''; };
-      slides.forEach((s, i) => s.addEventListener('click', () => openLb(i)));
-      $('.lightbox__close', lb).addEventListener('click', closeLb);
-      $('.lightbox__nav--prev', lb)?.addEventListener('click', e => { e.stopPropagation(); openLb(cur - 1); });
-      $('.lightbox__nav--next', lb)?.addEventListener('click', e => { e.stopPropagation(); openLb(cur + 1); });
-      lb.addEventListener('click', e => { if (e.target === lb) closeLb(); });
-      document.addEventListener('keydown', e => {
-        if (!lb.classList.contains('is-open')) return;
-        if (e.key === 'Escape') closeLb();
-        if (e.key === 'ArrowLeft') openLb(cur - 1);
-        if (e.key === 'ArrowRight') openLb(cur + 1);
-      });
-    }
   });
+
+  /* ---------- Лайтбокс (фото и видео) ---------- */
+  /* Единый на всю страницу:
+     – слайды карусели открываются со стрелками «влево/вправо» по кругу;
+     – любой элемент [data-lightbox] (видео «О чём диктант», кнопки
+       обращений у почётных гостей) открывается одиночно, без стрелок;
+     data-kind="video" – вместо <img> показывается <video controls>
+     (вертикальные ролики вписываются в экран стилями);
+     воспроизведение останавливается при закрытии и при смене слайда.
+     Подпись под кадром берётся из data-caption. */
+  const lb = $('.lightbox');
+  if (lb) {
+    const lbImg = $('img', lb), lbCap = $('figcaption', lb), lbVid = $('.lightbox__video', lb);
+    const navBtns = $$('.lightbox__nav', lb);
+    const lbSlides = $$('.slide');
+    let cur = 0, solo = true;
+
+    const stopVid = () => {
+      if (!lbVid) return;
+      lbVid.pause();
+      lbVid.removeAttribute('src');
+      lbVid.load();
+    };
+    const closeLb = () => { stopVid(); lb.classList.remove('is-open'); document.body.style.overflow = ''; };
+    const showItem = item => {
+      const isVideo = item.kind === 'video';
+      stopVid();
+      if (isVideo && lbVid) lbVid.src = item.src;
+      if (lbImg) {
+        lbImg.hidden = isVideo;
+        if (!isVideo) { lbImg.src = item.src; lbImg.alt = item.alt || item.caption || ''; }
+      }
+      if (lbVid) lbVid.hidden = !isVideo;
+      lbCap.textContent = item.caption || item.alt || '';
+      lb.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+      if (isVideo && lbVid) lbVid.play().catch(() => { /* автоплей мог быть запрещён – стартуем кнопкой плеера */ });
+    };
+    const openSlide = i => {
+      solo = false;
+      navBtns.forEach(b => { b.hidden = false; });
+      cur = (i + lbSlides.length) % lbSlides.length;
+      const s = lbSlides[cur], im = $('img', s);
+      showItem({
+        kind: s.dataset.kind === 'video' ? 'video' : 'img',
+        src: s.dataset.src || (im && im.src),
+        alt: im ? im.alt : '',
+        caption: s.dataset.caption || (im ? im.alt : '')
+      });
+    };
+    const openSolo = el => {
+      solo = true;
+      cur = -1;
+      navBtns.forEach(b => { b.hidden = true; });
+      const media = $('img', el) || $('video', el);
+      showItem({
+        kind: el.dataset.kind === 'video' ? 'video' : 'img',
+        src: el.dataset.src || (media && (media.currentSrc || media.src)),
+        caption: el.dataset.caption || (media ? (media.getAttribute('alt') || '') : '')
+      });
+    };
+    lbSlides.forEach((s, i) => s.addEventListener('click', () => openSlide(i)));
+    $$('[data-lightbox]').forEach(el => el.addEventListener('click', e => {
+      if (e.target.closest('a')) return;   /* ссылка в подписи работает как обычно */
+      e.preventDefault();
+      openSolo(el);
+    }));
+    $('.lightbox__close', lb).addEventListener('click', closeLb);
+    navBtns.forEach(b => b.addEventListener('click', e => {
+      e.stopPropagation();
+      if (!solo) openSlide(cur + (b.classList.contains('lightbox__nav--prev') ? -1 : 1));
+    }));
+    lb.addEventListener('click', e => { if (e.target === lb) closeLb(); });
+    document.addEventListener('keydown', e => {
+      if (!lb.classList.contains('is-open')) return;
+      if (e.key === 'Escape') closeLb();
+      if (solo) return;
+      if (e.key === 'ArrowLeft') openSlide(cur - 1);
+      if (e.key === 'ArrowRight') openSlide(cur + 1);
+    });
+  }
 
   /* ---------- FAQ-аккордеон ---------- */
   $$('.faq-item').forEach(item => {
