@@ -22,6 +22,14 @@ docs-dev/reference/orgs-source.xlsx). Сайт не читает .xlsx
       из 89 субъектов РФ (нумерация = порядок регионов в списке
       REGIONS внутри assets/js/reg-form.js; файл rNN соответствует
       REGIONS[NN-1]);
+  assets/data/orgs/r90.json              - организации за пределами
+      РФ: консульства, школы при посольствах (псевдорегион
+      «За пределами Российской Федерации» – 90-й, последний пункт
+      списка REGIONS в reg-form.js; запрос заказчика 05.08.2026:
+      рассылка по консульствам). ВАЖНО: те же записи по-прежнему
+      ОСТАЮТСЯ и в none.json / all.json (idx 0) – решением
+      заказчика зарубежные школы участвуют в поиске любого
+      региона, поэтому глобальный поиск не меняется ни на байт;
   assets/data/orgs/none.json             - записи без региона
       (в исходной выгрузке поле пустое; это обычные школы-
       филиалы). Сюда же влиты организации за пределами РФ:
@@ -30,8 +38,9 @@ docs-dev/reference/orgs-source.xlsx). Сайт не читает .xlsx
   assets/data/orgs/all.json              - ВСЯ база одним файлом
       в компактном виде [[name, short, regionIdx], ...], где
       regionIdx 1..89 = номер региона в списке REGIONS, 0 = без
-      региона/зарубежье. Страница подгружает его в фоне, чтобы
-      искать по всей стране (свой регион выше в выдаче);
+      региона/зарубежье (записи из r90.json вошли сюда как 0 –
+      повторно с idx 90 не дублируем). Страница подгружает его
+      в фоне, чтобы искать по всей стране (свой регион выше);
   assets/data/orgs/manifest.json         - служебная сводка:
       дата сборки, счётчики, какой файл за какой регион отвечает.
 
@@ -92,6 +101,8 @@ REGION_ALIASES = {
     "Ханты-Мансийский автономный округ - Югра": "Ханты-Мансийский автономный округ – Югра",
 }
 FOREIGN_LABEL = "образовательные учреждения, находящиеся за пределами Российской Федерации"
+ABROAD_KEY = "r90"   # зарубежье: файл для 90-го пункта списка REGIONS
+                     # в reg-form.js («За пределами Российской Федерации»)
 
 # Служебные артефакты Excel: "_x000D_" (escaped CR), управляющие символы.
 JUNK_RE = re.compile(r"_x[0-9A-Fa-f]{4}_|[\x00-\x08\x0b\x0c\x0e-\x1f]")
@@ -109,14 +120,17 @@ def clean(text):
 
 def canon_region(raw):
     """RegionName из выгрузки -> ключ файла:
-    'r01'...'r89' для региона, 'none' – без региона И зарубежье
-    (заказчик решил: зарубежные школы идут в общий поиск)."""
+    'r01'...'r89' для региона, 'none' – без региона,
+    ABROAD_KEY ('r90') – зарубежье (консульства и школы
+    при посольствах; те же записи ниже дополнительно
+    вливаются в none.json – решением заказчика зарубежные
+    школы участвуют в поиске любого региона)."""
     r = clean(raw)
     if not r or r.lower() == "none":
         return "none"
     r = REGION_ALIASES.get(r, r)
     if r == FOREIGN_LABEL or "за пределами" in r:
-        return "none"
+        return ABROAD_KEY
     if r in REGIONS:
         return "r%02d" % (REGIONS.index(r) + 1)
     sys.exit(f"Неизвестный регион в выгрузке: {raw!r}. "
@@ -154,20 +168,34 @@ def main():
         buckets.setdefault(key, set()).add((full, short))
 
     OUT.mkdir(parents=True, exist_ok=True)
-    manifest = {"version": 2,
+    manifest = {"version": 3,
                 "source": "docs-dev/reference/orgs-source.xlsx",
                 "note": "rNN.json = REGIONS[NN-1] из assets/js/reg-form.js; "
-                        "none.json (без региона + зарубежье) подмешивается в поиск "
-                        "любого региона; all.json – вся база для глобального поиска, "
-                        "regionIdx: 1..89 = REGIONS, 0 = none",
+                        "r90.json – зарубежье (90-й пункт REGIONS, «За пределами "
+                        "Российской Федерации»); те же записи дублируются в "
+                        "none.json (без региона + зарубежье), который подмешивается "
+                        "в поиск любого региона; all.json – вся база для глобального "
+                        "поиска, regionIdx: 1..89 = REGIONS, 0 = none",
                 "regions": {}, "files": {}}
+    # Зарубежье: записи получают свой файл r90.json И одновременно
+    # остаются в none.json (запрос заказчика: зарубежные школы
+    # участвуют в поиске любого региона; 90-й пункт списка нужен,
+    # чтобы сотрудники консульств находили свою организацию).
+    abroad_pairs = buckets.get(ABROAD_KEY, set())
+    if abroad_pairs:
+        buckets.setdefault("none", set()).update(abroad_pairs)
+        print(f"Зарубежье: {len(abroad_pairs)} записей -> {ABROAD_KEY}.json, "
+              f"те же оставлены в none.json")
+
     # Пересекающиеся дубли: многие школы-филиалы есть в выгрузке
     # дважды – с регионом и без него. Региональная версия всегда
     # информативнее (с ней работает пометка региона и бонус
     # релевантности), поэтому из none такие копии убираем.
+    # Исключение – зарубежье (ABROAD_KEY): его пары в none
+    # оставляем намеренно (см. выше).
     regional_pairs = set()
     for key, pairs in buckets.items():
-        if key != "none":
+        if key != "none" and key != ABROAD_KEY:
             regional_pairs |= pairs
     before = len(buckets.get("none", set()))
     buckets.get("none", set()).difference_update(regional_pairs)
@@ -176,15 +204,24 @@ def main():
           f"{len(buckets.get('none', set()))}")
 
     total = 0
-    flat = []   # для all.json: (name, short, idx), idx 1..89 регион, 0 - без региона
+    flat = []   # для all.json: (name, short, idx), idx 1..89 регион, 0 - без региона/зарубежье
     for key, pairs in sorted(buckets.items()):
-        items = sorted(pairs, key=lambda p: p[0].lower())
+        # сортировка детерминирована (05.08.2026): полное имя + короткое
+        # как тай-брейк. Без второго ключа порядок «близнецов» (одно
+        # полное имя, разные короткие) зависел от PYTHONHASHSEED через
+        # итерацию set → перегенерация на том же xlsx давала другие байты.
+        items = sorted(pairs, key=lambda p: (p[0].lower(), p[1].lower()))
         fname = key + ".json"
         with open(OUT / fname, "w", encoding="utf-8") as f:
             json.dump({"items": [[n, s] for n, s in items]}, f,
                       ensure_ascii=False, separators=(",", ":"))
-        total += len(items)
         manifest["files"][fname] = len(items)
+        if key == ABROAD_KEY:
+            # зарубежье уже сидит в none (idx 0): в all.json второй
+            # раз не кладём, а в total не считаем – иначе дубль.
+            manifest["regions"]["За пределами Российской Федерации"] = fname
+            continue
+        total += len(items)
         idx = int(key[1:]) if key.startswith("r") else 0
         flat.extend((n, s, idx) for n, s in items)
         if idx:

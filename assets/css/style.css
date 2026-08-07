@@ -1570,3 +1570,69 @@ html { scroll-padding-top: 96px; }
 [hidden] { display: none !important; }
 /* атрибут data-reveal оставлен в разметке как якорь, анимация отключена намеренно */
 [data-reveal] { /* намеренно пусто */ }
+
+/* ============ 22. Тест: меню вопросов и анкеты pre/post (05.08.2026) ============
+   Механика запроса: пропускать вопросы нельзя, досрочного завершения
+   нет, поэтому участнику нужны (а) индикатор отвеченных вопросов с
+   переходом к любому из них и (б) понятное состояние недоступной
+   кнопки «Далее». Анкета теперь двухэтапная: короткая pre перед
+   тестом и ФИО/почта post после результата – в post показываем
+   сводку того, что участник указал до теста. */
+
+/* недоступная кнопка (у нас только .car-btn имела такое состояние):
+   паттерн дома – приглушить и выключить события указателя */
+.btn[disabled],
+.btn:disabled { opacity: .45; pointer-events: none; box-shadow: none; }
+
+/* кнопка «Вопросы N/30» в липкой плашке: визуальный близнец таймера,
+   чтобы HUD читался как единая панель */
+.test-hud__menu { display: inline-flex; align-items: center; gap: 9px; padding: 11px 18px; border-radius: 999px; cursor: pointer;
+  font-family: var(--font-b); font-weight: 800; font-size: 13.5px; color: var(--navy-900); white-space: nowrap;
+  background: rgba(207,232,249,.7); border: 1px solid rgba(255,255,255,.8);
+  transition: background .25s, transform .25s var(--ease-out), box-shadow .25s; }
+.test-hud__menu:hover { background: rgba(255,255,255,.9); transform: translateY(-1px); box-shadow: var(--shadow-1); }
+.test-hud__menu svg { width: 16px; height: 16px; flex: 0 0 auto; }
+.test-hud__menu b { font-family: var(--font-d); font-weight: 600; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--blue-700); }
+.test-hud__menu .test-hud__menu-chev { transition: transform .3s var(--ease-out); }
+.test-hud__menu.is-open .test-hud__menu-chev { transform: rotate(180deg); }
+
+/* панель меню: раскрывается под плашкой, повторяет ритм карточек */
+.q-menu { padding: 18px 20px 20px; border-radius: 22px; margin: -8px 0 22px; }
+.q-menu__legend { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 18px; margin-bottom: 14px;
+  font-size: 12.5px; font-weight: 700; color: var(--ink-55); }
+.q-menu__legend > span { display: inline-flex; align-items: center; gap: 7px; }
+.q-menu__legend b { margin-left: auto; font-weight: 800; color: var(--red-600); }
+.q-menu__sw { width: 14px; height: 14px; border-radius: 5px; display: inline-block;
+  background: rgba(255,255,255,.55); border: 1.5px solid rgba(32,94,152,.16); }
+.q-menu__sw--done { background: linear-gradient(135deg, var(--blue-700), var(--sky-500)); border-color: transparent; }
+
+/* сетка номеров: читается «отвечено/текущий/не отвечено» одним взглядом */
+.q-menu__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 8px; }
+.q-menu__num { aspect-ratio: 1; border-radius: 12px; display: grid; place-items: center; cursor: pointer;
+  font-family: var(--font-d); font-weight: 600; font-size: 13px; color: var(--navy-900);
+  background: rgba(255,255,255,.55); border: 1.5px solid rgba(32,94,152,.16);
+  transition: border-color .2s, background .2s, transform .2s var(--ease-out), box-shadow .2s; }
+.q-menu__num:hover { border-color: rgba(32,94,152,.45); background: rgba(255,255,255,.9); transform: translateY(-2px); }
+.q-menu__num.is-done { color: #fff; border-color: transparent;
+  background: linear-gradient(135deg, var(--blue-700), var(--sky-500));
+  box-shadow: 0 8px 18px -8px rgba(32,94,152,.55), inset 0 1px 0 rgba(255,255,255,.35); }
+/* текущий вопрос – толстая тёмная рамка поверх любого состояния */
+.q-menu__num.is-cur { outline: 2.5px solid var(--navy-900); outline-offset: 1.5px; }
+/* пропущенный при нажатии «К результату» – красный импульс-подсвет */
+@keyframes menuFlag { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); box-shadow: 0 0 0 7px rgba(192,0,0,.22); } }
+.q-menu__num.is-flag { border-color: var(--red-600); color: var(--red-600); animation: menuFlag .6s ease-in-out 3; }
+
+/* post-анкета: сводка полей, указанных перед тестом (спокойная
+   подложка-напоминание, без кликабельности) */
+.pre-summary { background: rgba(207,232,249,.4); }
+.pre-summary__h { font-family: var(--font-d); font-weight: 600; font-size: 15px; color: var(--navy-900); margin-bottom: 10px; }
+.pre-summary__row { font-size: 15px; font-weight: 800; line-height: 1.55; color: var(--ink); }
+.pre-summary__note { margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--ink-55); }
+.pre-summary__note a { color: var(--blue-700); }
+
+@media (max-width: 640px) {
+  /* на телефоне легенда под кнопкой, номера компактнее */
+  .q-menu { padding: 14px 14px 16px; }
+  .q-menu__grid { grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 6px; }
+  .q-menu__legend b { flex-basis: 100%; margin-left: 0; }
+}

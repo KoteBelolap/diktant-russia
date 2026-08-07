@@ -10,11 +10,22 @@
      приходят без них (GET /api/test), а балл считает сервер
      (POST /api/test/submit). Демо-режим: локальный банк
      question-bank-demo.js (ТОЛЬКО для превью).
-   – Кнопка «Назад» браузера возвращает к выбору категории
+   – Кнопка «Назад» браузера возвращает к стартовой анкете
      (History API), кнопка «Назад» интерфейса – к предыдущему
-     вопросу, а с первого вопроса – к выбору категории.
-   – Повторное прохождение с одного устройства разрешено;
-     дубли участников отсеиваются при регистрации (reg-form.js).
+     вопросу, а с первого вопроса – к анкете.
+   Механика от 05.08.2026 (запросы заказчика):
+   – ПЕРЕД тестом – короткая анкета (пол/возраст/регион/организация,
+     вариант reg-form.js «pre»); категория вопросов выводится из типа
+     организации. ФИО и почта – ПОСЛЕ теста (вариант «post»).
+   – «Далее» неактивна, пока на вопрос не дан ответ; «К результату»
+     доступна только при ответах на все вопросы.
+   – Меню вопросов показывает, отвечено/не отвечено, и ведёт к любому.
+   – Кнопки «Завершить досрочно» нет: тест идёт до конца вопросов
+     или до конца времени.
+   – Повторное прохождение с того же устройства запрещено
+     (localStorage-флаг); дубли участников отсекаются регистрацией.
+   Тренировочный режим (?mode=training) работает по-прежнему:
+   плитки категорий и повторные попытки без ограничений.
    ============================================================ */
 (() => {
   'use strict';
@@ -40,10 +51,18 @@
     adult:   'Закончил(а) обучение'
   };
 
+  /* Запрет повторного прохождения с устройства (05.08.2026):
+     после завершения основного теста пишем результат; при новом
+     визите показываем экран «уже пройден». Тренировка не блокируется.
+     Записи: { score, max, at, pre, registered }. */
+  const DONE_KEY = 'diktant_attempt_done_v1';
+  const doneRecRead = () => { try { return JSON.parse(localStorage.getItem(DONE_KEY) || 'null'); } catch { return null; } };
+  const doneRecWrite = r => { try { localStorage.setItem(DONE_KEY, JSON.stringify(r)); } catch { /* приватный режим */ } };
+
   const state = {
     cat: null, qs: [], q: 0, answers: [],
     left: DURATION, timer: null, done: false, locked: false,
-    demo: true, attemptId: null
+    demo: true, attemptId: null, pre: null   /* pre – анкета перед тестом */
   };
 
   const esc = s => String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
@@ -57,6 +76,29 @@
   const scr = { gate: $('#test-gate'), start: $('#test-start'), run: $('#test-run'), result: $('#test-result') };
   function show(name) {
     Object.entries(scr).forEach(([k, el]) => { if (el) el.hidden = k !== name; });
+    if (name === 'start') prepareStart();
+  }
+
+  /* стартовый экран: основной режим – короткая анкета «pre» (монтируется
+     reg-form.js один раз); тренировочный – плитки категорий, как прежде */
+  function prepareStart() {
+    const cats = $('#start-cats'), preHost = $('#pre-reg-mount');
+    if (MODE === 'training') {
+      if (cats) cats.hidden = false;
+      if (preHost) preHost.hidden = true;
+      return;
+    }
+    if (cats) cats.hidden = true;
+    if (preHost) {
+      preHost.hidden = false;
+      if (window.RegForm && !preHost.dataset.mounted) {
+        preHost.dataset.mounted = '1';
+        window.RegForm.mount(preHost, {
+          variant: 'pre',
+          onSubmit: d => { state.pre = d; begin(d.categoryKey || 'adult'); }
+        });
+      }
+    }
   }
 
   /* ---------- гейт дат (от времени сервера) ---------- */
@@ -102,7 +144,11 @@
 
   /* если гейт закрыт на «скоро», страница сама «оживёт» в момент старта:
      следим раз в секунду – 05.11.2026 в 10:00:00 тест открывается сам,
-     без перезагрузки страницы; на 08.11 23:59 закрывается так же */
+     без перезагрузки страницы; на 08.11 23:59 закрывается так же.
+     «Оживление» идёт через init() → checkLock() (05.08.2026): для
+     устройства с записью о прохождении гейт повторный тест не откроет –
+     покажет экран «уже пройден», а при незавершённой регистрации
+     вернёт экран результата с сохранённой анкетой. */
   let lastGate = gateState();
   setInterval(() => {
     const g = gateState();
@@ -168,6 +214,7 @@
 
   async function begin(cat) {
     if (gateState() !== 'open') { renderGate(); return; }
+    if (MODE === 'main' && !state.pre) { show('start'); return; }   /* без анкеты тест не стартует */
     state.cat = cat;
     state.qs = await loadQuestions(cat);
     if (!state.qs.length) return;
@@ -176,6 +223,7 @@
     state.done = false; state.locked = false;
     state.left = DURATION;
 
+    buildMenu();
     show('run');
     history.pushState({ diktant: 'run' }, '', location.href);
     tickTimer();
@@ -226,7 +274,6 @@
             <span>${esc(o)}</span>
           </button>`).join('')}
       </div>
-      ${q.type === 'multi' ? '<div class="test-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16.5v.01"/></svg>Выберите все верные варианты и нажмите «Далее»</div>' : ''}
     `;
 
     $$('.q-opt', card).forEach(btn => btn.addEventListener('click', () => {
@@ -243,10 +290,10 @@
         btn.classList.toggle('is-sel');
         btn.setAttribute('aria-checked', ix < 0);
       }
-      updateNav();
+      updateNav(); updateMenu();
     }));
 
-    updateNav();
+    updateNav(); updateMenu();
   }
 
   function mediaMarkup(m) {
@@ -265,15 +312,54 @@
     </div>`;
   }
 
+  /* ---------- меню вопросов: отвечено/не отвечено (05.08.2026) ---------- */
+  const menuBox = $('#q-menu'), menuGrid = $('#q-menu-grid'),
+        menuBtn = $('#q-menu-btn'), menuCountEl = $('#q-menu-count'),
+        menuEmptyEl = $('#q-menu-legend-empty');
+  function buildMenu() {
+    if (!menuGrid) return;
+    menuGrid.innerHTML = state.qs.map((_, i) =>
+      `<button type="button" class="q-menu__num" data-i="${i}" aria-label="Вопрос ${i + 1}">${i + 1}</button>`).join('');
+    $$('.q-menu__num', menuGrid).forEach(b =>
+      b.addEventListener('click', () => { state.q = +b.dataset.i; renderQ(); }));
+    if (menuBox) menuBox.hidden = true;
+    if (menuBtn) { menuBtn.setAttribute('aria-expanded', 'false'); menuBtn.classList.remove('is-open'); }
+    if (menuEmptyEl) menuEmptyEl.textContent = '';
+    updateMenu();
+  }
+  function updateMenu() {
+    if (!menuGrid || !state.qs.length) return;
+    const done = state.answers.filter(a => a.length).length;
+    if (menuCountEl) menuCountEl.textContent = done + '/' + state.qs.length;
+    $$('.q-menu__num', menuGrid).forEach((b, i) => {
+      b.classList.toggle('is-done', state.answers[i].length > 0);
+      b.classList.toggle('is-cur', i === state.q);
+      b.classList.remove('is-flag');
+      if (i === state.q) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
+    });
+  }
+  if (menuBtn) menuBtn.addEventListener('click', () => {
+    const open = menuBox.hidden;
+    menuBox.hidden = !open;
+    menuBtn.setAttribute('aria-expanded', String(open));
+    menuBtn.classList.toggle('is-open', open);
+    if (menuEmptyEl && open) menuEmptyEl.textContent = '';
+  });
+  function openMenu() { if (menuBox && menuBox.hidden) menuBtn.click(); }
+
   function updateNav() {
     const total = state.qs.length;
     const prev = $('#q-prev');
     prev.disabled = false;
     prev.innerHTML = state.q === 0
-      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m6 6-6-6 6-6"/></svg>К выбору категории'
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m6 6-6-6 6-6"/></svg>' + (MODE === 'training' ? 'К выбору категории' : 'К анкете')
       : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m6 6-6-6 6-6"/></svg>Назад';
     const last = state.q === total - 1;
-    $('#q-next').innerHTML = (last ? 'К результату' : 'Далее') + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>';
+    const next = $('#q-next');
+    next.innerHTML = (last ? 'К результату' : 'Далее') + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>';
+    /* без ответа на текущий вопрос дальше не идём (запрос 05.08.2026):
+       пропускать вопросы нельзя – засчитываются только отвеченные */
+    next.disabled = !state.answers[state.q].length;
   }
 
   $('#q-prev').addEventListener('click', () => {
@@ -283,20 +369,25 @@
     }
     nav(-1);
   });
-  $('#q-next').addEventListener('click', () => nav(1));
-  $('#q-finish').addEventListener('click', () => {
-    const empty = state.answers.filter(a => !a.length).length;
-    $('#finish-modal-text').textContent = empty
-      ? 'Вы ответили не на все вопросы (' + empty + ' без ответа). Завершить тест и подсчитать баллы?'
-      : 'Завершить тест и подсчитать баллы?';
-    $('#finish-modal').hidden = false;
+  /* «Далее»: последняя = «К результату»; без ответа отключена (updateNav).
+     «К результату» срабатывает только при ответах на все вопросы –
+     иначе открываем меню и подсвечиваем пропущенные (запрос 05.08.2026). */
+  $('#q-next').addEventListener('click', () => {
+    const total = state.qs.length;
+    if (state.q === total - 1) {
+      const empty = state.answers.reduce((acc, a, i) => acc.concat(a.length ? [] : [i]), []);
+      if (!empty.length) { finish(false); return; }
+      openMenu();
+      if (menuEmptyEl) menuEmptyEl.textContent = 'Без ответа: ' + empty.map(i => i + 1).join(', ');
+      const first = $$('.q-menu__num', menuGrid)[empty[0]];
+      if (first) { first.classList.add('is-flag'); setTimeout(() => first.classList.remove('is-flag'), 1800); }
+      return;
+    }
+    nav(1);
   });
-  $('#finish-cancel').addEventListener('click', () => $('#finish-modal').hidden = true);
-  $('#finish-ok').addEventListener('click', () => { $('#finish-modal').hidden = true; finish(false); });
 
   function nav(d) {
     const total = state.qs.length;
-    if (d > 0 && state.q === total - 1) { $('#q-finish').click(); return; }
     state.q = Math.max(0, Math.min(total - 1, state.q + d));
     renderQ();
   }
@@ -334,6 +425,12 @@
     history.replaceState({ diktant: 'result' }, '', location.href);
     show('result');
     renderResult(score, max, byTime);
+
+    /* запрет повторного прохождения с устройства (05.08.2026):
+       в тренировке флаг не ставим – там попытки свободны */
+    if (MODE === 'main') {
+      doneRecWrite({ score, max, at: new Date().toISOString(), pre: state.pre, registered: false });
+    }
   }
 
   /* ---------- формулировки вердиктов (шкала 30 / 25–29 / 15–24 / 0–14) ---------- */
@@ -384,13 +481,19 @@
       ? 'Время вышло – показан результат по уже данным ответам.'
       : 'Верных ответов: ' + score + ' из ' + max + '.';
 
-    /* основной режим: регистрационная форма – сразу под результатом (ТЗ) */
+    /* основной режим: вторая анкета (ФИО + почта + согласия) сразу
+       под результатом; поля из pre подставляются сводкой (05.08.2026) */
     const regHost = $('#result-reg');
     if (MODE === 'main') {
       regHost.hidden = false;
       if (!regHost.dataset.mounted && window.RegForm) {
         regHost.dataset.mounted = '1';
-        window.RegForm.mount(regHost, { score, total: max, category: state.cat === 'adult' ? 'adult' : state.cat });
+        window.RegForm.mount(regHost, {
+          variant: 'post', pre: state.pre, score, total: max,
+          onSuccess: () => {   /* сертификат заказан – устройство «чистое» */
+            const r = doneRecRead(); if (r) { r.registered = true; doneRecWrite(r); }
+          }
+        });
       }
     } else {
       regHost.hidden = true;
@@ -399,14 +502,43 @@
     scr.result.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
   }
 
-  /* «Пройти ещё раз» в тренировке и на экране результата */
-  $$('[data-restart]').forEach(b => b.addEventListener('click', () => {
-    state.done = false; state.cat = null;
-    show('start');
-    scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
-  }));
+  /* «Пройти ещё раз» – только тренировка: в основном режиме повторное
+     прохождение с устройства запрещено, кнопки скрыты (05.08.2026) */
+  if (MODE === 'training') {
+    $$('[data-restart]').forEach(b => b.addEventListener('click', () => {
+      state.done = false; state.cat = null;
+      show('start');
+      scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
+    }));
+  } else {
+    $$('[data-restart]').forEach(b => { b.hidden = true; });
+  }
 
   /* ---------- первичная инициализация ---------- */
-  function init() { renderGate(); }
+  /* уже проходил с этого устройства? Экран «уже пройден» (основной режим).
+     Исключение: тест пройден, а регистрация не завершена и диктант ещё идёт –
+     возвращаем экран результата с сохранённой анкетой и формой (05.08.2026). */
+  function checkLock() {
+    if (MODE !== 'main') return false;
+    const rec = doneRecRead();
+    if (!rec) return false;
+    if (!rec.registered && gateState() === 'open' && rec.pre) {
+      state.pre = rec.pre;
+      show('result');
+      renderResult(rec.score, rec.max, false);
+      return true;
+    }
+    show('gate');
+    const box = $('#gate-panel');
+    const when = rec.at ? new Date(rec.at).toLocaleString('ru-RU', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : '';
+    box.innerHTML = `
+      <span class="gate-panel__icon">${icons.flag}</span>
+      <h1>На этом устройстве диктант уже пройден</h1>
+      <p>Ваш результат: <b>${rec.score} из ${rec.max}</b>${when ? ' (' + when + ')' : ''}. Повторное прохождение с одного устройства недоступно – так результаты всех участников остаются честными.</p>
+      <p>Сертификат участника отправлен на почту, указанную при регистрации. Если письма нет – проверьте папки «Спам» и «Нежелательная почта» или напишите на <a href="mailto:diktant-russia@ranepa.ru">diktant-russia@ranepa.ru</a>.</p>
+      <div class="btn-row" style="justify-content:center"><a class="btn btn--blue" href="index.html">На главную</a></div>`;
+    return true;
+  }
+  function init() { if (!checkLock()) renderGate(); }
   init();
 })();

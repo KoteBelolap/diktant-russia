@@ -17,7 +17,10 @@
           → { "ok": true, "regNumber": "ПА/НОТА-26/000123" }
         Регистрационный номер: «ПА/НОТА-26/» + ID участника,
         дополненный нулями слева до 6 знаков.
-     3) Список организаций для поиска:
+     3) Регионов проживания 90: 89 субъектов Российской Федерации +
+        «За пределами Российской Федерации» (записи консульств
+        и зарубежных школ – r90.json справочника).
+     4) Список организаций для поиска:
         GET /api/orgs?q=…&region=…  → [{n, r, s?} ×40]
         Поиск глобальный: сервер ищет по всем субъектам, регион
         участника получает бонус релевантности (иногородние студенты).
@@ -41,40 +44,67 @@ window.RegForm = (() => {
   const $$ = (s, c = document) => [...c.querySelectorAll(s)];
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const REGIONS = ["Республика Адыгея","Республика Алтай","Республика Башкортостан","Республика Бурятия","Республика Дагестан","Донецкая Народная Республика","Республика Ингушетия","Кабардино-Балкарская Республика","Республика Калмыкия","Карачаево-Черкесская Республика","Республика Карелия","Республика Коми","Республика Крым","Луганская Народная Республика","Республика Марий Эл","Республика Мордовия","Республика Саха (Якутия)","Республика Северная Осетия – Алания","Республика Татарстан","Республика Тыва","Удмуртская Республика","Республика Хакасия","Чеченская Республика","Чувашская Республика","Алтайский край","Забайкальский край","Камчатский край","Краснодарский край","Красноярский край","Пермский край","Приморский край","Ставропольский край","Хабаровский край","Амурская область","Архангельская область","Астраханская область","Белгородская область","Брянская область","Владимирская область","Волгоградская область","Вологодская область","Воронежская область","Запорожская область","Ивановская область","Иркутская область","Калининградская область","Калужская область","Кемеровская область – Кузбасс","Кировская область","Костромская область","Курганская область","Курская область","Ленинградская область","Липецкая область","Магаданская область","Московская область","Мурманская область","Нижегородская область","Новгородская область","Новосибирская область","Омская область","Оренбургская область","Орловская область","Пензенская область","Псковская область","Ростовская область","Рязанская область","Самарская область","Саратовская область","Сахалинская область","Свердловская область","Смоленская область","Тамбовская область","Тверская область","Томская область","Тульская область","Тюменская область","Ульяновская область","Херсонская область","Челябинская область","Ярославская область","Москва","Санкт-Петербург","Севастополь","Еврейская автономная область","Ненецкий автономный округ","Ханты-Мансийский автономный округ – Югра","Чукотский автономный округ","Ямало-Ненецкий автономный округ"];
+  const REGIONS = ["Республика Адыгея","Республика Алтай","Республика Башкортостан","Республика Бурятия","Республика Дагестан","Донецкая Народная Республика","Республика Ингушетия","Кабардино-Балкарская Республика","Республика Калмыкия","Карачаево-Черкесская Республика","Республика Карелия","Республика Коми","Республика Крым","Луганская Народная Республика","Республика Марий Эл","Республика Мордовия","Республика Саха (Якутия)","Республика Северная Осетия – Алания","Республика Татарстан","Республика Тыва","Удмуртская Республика","Республика Хакасия","Чеченская Республика","Чувашская Республика","Алтайский край","Забайкальский край","Камчатский край","Краснодарский край","Красноярский край","Пермский край","Приморский край","Ставропольский край","Хабаровский край","Амурская область","Архангельская область","Астраханская область","Белгородская область","Брянская область","Владимирская область","Волгоградская область","Вологодская область","Воронежская область","Запорожская область","Ивановская область","Иркутская область","Калининградская область","Калужская область","Кемеровская область – Кузбасс","Кировская область","Костромская область","Курганская область","Курская область","Ленинградская область","Липецкая область","Магаданская область","Московская область","Мурманская область","Нижегородская область","Новгородская область","Новосибирская область","Омская область","Оренбургская область","Орловская область","Пензенская область","Псковская область","Ростовская область","Рязанская область","Самарская область","Саратовская область","Сахалинская область","Свердловская область","Смоленская область","Тамбовская область","Тверская область","Томская область","Тульская область","Тюменская область","Ульяновская область","Херсонская область","Челябинская область","Ярославская область","Москва","Санкт-Петербург","Севастополь","Еврейская автономная область","Ненецкий автономный округ","Ханты-Мансийский автономный округ – Югра","Чукотский автономный округ","Ямало-Ненецкий автономный округ",
+    "За пределами Российской Федерации"];
+  /* 90-й пункт списка – не субъект РФ, а зарубежье (запрос заказчика
+     05.08.2026: рассылка по консульствам). Файл справочника для него –
+     r90.json, конвертер кладёт туда записи с RegionName
+     «…за пределами Российской Федерации» (консульства, школы при
+     посольствах и т.п.). Для него «маркеры региона» не работают:
+     любая российская организация формально «упоминает» Российскую
+     Федерацию – см. охранку в regionMarkers. */
+  const ABROAD_REGION = REGIONS[REGIONS.length - 1];
 
   const CATS = [
     { v: 'Школьник 5–11 класс', k: 'school' },
     { v: 'Студент вуза или СПО', k: 'student' },
     { v: 'Закончил(а) обучение', k: 'adult' }
   ];
+  /* Категория участника выводится из типа организации (механика
+     05.08.2026: короткая анкета перед тестом спрашивает организацию,
+     от неё зависят вопросы); school/student/adult – ключи банка */
+  const CAT_OF_ORGTYPE = {
+    'Школы, лицеи и гимназии': 'Школьник 5–11 класс',
+    'Колледжи, техникумы': 'Студент вуза или СПО',
+    'Президентская академия и её филиалы': 'Студент вуза или СПО',
+    'Вузы': 'Студент вуза или СПО',
+    'Иные организации': 'Закончил(а) обучение',
+    'Личное участие': 'Закончил(а) обучение'
+  };
+  const CAT_KEY = { 'Школьник 5–11 класс': 'school', 'Студент вуза или СПО': 'student', 'Закончил(а) обучение': 'adult' };
 
   /* ---------- уникальный префикс полей (форм на странице может быть две) ---------- */
   let uid = 0;
 
-  /* ---------- HTML формы ---------- */
+  /* ---------- HTML формы ----------
+     Три варианта (запрос заказчика 05.08.2026):
+       full – полная анкета (register.html);
+       pre  – короткая анкета ПЕРЕД тестом (test.html): пол, возраст,
+              регион, организация. ФИО и почту спрашиваем после теста;
+       post – анкета ПОСЛЕ теста (test.html): ФИО, почта, согласия;
+              сведения из pre приходят через preset.pre сводкой. */
   function markup(u, preset) {
-    const orgTypes = ['Школы', 'Колледжи, техникумы', 'Президентская академия и её филиалы', 'Вузы', 'Иные организации', 'Личное участие'];
-    return `
-    <form class="reg-form" id="${u}-form" novalidate>
-      <section class="f-card glass" aria-labelledby="${u}-h1">
-        <header class="f-card__head"><span class="f-card__num">1</span><h2 id="${u}-h1">Кто Вы</h2></header>
-        <div class="f-grid--3 f-grid">
+    const variant = preset.variant || 'full';
+    const orgTypes = ['Школы, лицеи и гимназии', 'Колледжи, техникумы', 'Президентская академия и её филиалы', 'Вузы', 'Иные организации', 'Личное участие'];
+    const fSurname = `
           <div class="f-field">
             <label for="${u}-surname">Фамилия</label>
             <input class="f-input" id="${u}-surname" name="surname" type="text" placeholder="Иванова" autocomplete="family-name" required>
             <span class="f-error"></span>
-          </div>
+          </div>`;
+    const fName = `
           <div class="f-field">
             <label for="${u}-name">Имя</label>
             <input class="f-input" id="${u}-name" name="name" type="text" placeholder="Мария" autocomplete="given-name" required>
             <span class="f-error"></span>
-          </div>
+          </div>`;
+    const fPatr = `
           <div class="f-field">
             <label for="${u}-patronymic">Отчество <small>(если есть)</small></label>
             <input class="f-input" id="${u}-patronymic" name="patronymic" type="text" placeholder="Сергеевна" autocomplete="additional-name">
             <span class="f-error"></span>
-          </div>
+          </div>`;
+    const fSex = `
           <div class="f-field" id="${u}-w-sex">
             <label>Пол</label>
             <div class="seg" role="radiogroup" aria-label="Пол">
@@ -82,27 +112,45 @@ window.RegForm = (() => {
               <label class="seg__opt"><input type="radio" name="${u}-sex" value="Мужской"><span>Мужской</span></label>
             </div>
             <span class="f-error"></span>
-          </div>
+          </div>`;
+    const fAge = `
           <div class="f-field">
             <label for="${u}-age">Возраст</label>
             <input class="f-input" id="${u}-age" name="age" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="16" required>
             <span class="f-error"></span>
-          </div>
+          </div>`;
+    const fEmail = `
           <div class="f-field">
             <label for="${u}-email">Электронная почта</label>
             <input class="f-input" id="${u}-email" name="email" type="email" placeholder="maria@example.ru" autocomplete="email" required>
             <span class="f-error"></span>
-          </div>
-        </div>
-      </section>
+          </div>`;
 
+    /* шаг 1 анкеты */
+    const secWho = variant === 'pre' ? `
+      <section class="f-card glass" aria-labelledby="${u}-h1">
+        <header class="f-card__head"><span class="f-card__num">1</span><h2 id="${u}-h1">Немного о Вас</h2></header>
+        <div class="f-grid--3 f-grid">${fSex}${fAge}
+        </div>
+      </section>`
+    : `
+      <section class="f-card glass" aria-labelledby="${u}-h1">
+        <header class="f-card__head"><span class="f-card__num">1</span><h2 id="${u}-h1">Кто Вы</h2></header>
+        <div class="f-grid--3 f-grid">
+          ${variant === 'post' ? fSurname + fName + fPatr + fEmail : fSurname + fName + fPatr + fSex + fAge + fEmail}
+        </div>
+      </section>`;
+
+    /* шаг 2 анкеты: регион и организация (в post не нужен – пришёл из pre);
+       субъектов Российской Федерации ровно 89, 90-й пункт – зарубежье */
+    const secRegionOrg = variant === 'post' ? '' : `
       <section class="f-card glass" aria-labelledby="${u}-h2">
         <header class="f-card__head"><span class="f-card__num">2</span><h2 id="${u}-h2">Регион и организация</h2></header>
         <div class="f-grid">
           <div class="f-field f-field--full">
             <label for="${u}-region">Регион проживания</label>
             <span class="f-select-wrap"><select class="f-select" id="${u}-region" required>
-              <option value="" selected disabled>Выберите из ${REGIONS.length} субъектов Российской Федерации…</option>
+              <option value="" selected disabled>Выберите из ${REGIONS.length - 1} субъектов Российской Федерации…</option>
               ${REGIONS.map(r => `<option>${r}</option>`).join('')}
             </select></span>
             <span class="f-error"></span>
@@ -135,30 +183,57 @@ window.RegForm = (() => {
             <input class="f-input" id="${u}-org-custom" type="text" placeholder="Полное название Вашей организации" autocomplete="organization">
             <span class="f-error"></span>
           </div>
+          ${variant === 'full' ? `
           <div class="f-field f-field--full" id="${u}-w-category">
             <label>Ваша возрастная категория</label>
-            <div class="seg" role="radiogroup" aria-label="Возрастная категория">
+            <div class="seg" role="radiogroup" aria-label="Ваша возрастная категория">
               ${CATS.map(c => `<label class="seg__opt"><input type="radio" name="${u}-category" value="${c.v}"${preset && preset.category === c.k ? ' checked' : ''}><span>${c.v}</span></label>`).join('')}
             </div>
             <span class="f-error"></span>
-          </div>
+          </div>` : ''}
         </div>
-      </section>
+      </section>`;
 
+    /* post: сводка того, что участник указал перед тестом */
+    const preSummary = variant === 'post' ? `
+      <section class="f-card glass pre-summary" id="${u}-pre-summary-box" hidden>
+        <h2 class="pre-summary__h">Вы уже указали</h2>
+        <p class="pre-summary__row" id="${u}-pre-summary"></p>
+        <p class="pre-summary__note">Если здесь ошибка – напишите нам: <a href="mailto:diktant-russia@ranepa.ru">diktant-russia@ranepa.ru</a>.</p>
+      </section>` : '';
+
+    /* согласия (в pre не спрашиваем – по запросу заказчика они во
+       второй анкете, вместе с ФИО) */
+    const consent = variant === 'pre' ? '' : `
       <section class="f-card glass" id="${u}-w-consent">
         <label class="consent">
           <input type="checkbox" id="${u}-consent" required>
           <span class="consent__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
-          <p>Я выражаю своё согласие на <a href="assets/docs/consent-processing.docx" download>обработку</a> и <a href="assets/docs/consent-distribution.docx" download>передачу</a> своих персональных данных в соответствии с Федеральным законом № 152-ФЗ «О персональных данных».</p>
+          <p>Я выражаю своё согласие на <a href="assets/docs/Согласие на обработку персональных данных.docx" download>обработку</a> и <a href="assets/docs/Согласие на передачу персональных данных.docx" download>передачу</a> своих персональных данных в соответствии с Федеральным законом № 152-ФЗ «О персональных данных».</p>
         </label>
         <span class="f-error" style="margin-top:10px"></span>
-      </section>
+      </section>`;
 
-      <div class="form-foot">
-        <p class="note">Нажимая кнопку, Вы отправляете данные на сервер Президентской академии. После заполнения регистрационной формы сертификат участника будет отправлен на указанную электронную почту в течение 48 часов.</p>
-        <button class="btn btn--primary btn--lg" id="${u}-submit" type="submit">
+    const footNote = variant === 'pre'
+      ? 'ФИО и электронную почту мы спросим после теста – на указанную Вами почту придёт сертификат участника в течение 48 часов.'
+      : 'Нажимая кнопку, Вы отправляете данные на сервер Президентской академии. После заполнения регистрационной формы сертификат участника будет отправлен на указанную электронную почту в течение 48 часов.';
+    const submitBtn = variant === 'pre'
+      ? `<button class="btn btn--primary btn--lg" id="${u}-submit" type="submit">
+          Перейти к вопросам
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>`
+      : `<button class="btn btn--primary btn--lg" id="${u}-submit" type="submit">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg>
-          Получить сертификат</button>
+          Получить сертификат</button>`;
+
+    return `
+    <form class="reg-form reg-form--${variant}" id="${u}-form" novalidate>
+      ${secWho}
+      ${secRegionOrg}
+      ${preSummary}
+      ${consent}
+      <div class="form-foot">
+        <p class="note">${footNote}</p>
+        ${submitBtn}
       </div>
     </form>`;
   }
@@ -179,6 +254,7 @@ window.RegForm = (() => {
 
   /* ---------- поиск организаций (локальный, демо) ---------- */
   const STOP = new Set(['и', 'в', 'г', '№', 'им', 'имени', '-', '»', '«']);
+  const ageWord = n => { n = +n; const f = ['год', 'года', 'лет']; return f[(n % 10 === 1 && n % 100 !== 11) ? 0 : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? 1 : 2]; };
   const tokenize = s => s.toLowerCase().replace(/[«»"()\[\],.:;]/g, ' ').split(/[\s/\\-]+/)
     .map(t => t.trim()).filter(t => t && !STOP.has(t));
   function lev(a, b, max = 2) {
@@ -271,7 +347,7 @@ window.RegForm = (() => {
   /* служебные слова названий субъектов – маркерами не являются */
   const REGION_GENERIC = new Set(['область', 'край', 'республика',
     'автономный', 'автономная', 'округ', 'город', 'г', 'народная',
-    'эл', 'федерального', 'значения']);
+    'эл', 'федерального', 'значения', 'российской', 'федерации']);
   /* основы-направления («Северная» в «Республика Северная Осетия»)
      слишком частотны в названиях организаций – за маркер не считаем */
   const DIRECTION_STEMS = new Set(['север', 'южн', 'восточ', 'запад']);
@@ -296,6 +372,7 @@ window.RegForm = (() => {
   const regionMarkers = (() => {
     const cache = new Map();
     return region => {
+      if (region === ABROAD_REGION) return EMPTY_SET;   /* зарубежье: буквенных маркеров нет – буст выключен */
       let m = cache.get(region);
       if (!m) {
         m = new Set();
@@ -312,6 +389,7 @@ window.RegForm = (() => {
     };
   })();
   /* основы названия записи – лениво, один раз на запись */
+  const EMPTY_SET = new Set();
   const orgStems = o => o._st || (o._st = new Set(o._t.map(stemOf)));
   function orgMentionsRegion(o, region) {
     const markers = regionMarkers(region);
@@ -467,25 +545,46 @@ window.RegForm = (() => {
        preset = { score: Number|null, category: 'school'|'student'|null, total: Number }
      ============================================================ */
   function mount(host, preset = {}) {
+    const variant = preset.variant || 'full';   /* full | pre | post – см. markup() */
     const u = 'rf' + (++uid);
     const wrap = document.createElement('div');
     wrap.innerHTML = markup(u, preset);
     const form = $('form', wrap);
     host.appendChild(wrap);
 
-    /* --- комбобокс организации --- */
-    const regionSel = $(`#${u}-region`, form);
-    const typeSel = $(`#${u}-orgtype`, form);
-    const fwOrg = $(`#${u}-w-org`, form);
-    const orgInput = $(`#${u}-org`, form);
-    const orgDrop = $(`#${u}-org-drop`, form);
-    const orgSelected = $(`#${u}-org-selected`, form);
-    const orgCustomWrap = $(`#${u}-w-org-custom`, form);
-    const orgCustom = $(`#${u}-org-custom`, form);
-    const orgMiss = $(`#${u}-org-miss`, form);
-    let chosen = null, activeIdx = -1, items = [];
-    let orgPool = null;       /* стартовый пул: выбранный регион + none */
-    let orgPoolRegion = null; /* для какого региона загружены */
+    /* post-вариант: показать сводку полей, указанных перед тестом */
+    if (variant === 'post' && preset.pre) {
+      const pre = preset.pre;
+      const box = $(`#${u}-pre-summary-box`, form);
+      if (box) {
+        box.hidden = false;
+        const line1 = [pre.sex, pre.age ? `${pre.age} ${ageWord(pre.age)}` : '', pre.region].filter(Boolean).join(' · ');
+        const line2 = pre.orgType ? escH(pre.orgType) + (pre.org ? ' – ' + escH(pre.org) : '') : '';
+        $(`#${u}-pre-summary`, form).innerHTML = escH(line1) + (line2 ? '<br>' + line2 : '');
+      }
+    }
+
+    /* --- комбобокс организации (в post-варианте этого блока нет) --- */
+    /* ВНИМАНИЕ про область видимости: ссылки на эти элементы стоят
+       и в collect()/validate() ниже (функции уровня mount), поэтому
+       переменные объявлены ЗДЕСЬ, на уровне mount(), а инициализируются
+       внутри if-блока. Объявить их внутри if нельзя: const/let
+       там останутся недоступны validate()/collect() → ReferenceError. */
+    let regionSel, typeSel, fwOrg, orgInput, orgDrop, orgSelected,
+        orgCustomWrap, orgCustom, orgMiss,
+        chosen = null, activeIdx = -1, items = [],
+        orgPool = null,        /* стартовый пул: выбранный регион + none */
+        orgPoolRegion = null;  /* для какого региона загружены */
+    if (variant !== 'post') {
+    regionSel = $(`#${u}-region`, form);
+    typeSel = $(`#${u}-orgtype`, form);
+    fwOrg = $(`#${u}-w-org`, form);
+    orgInput = $(`#${u}-org`, form);
+    orgDrop = $(`#${u}-org-drop`, form);
+    orgSelected = $(`#${u}-org-selected`, form);
+    orgCustomWrap = $(`#${u}-w-org-custom`, form);
+    orgCustom = $(`#${u}-org-custom`, form);
+    orgMiss = $(`#${u}-org-miss`, form);
     let allPool = null;       /* глобальный пул: ВСЯ страна (all.json) */
     let allIndex = null;      /* инвертированный индекс глобального пула */
     let allLoading = null;    /* Promise фоновой догрузки all.json */
@@ -533,7 +632,7 @@ window.RegForm = (() => {
       return null;   /* региональный пул ещё не загружен */
     }
 
-    const eduTypes = new Set(['Школы', 'Колледжи, техникумы', 'Президентская академия и её филиалы', 'Вузы']);
+    const eduTypes = new Set(['Школы, лицеи и гимназии', 'Колледжи, техникумы', 'Президентская академия и её филиалы', 'Вузы']);
     /* Поиск по справочнику открыт и для типа «Иные организации»
        (запрос заказчика 05.08.2026: информация о диктанте рассылается
        по консульствам – их сотрудники тоже должны находить свою
@@ -582,7 +681,13 @@ window.RegForm = (() => {
        пометка региона (запрос: иногородний студент должен находить свою
        организацию и видеть, где она) */
     const orgSubline = o => {
-      const tag = o.r && o.r !== regionSel.value ? o.r : '';
+      /* метка региона: чужим – всегда; своим – когда в названии нет
+         намёка на населённый пункт (запрос заказчика 05.08.2026:
+         «добавь всем организациям без указания места в названии»);
+         у записей без региона – только краткое имя */
+      let tag = '';
+      if (o.r && o.r !== regionSel.value) tag = o.r;
+      else if (o.r && regionMarkers(regionSel.value).size && !orgMentionsRegion(o, regionSel.value)) tag = o.r;
       return o.s && tag ? o.s + ' · ' + tag : (tag || o.s || '');
     };
     function showItems(list, qToks) {
@@ -657,6 +762,7 @@ window.RegForm = (() => {
       prefetchRegionOrgs(regionSel.value);
       renderDrop();
     });
+    }
 
     /* --- валидация --- */
     function setError(w, msg) { w.classList.add('has-error'); const e = $('.f-error', w); if (e) e.textContent = msg; }
@@ -667,7 +773,40 @@ window.RegForm = (() => {
     const radioValue = name => { const r = $(`input[name="${u}-${name}"]:checked`, form); return r ? r.value : ''; };
 
     function collect() {
-      return {
+      const base = {
+        score: typeof preset.score === 'number' ? preset.score : null,
+        total: typeof preset.total === 'number' ? preset.total : null
+      };
+      /* pre: короткая анкета перед тестом – пол/возраст/регион/организация,
+         категория выводится из типа организации */
+      if (variant === 'pre') {
+        const orgType = typeSel.value || '';
+        const org = fwOrg.hidden ? ''
+          : (orgMiss.checked ? orgCustom.value.trim() : (chosen ? chosen.n : ''));
+        return Object.assign(base, {
+          variant, sex: radioValue('sex'),
+          age: $(`#${u}-age`, form).value.trim(),
+          region: regionSel.value || '',
+          orgType, org,
+          category: CAT_OF_ORGTYPE[orgType] || '',
+          categoryKey: CAT_KEY[CAT_OF_ORGTYPE[orgType]] || ''
+        });
+      }
+      /* post: ФИО/почта + всё содержимое pre (preset.pre) */
+      if (variant === 'post') {
+        const pre = preset.pre || {};
+        return Object.assign(base, {
+          surname: $(`#${u}-surname`, form).value.trim(),
+          name: $(`#${u}-name`, form).value.trim(),
+          patronymic: $(`#${u}-patronymic`, form).value.trim(),
+          email: $(`#${u}-email`, form).value.trim(),
+          sex: pre.sex || '', age: pre.age || '',
+          region: pre.region || '', orgType: pre.orgType || '',
+          org: pre.org || '', category: pre.category || ''
+        });
+      }
+      /* full */
+      return Object.assign(base, {
         surname: $(`#${u}-surname`, form).value.trim(),
         name: $(`#${u}-name`, form).value.trim(),
         patronymic: $(`#${u}-patronymic`, form).value.trim(),
@@ -678,32 +817,35 @@ window.RegForm = (() => {
         orgType: typeSel.value || '',
         org: fwOrg.hidden ? ''
           : (orgMiss.checked ? orgCustom.value.trim() : (chosen ? chosen.n : '')),
-        category: radioValue('category'),
-        score: typeof preset.score === 'number' ? preset.score : null,
-        total: typeof preset.total === 'number' ? preset.total : null
-      };
+        category: radioValue('category')
+      });
     }
 
     function validate(d) {
       let firstBad = null;
       const fail = (w, msg) => { setError(w, msg); firstBad = firstBad || w; };
       const letters = v => /^[А-Яа-яЁёA-Za-z\-\s]+$/.test(v);
-      if (!d.surname) fail($(`#${u}-surname`, form).closest('.f-field'), 'Укажите фамилию');
-      else if (!letters(d.surname)) fail($(`#${u}-surname`, form).closest('.f-field'), 'Только буквы');
-      if (!d.name) fail($(`#${u}-name`, form).closest('.f-field'), 'Укажите имя');
-      else if (!letters(d.name)) fail($(`#${u}-name`, form).closest('.f-field'), 'Только буквы');
-      if (d.patronymic && !letters(d.patronymic)) fail($(`#${u}-patronymic`, form).closest('.f-field'), 'Только буквы');
-      if (!d.sex) fail($(`#${u}-w-sex`, form), 'Выберите пол');
-      if (!/^\d+$/.test(d.age) || +d.age < 0 || +d.age > 120) fail($(`#${u}-age`, form).closest('.f-field'), 'Укажите возраст цифрами');
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email)) fail($(`#${u}-email`, form).closest('.f-field'), 'Укажите корректную электронную почту');
-      if (!d.region) fail(regionSel.closest('.f-field'), 'Выберите регион');
-      if (!d.orgType) fail(typeSel.closest('.f-field'), 'Выберите Вашу организацию');
-      if (!fwOrg.hidden) {
-        if (orgMiss.checked) { if (!orgCustom.value.trim()) fail(orgCustomWrap, 'Введите наименование организации'); }
-        else if (!chosen) fail(fwOrg, 'Начните вводить название и выберите организацию из списка');
+      const isPre = variant === 'pre', isPost = variant === 'post';
+      if (!isPre) {
+        if (!d.surname) fail($(`#${u}-surname`, form).closest('.f-field'), 'Укажите фамилию');
+        else if (!letters(d.surname)) fail($(`#${u}-surname`, form).closest('.f-field'), 'Только буквы');
+        if (!d.name) fail($(`#${u}-name`, form).closest('.f-field'), 'Укажите имя');
+        else if (!letters(d.name)) fail($(`#${u}-name`, form).closest('.f-field'), 'Только буквы');
+        if (d.patronymic && !letters(d.patronymic)) fail($(`#${u}-patronymic`, form).closest('.f-field'), 'Только буквы');
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email)) fail($(`#${u}-email`, form).closest('.f-field'), 'Укажите корректную электронную почту');
       }
-      if (!d.category) fail($(`#${u}-w-category`, form), 'Выберите возрастную категорию');
-      if (!$(`#${u}-consent`, form).checked) fail($(`#${u}-w-consent`, form), 'Необходимо согласие на обработку персональных данных');
+      if (!isPost) {
+        if (!d.sex) fail($(`#${u}-w-sex`, form), 'Выберите пол');
+        if (!/^\d+$/.test(d.age) || +d.age < 0 || +d.age > 120) fail($(`#${u}-age`, form).closest('.f-field'), 'Укажите возраст цифрами');
+        if (!d.region) fail(regionSel.closest('.f-field'), 'Выберите регион');
+        if (!d.orgType) fail(typeSel.closest('.f-field'), 'Выберите Вашу организацию');
+        if (!fwOrg.hidden) {
+          if (orgMiss.checked) { if (!orgCustom.value.trim()) fail(orgCustomWrap, 'Введите наименование организации'); }
+          else if (!chosen) fail(fwOrg, 'Начните вводить название и выберите организацию из списка');
+        }
+      }
+      if (variant === 'full' && !d.category) fail($(`#${u}-w-category`, form), 'Выберите возрастную категорию');
+      if (!isPre && !$(`#${u}-consent`, form).checked) fail($(`#${u}-w-consent`, form), 'Необходимо согласие на обработку персональных данных');
       return firstBad;
     }
 
@@ -769,6 +911,11 @@ window.RegForm = (() => {
         firstBad.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' });
         const focusable = $('.f-input, .f-select, input, button', firstBad);
         focusable && focusable.focus({ preventScroll: true });
+        return;
+      }
+      /* вариант pre: сервер пока не нужен – анкета уходит механике теста */
+      if (variant === 'pre') {
+        if (typeof preset.onSubmit === 'function') preset.onSubmit(d);
         return;
       }
       /* дубль-проверка: сервер, при недоступности – демо-журнал устройства */
