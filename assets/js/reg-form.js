@@ -868,7 +868,11 @@ window.RegForm = (() => {
     function collect() {
       const base = {
         score: typeof preset.score === 'number' ? preset.score : null,
-        total: typeof preset.total === 'number' ? preset.total : null
+        total: typeof preset.total === 'number' ? preset.total : null,
+        /* ит. 5 (08.08.2026): сквозной id попытки; по нему сервер
+           отклоняет регистрацию, если результат уже записан без ФИО
+           (CMS-GUIDE §5.4). В pre его ещё нет – придёт null. */
+        attemptId: preset.attemptId || null
       };
       /* pre: короткая анкета перед тестом – пол/возраст/регион/организация,
          а категорию с 08.08.2026 выбирает сам участник (ит. 3) */

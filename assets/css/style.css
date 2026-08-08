@@ -1747,14 +1747,15 @@ html { scroll-padding-top: 96px; }
 
 /* 24.4. Панель решения после теста (баллы → «Дозаполнить данные» /
    «Отказаться» / таймаут 2 минут → запись без ФИО) */
+/* ит. 5 (08.08.2026): вариант с пометкой «уже записано, но можно
+   дозаполнить» отменён заказчиком – .result-cta__saved удалён
+   вместе с разметкой; после записи без ФИО остаётся только
+   итоговый .result-cta__done */
 .result-cta { margin-top: 22px; padding: clamp(22px,3vw,30px); border-radius: 24px; text-align: center; }
 .result-cta__text { margin: 0 auto 20px; max-width: 46ch;
   font-size: clamp(15px,1.8vw,17.5px); font-weight: 750; line-height: 1.5; color: var(--navy-900); }
 .result-cta__timer { margin: 18px auto 0; max-width: 54ch; font-size: 13px; font-weight: 600; line-height: 1.5; color: var(--ink-55); }
 .result-cta__timer b { color: var(--red-600); font-variant-numeric: tabular-nums; }
-.result-cta__saved { margin: 14px auto 0; max-width: 54ch; padding: 10px 16px; border-radius: 12px;
-  background: rgba(207,232,249,.55); border: 1px solid rgba(32,94,152,.16);
-  font-size: 13px; font-weight: 700; line-height: 1.5; color: var(--navy-800); }
 .result-cta__done { margin: 0 auto 20px; max-width: 56ch; font-size: 15px; font-weight: 650; line-height: 1.55; color: var(--ink-70); }
 .result-cta__done b { color: var(--navy-900); }
 

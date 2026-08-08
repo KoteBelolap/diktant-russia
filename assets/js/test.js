@@ -31,6 +31,16 @@
    – после теста показываются баллы и панель решения «Дозаполнить
      данные» / «Отказаться»; 2 минуты без ответа или отказ – ответ
      записывается в базу без ФИО («не заполнено»), см. setupCta();
+   Ужесточение 08.08.2026 (итерация 5):
+   – двухминутный отсчёт идёт по РЕАЛЬНОМУ времени от момента
+     финиша теста (rec.at + certDecisionSec): уход со страницы не
+     останавливает и не перезапускает его; при возврате после
+     дедлайна запись без ФИО отправляется немедленно (догон);
+     серверный двойник правила – в CMS-GUIDE §5.4;
+   – после анонимной записи дозаполнение персональных данных
+     НЕ предлагается и заблокировано (только итоговый экран);
+     связка записей – attemptId (в payload регистрации и анонимной
+     записи);
    – тренировочные тесты открываются только вручную (config.js,
      trainingMode: 'on'), авто-открытия по дате больше нет.
    Тренировочный режим (?mode=training) работает по-прежнему:
@@ -82,6 +92,13 @@
   };
 
   const esc = s => String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+
+  /* attemptId – сквозной идентификатор попытки (08.08.2026, ит. 5):
+     в бою его выдаёт сервер (GET /api/test), в демо генерируем сами.
+     Им связаны запись результата без ФИО и регистрация: по нему
+     сервер запрещает дозаполнение после анонимной записи (§5.4). */
+  const uid = () => (crypto.randomUUID ? crypto.randomUUID()
+    : 'att-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10));
 
   /* ---------- защита от копирования (ТЗ 1.4) ---------- */
   document.addEventListener('contextmenu', e => { if ($('#test-app .q-card')) e.preventDefault(); });
@@ -196,6 +213,7 @@
     } catch { /* статичное демо – сеть недоступна */ }
     /* демо: локальный банк (вопросы+ответы), случайная выборка и перемешивание */
     state.demo = true;
+    if (!state.attemptId) state.attemptId = uid();   /* см. uid(): сквозной id попытки */
     const bankKey = MODE === 'training' ? 'training' : cat;
     const pool = [...(window.QUESTION_BANK_DEMO[bankKey] || [])];
     shuffle(pool);
@@ -445,7 +463,7 @@
     /* запрет повторного прохождения с устройства (05.08.2026):
        в тренировке флаг не ставим – там попытки свободны */
     if (MODE === 'main') {
-      doneRecWrite({ score, max, at: new Date().toISOString(), pre: state.pre, registered: false });
+      doneRecWrite({ score, max, at: new Date().toISOString(), pre: state.pre, registered: false, attemptId: state.attemptId || null });
     }
   }
 
@@ -480,24 +498,43 @@
   let CTA_HTML = null;
   const mmss = s => String(Math.floor(s / 60)) + ':' + String(s % 60).padStart(2, '0');
 
+  /* Итог после записи без ФИО (ит. 5): дозаполнение больше НЕ
+     предлагаем – ни кнопки, ни отсчёта, только честный итог. */
+  const ctaDoneHtml = (score, max) => `
+        <p class="result-cta__done"><b>Ответ записан.</b> Ваш результат – <b>${score} из ${max}</b> – сохранён в базе без ФИО (вместо них указано «не заполнено»), поэтому сертификат участника по этой записи не высылается.</p>
+        <div class="btn-row" style="justify-content:center">
+          <a class="btn btn--blue" href="index.html">На главную</a>
+        </div>`;
+
   function setupCta(score, max) {
     const cta = $('#result-cta');
     if (!cta) return;
     if (CTA_HTML === null) CTA_HTML = cta.innerHTML;
     clearInterval(state.ctaTimer);
-    cta.innerHTML = CTA_HTML;
     cta.hidden = false;
 
-    /* если анонимная запись уже сохранялась (прошлый визит), честно
-       напоминаем об этом – но заполнить данные всё ещё можно */
-    const saved = $('#result-cta-saved');
-    if (saved && state.anon) saved.hidden = false;
+    /* анонимная запись уже ушла (этот или прошлый визит) – сразу
+       итоговый экран; «Дозаполнить данные» не возвращаем (заказчик, ит. 5) */
+    if (state.anon) { cta.innerHTML = ctaDoneHtml(score, max); return; }
+
+    cta.innerHTML = CTA_HTML;
+
+    /* Отсчёт идёт по РЕАЛЬНОМУ времени от финиша теста (ит. 5):
+       дедлайн = rec.at + certDecisionSec. Уход со страницы его не
+       останавливает и не перезапускает; вернулся после дедлайна –
+       запись без ФИО отправляется сразу (догон). В бою тот же дедлайн
+       контролирует и сервер (CMS-GUIDE §5.4). */
+    const rec = doneRecRead();
+    const finished = rec && rec.at ? new Date(rec.at).getTime() : Date.now();
+    const deadline = (isFinite(finished) ? finished : Date.now()) + DECISION_SEC * 1000;
 
     const leftEl = $('#result-cta-left');
-    let left = DECISION_SEC;
+    const remain = () => Math.round((deadline - Date.now()) / 1000);
+    let left = remain();
+    if (left <= 0) { anonSave(score, max, 'таймаут 2 минут без ответа'); return; }
     if (leftEl) leftEl.textContent = mmss(left);
     state.ctaTimer = setInterval(() => {
-      left--;
+      left = remain();
       if (leftEl) leftEl.textContent = mmss(Math.max(0, left));
       if (left <= 0) anonSave(score, max, 'таймаут 2 минут без ответа');
     }, 1000);
@@ -510,6 +547,9 @@
      регистрационную форму участника (вариант post: ФИО + почта, данные
      из pre показаны сводкой с кнопкой «Изменить данные», 05/08.08.2026) */
   function revealReg() {
+    /* ит. 5: после записи без ФИО дозаполнение запрещено – на всякий
+       случай режем и здесь (кнопку в таком состоянии уже не рисуем) */
+    if (state.anon || (doneRecRead() || {}).anon) return;
     clearInterval(state.ctaTimer);
     const cta = $('#result-cta'), regHost = $('#result-reg');
     if (cta) cta.hidden = true;
@@ -519,6 +559,7 @@
       regHost.dataset.mounted = '1';
       window.RegForm.mount(regHost, {
         variant: 'post', pre: state.pre, score: state.lastScore, total: state.lastMax,
+        attemptId: state.attemptId,   /* связка с анонимной записью (ит. 5, §5.4) */
         onSuccess: () => {   /* сертификат заказан – устройство «чистое» */
           const r = doneRecRead(); if (r) { r.registered = true; doneRecWrite(r); }
         }
@@ -540,6 +581,7 @@
       const pre = state.pre || {};
       const payload = {
         variant: 'anonymous', reason,
+        attemptId: state.attemptId || null,   /* связка с возможной регистрацией (ит. 5) */
         surname: 'не заполнено', name: 'не заполнено', patronymic: '',
         email: 'не заполнено',
         sex: pre.sex || '', age: pre.age || '', region: pre.region || '',
@@ -565,6 +607,7 @@
                   payload.region, payload.orgType, payload.org, payload.category]
               .join('|').toLowerCase().replace(/\s+/g, ' ').trim(),
             email: payload.email, regNumber, anonymous: true,
+            attemptId: payload.attemptId,
             at: new Date().toISOString()
           });
           localStorage.setItem(REG_KEY, JSON.stringify(regs));
@@ -572,13 +615,7 @@
       }
     }
     const cta = $('#result-cta');
-    if (cta) {
-      cta.innerHTML = `
-        <p class="result-cta__done"><b>Ответ записан.</b> Ваш результат – <b>${score} из ${max}</b> – сохранён в базе без ФИО (вместо них указано «не заполнено»), поэтому сертификат участника по этой записи не высылается.</p>
-        <div class="btn-row" style="justify-content:center">
-          <a class="btn btn--blue" href="index.html">На главную</a>
-        </div>`;
-    }
+    if (cta) { cta.hidden = false; cta.innerHTML = ctaDoneHtml(score, max); }
   }
 
   function renderResult(score, max, byTime) {
@@ -646,6 +683,7 @@
     if (!rec.registered && gateState() === 'open' && rec.pre) {
       state.pre = rec.pre;
       state.anon = !!rec.anon;   /* возможно, результат уже записан без ФИО */
+      state.attemptId = rec.attemptId || null;   /* связка записей (ит. 5) */
       show('result');
       renderResult(rec.score, rec.max, false);
       return true;
