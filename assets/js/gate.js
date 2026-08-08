@@ -81,7 +81,9 @@
       }
     });
 
-    /* Блок тренировочных тестов: виден только когда trainingOpen() */
+    /* Блок тренировочных тестов: виден только когда trainingOpen().
+       Авто-открытия по дате нет (заказчик, 08.08.2026, ит. 3): это
+       только ручное включение trainingMode: 'on' в config.js через CMS. */
     document.querySelectorAll('[data-gate="training"]').forEach(box => {
       if (window.DIKTANT.status.trainingOpen()) {
         box.classList.add('is-open-training');

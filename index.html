@@ -111,7 +111,8 @@
           <div class="cd-cell"><b data-cd="s">00</b><span data-cdl="s">секунд</span></div>
         </div>
         <p class="countdown__note">Диктант проходит с 5 ноября 2026 года 10:00 до 23:59 8 ноября по московскому времени</p>
-        <p class="countdown__note countdown__note--broadcast">Прямая трансляция открытия Диктанта появится на этой странице за несколько часов до старта Диктанта.</p>
+        <!-- Убрано по запросу заказчика 08.08.2026 (ит. 3): дублирующая подпись
+             о трансляции – эта информация есть в тёмной кнопке РУТУБ ниже -->
         <p class="countdown__ended" hidden>Диктант закончился 08 ноября. Ждём Вас в следующем году!</p>
         <div class="broadcast" id="broadcast">
           <a class="broadcast__link" href="https://rutube.ru/" target="_blank" rel="noopener" data-broadcast-link>
@@ -134,7 +135,6 @@
         <a class="chip" href="#tasks">Цель и задачи</a>
         <a class="chip" href="#news">Новости</a>
         <a class="chip" href="#stats">4 сезона в цифрах</a>
-        <a class="chip" href="#audience">Для кого</a>
         <a class="chip" href="#format">О чём диктант</a>
         <a class="chip" href="#media">Медиагалерея</a>
         <a class="chip" href="#prizes">Награды</a>
@@ -300,28 +300,9 @@
         </div>
       </section>
 
-      <!-- ═══════ ДЛЯ КОГО ═══════ -->
-      <section class="sec" id="audience">
-        <header class="sec-head sec-head--center">
-          <span class="sec-overline">Для кого</span>
-          <h2 class="sec-title">Диктант – для всех</h2>
-          <p class="sec-lead">Вопросы адаптированы под три возрастные категории – каждому будет интересно и по силам.</p>
-        </header>
-        <div class="aud-grid">
-          <article class="aud-card glass">
-            <span class="aud-card__ic"><img class="aud-card__ic-img" src="assets/img/icon-books.png" alt="" width="44" height="44"></span>
-            <h3>Школьники 5–11 классов</h3>
-          </article>
-          <article class="aud-card glass">
-            <span class="aud-card__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5v6"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></span>
-            <h3>Студенты вузов и СПО</h3>
-          </article>
-          <article class="aud-card glass">
-            <span class="aud-card__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
-            <h3>Взрослые и пенсионеры</h3>
-          </article>
-        </div>
-      </section>
+      <!-- Раздел «Для кого» удалён по запросу заказчика 08.08.2026 (ит. 3):
+           его плашки аудиторий переехали в отдельную карточку «Диктант – для всех»
+           внутри раздела «О чём диктант» ниже -->
 
       <!-- ═══════ О ЧЁМ ДИКТАНТ ═══════ -->
       <section class="sec" id="format">
@@ -341,14 +322,32 @@
               <span class="topic topic--green">Гражданская идентичность</span>
               <span class="topic">Религии</span>
             </div>
-            <dl class="topics__cats">
-              <div class="topics__cat"><dt>Школьники 5–11 классов</dt><dd>Вопросы об основных событиях истории, героях, культуре и праздниках народов России.</dd></div>
-              <div class="topics__cat"><dt>Студенты вузов и СПО</dt><dd>Повышенная сложность вопросов, для ответов на которые нужны более глубокие знания о нашей стране.</dd></div>
-              <div class="topics__cat"><dt>Взрослые и пенсионеры</dt><dd>Личное участие из дома, с работы или с базовой площадки для тех, кто уже закончил своё обучение.</dd></div>
-            </dl>
+            <!-- Возрастные группы отсюда убраны совсем по запросу заказчика
+                 08.08.2026 (ит. 3): они – в соседней карточке «Диктант – для всех» -->
             <div class="topics__grid">
               <div class="mini-fact"><b>30</b><span>вопросов в каждом варианте диктанта</span></div>
               <div class="mini-fact"><b>40 мин</b><span>на прохождение теста</span></div>
+            </div>
+          </div>
+          <!-- Карточка «Диктант – для всех» (заказчик, 08.08.2026, ит. 3):
+               плашки аудиторий из удалённого раздела «Для кого», компактная
+               версия – только названия возрастных групп, без описаний -->
+          <div class="forall glass">
+            <h3 class="forall__h">Диктант – для всех</h3>
+            <p class="forall__lead">Вопросы адаптированы под три возрастные категории – каждому будет интересно и по силам.</p>
+            <div class="forall__grid">
+              <article class="aud-card aud-card--sm">
+                <span class="aud-card__ic"><img class="aud-card__ic-img" src="assets/img/icon-books.png" alt="" width="44" height="44"></span>
+                <b class="aud-card__t">Школьники 5–11 классов</b>
+              </article>
+              <article class="aud-card aud-card--sm">
+                <span class="aud-card__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5v6"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></span>
+                <b class="aud-card__t">Студенты вузов и СПО</b>
+              </article>
+              <article class="aud-card aud-card--sm">
+                <span class="aud-card__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
+                <b class="aud-card__t">Взрослые и пенсионеры</b>
+              </article>
             </div>
           </div>
           <div class="cert-show glass">
@@ -366,9 +365,14 @@
             <button class="format-video__play" type="button" aria-label="Открыть видео о проекте в полном размере">
               <video src="assets/video/about-project.mp4" poster="assets/video/about-project-poster.webp"
                      autoplay muted loop playsinline preload="metadata" aria-hidden="true" tabindex="-1"></video>
+              <!-- Наслоение-текст в общей стилистике сайта (заказчик, 08.08.2026,
+                   ит. 3): вместо подписи со ссылкой на Яндекс.Диск под роликом -->
+              <span class="format-video__stickers" aria-hidden="true">
+                <span class="format-video__st format-video__st--l">Видео</span>
+                <span class="format-video__st format-video__st--r">о проекте</span>
+              </span>
               <span class="format-video__zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3" fill="currentColor" stroke="none"/></svg>смотреть полностью</span>
             </button>
-            <figcaption class="format-video__cap">Видео о проекте: <a href="https://disk.yandex.ru/i/K7V-dNHAgcdNYg" target="_blank" rel="noopener">https://disk.yandex.ru/i/K7V-dNHAgcdNYg</a></figcaption>
           </figure>
         </div>
       </section>
@@ -449,20 +453,20 @@
           <h2 class="sec-title">Наш Диктант поддерживают <span class="grad">известные люди страны</span></h2>
         </header>
         <div class="guests">
-          <div class="guest glass"><span class="guest__ava"><img src="assets/img/guests/ashirov.webp" alt="Денис Аширов" loading="lazy"></span><span><span class="guest__name">Аширов Денис Валерьевич</span><span class="guest__role">Заместитель руководителя Федерального агентства по делам молодёжи</span></span><button class="guest__media" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/ashirov.webp" data-caption="Аширов Денис Валерьевич – обращение к участникам диктанта (материалы скоро будут)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7 16 12l7 5V7Z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Фото/видео обращения</span></button></div>
-          <div class="guest glass"><span class="guest__ava"><img src="assets/img/guests/barinov.webp" alt="Игорь Баринов" loading="lazy"></span><span><span class="guest__name">Баринов Игорь Вячеславович</span><span class="guest__role">Руководитель Федерального агентства по делам национальностей</span></span><button class="guest__media" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/barinov.webp" data-caption="Баринов Игорь Вячеславович – обращение к участникам диктанта (материалы скоро будут)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7 16 12l7 5V7Z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Фото/видео обращения</span></button></div>
-          <div class="guest glass"><span class="guest__ava"><img src="assets/img/guests/boyko.webp" alt="Сергей Бойко" loading="lazy"></span><span><span class="guest__name">Бойко Сергей Николаевич</span><span class="guest__role">Герой Российской Федерации, директор Департамента государственной молодёжной политики и воспитательной деятельности Минобрнауки</span></span><button class="guest__media" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/boyko.webp" data-caption="Бойко Сергей Николаевич – обращение к участникам диктанта (материалы скоро будут)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7 16 12l7 5V7Z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Фото/видео обращения</span></button></div>
-          <div class="guest glass"><span class="guest__ava"><img src="assets/img/guests/zanko.webp" alt="Ольга Занко" loading="lazy"></span><span><span class="guest__name">Занко Ольга Николаевна</span><span class="guest__role">Заместитель председателя Комитета Государственной Думы по развитию гражданского общества, вопросам общественных и религиозных объединений</span></span><button class="guest__media" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/zanko.webp" data-caption="Занко Ольга Николаевна – обращение к участникам диктанта (материалы скоро будут)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7 16 12l7 5V7Z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Фото/видео обращения</span></button></div>
-          <div class="guest glass"><span class="guest__ava"><img src="assets/img/guests/zakharova.webp" alt="Мария Захарова" loading="lazy"></span><span><span class="guest__name">Захарова Мария Владимировна</span><span class="guest__role">Директор Департамента информации и печати МИД Российской Федерации</span></span><button class="guest__media" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/zakharova.webp" data-caption="Захарова Мария Владимировна – обращение к участникам диктанта (материалы скоро будут)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7 16 12l7 5V7Z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Фото/видео обращения</span></button></div>
-          <div class="guest glass"><span class="guest__ava"><img src="assets/img/guests/koneva.webp" alt="Наталия Конева" loading="lazy"></span><span><span class="guest__name">Конева Наталия Ивановна</span><span class="guest__role">Президент Фонда памяти полководцев Победы, дочь дважды Героя Советского Союза Маршала Советского Союза Ивана Конева</span></span><button class="guest__media" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/koneva.webp" data-caption="Конева Наталия Ивановна – обращение к участникам диктанта (материалы скоро будут)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7 16 12l7 5V7Z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Фото/видео обращения</span></button></div>
-          <div class="guest glass"><span class="guest__ava"><img src="assets/img/guests/kuznetsov.webp" alt="Михаил Кузнецов" loading="lazy"></span><span><span class="guest__name">Кузнецов Михаил Михайлович</span><span class="guest__role">Руководитель исполкома «Народный фронт “За Россию”»</span></span><button class="guest__media" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/kuznetsov.webp" data-caption="Кузнецов Михаил Михайлович – обращение к участникам диктанта (материалы скоро будут)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7 16 12l7 5V7Z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Фото/видео обращения</span></button></div>
-          <div class="guest glass"><span class="guest__ava"><img src="assets/img/guests/nikitin.webp" alt="Андрей Никитин" loading="lazy"></span><span><span class="guest__name">Никитин Андрей Сергеевич</span><span class="guest__role">Министр транспорта Российской Федерации, экс-губернатор Новгородской области</span></span><button class="guest__media" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/nikitin.webp" data-caption="Никитин Андрей Сергеевич – обращение к участникам диктанта (материалы скоро будут)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7 16 12l7 5V7Z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Фото/видео обращения</span></button></div>
-          <div class="guest glass"><span class="guest__ava"><img src="assets/img/guests/petrova.webp" alt="Ольга Петрова" loading="lazy"></span><span><span class="guest__name">Петрова Ольга Викторовна</span><span class="guest__role">Заместитель Министра науки и высшего образования Российской Федерации</span></span><button class="guest__media" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/petrova.webp" data-caption="Петрова Ольга Викторовна – обращение к участникам диктанта (материалы скоро будут)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7 16 12l7 5V7Z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Фото/видео обращения</span></button></div>
-          <div class="guest glass"><span class="guest__ava"><img src="assets/img/guests/svyatenko.webp" alt="Инна Святенко" loading="lazy"></span><span><span class="guest__name">Святенко Инна Юрьевна</span><span class="guest__role">Заместитель Председателя Совета Федерации</span></span><button class="guest__media" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/svyatenko.webp" data-caption="Святенко Инна Юрьевна – обращение к участникам диктанта (материалы скоро будут)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7 16 12l7 5V7Z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Фото/видео обращения</span></button></div>
-          <div class="guest glass"><span class="guest__ava"><img src="assets/img/guests/sponyakov.webp" alt="Илья Споняков" loading="lazy"></span><span><span class="guest__name">Споняков Илья Дмитриевич</span><span class="guest__role">Герой Российской Федерации, советник Министра культуры Российской Федерации</span></span><button class="guest__media" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/sponyakov.webp" data-caption="Споняков Илья Дмитриевич – обращение к участникам диктанта (материалы скоро будут)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7 16 12l7 5V7Z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Фото/видео обращения</span></button></div>
-          <div class="guest glass"><span class="guest__ava"><img src="assets/img/guests/stepyko.webp" alt="Дмитрий Степыко" loading="lazy"></span><span><span class="guest__name">Степыко Дмитрий Геннадьевич</span><span class="guest__role">Заместитель директора ФГБУ «Роспатриотцентр»</span></span><button class="guest__media" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/stepyko.webp" data-caption="Степыко Дмитрий Геннадьевич – обращение к участникам диктанта (материалы скоро будут)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7 16 12l7 5V7Z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Фото/видео обращения</span></button></div>
-          <div class="guest glass"><span class="guest__ava"><img src="assets/img/guests/shits.webp" alt="Иван Шиц" loading="lazy"></span><span><span class="guest__name">Шиц Иван Александрович</span><span class="guest__role">Герой Российской Федерации, председатель Совета общественного движения участников специальной военной операции «Войсковое братство “СВОи”»</span></span><button class="guest__media" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/shits.webp" data-caption="Шиц Иван Александрович – обращение к участникам диктанта (материалы скоро будут)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7 16 12l7 5V7Z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span>Фото/видео обращения</span></button></div>
-        </div></div>
+          <button class="guest glass" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/ashirov.webp" data-caption="Аширов Денис Валерьевич – обращение к участникам диктанта (материалы скоро будут)" aria-label="Аширов Денис Валерьевич: открыть фото или видео обращение"><span class="guest__ava"><img src="assets/img/guests/ashirov.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Аширов Денис Валерьевич</span><span class="guest__role">Заместитель руководителя Федерального агентства по делам молодёжи</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/barinov.webp" data-caption="Баринов Игорь Вячеславович – обращение к участникам диктанта (материалы скоро будут)" aria-label="Баринов Игорь Вячеславович: открыть фото или видео обращение"><span class="guest__ava"><img src="assets/img/guests/barinov.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Баринов Игорь Вячеславович</span><span class="guest__role">Руководитель Федерального агентства по делам национальностей</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/boyko.webp" data-caption="Бойко Сергей Николаевич – обращение к участникам диктанта (материалы скоро будут)" aria-label="Бойко Сергей Николаевич: открыть фото или видео обращение"><span class="guest__ava"><img src="assets/img/guests/boyko.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Бойко Сергей Николаевич</span><span class="guest__role">Герой Российской Федерации, директор Департамента государственной молодёжной политики и воспитательной деятельности Минобрнауки</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/zanko.webp" data-caption="Занко Ольга Николаевна – обращение к участникам диктанта (материалы скоро будут)" aria-label="Занко Ольга Николаевна: открыть фото или видео обращение"><span class="guest__ava"><img src="assets/img/guests/zanko.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Занко Ольга Николаевна</span><span class="guest__role">Заместитель председателя Комитета Государственной Думы по развитию гражданского общества, вопросам общественных и религиозных объединений</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/zakharova.webp" data-caption="Захарова Мария Владимировна – обращение к участникам диктанта (материалы скоро будут)" aria-label="Захарова Мария Владимировна: открыть фото или видео обращение"><span class="guest__ava"><img src="assets/img/guests/zakharova.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Захарова Мария Владимировна</span><span class="guest__role">Директор Департамента информации и печати МИД Российской Федерации</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/koneva.webp" data-caption="Конева Наталия Ивановна – обращение к участникам диктанта (материалы скоро будут)" aria-label="Конева Наталия Ивановна: открыть фото или видео обращение"><span class="guest__ava"><img src="assets/img/guests/koneva.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Конева Наталия Ивановна</span><span class="guest__role">Президент Фонда памяти полководцев Победы, дочь дважды Героя Советского Союза Маршала Советского Союза Ивана Конева</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/kuznetsov.webp" data-caption="Кузнецов Михаил Михайлович – обращение к участникам диктанта (материалы скоро будут)" aria-label="Кузнецов Михаил Михайлович: открыть фото или видео обращение"><span class="guest__ava"><img src="assets/img/guests/kuznetsov.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Кузнецов Михаил Михайлович</span><span class="guest__role">Руководитель исполкома «Народный фронт “За Россию”»</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/nikitin.webp" data-caption="Никитин Андрей Сергеевич – обращение к участникам диктанта (материалы скоро будут)" aria-label="Никитин Андрей Сергеевич: открыть фото или видео обращение"><span class="guest__ava"><img src="assets/img/guests/nikitin.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Никитин Андрей Сергеевич</span><span class="guest__role">Министр транспорта Российской Федерации, экс-губернатор Новгородской области</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/petrova.webp" data-caption="Петрова Ольга Викторовна – обращение к участникам диктанта (материалы скоро будут)" aria-label="Петрова Ольга Викторовна: открыть фото или видео обращение"><span class="guest__ava"><img src="assets/img/guests/petrova.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Петрова Ольга Викторовна</span><span class="guest__role">Заместитель Министра науки и высшего образования Российской Федерации</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/svyatenko.webp" data-caption="Святенко Инна Юрьевна – обращение к участникам диктанта (материалы скоро будут)" aria-label="Святенко Инна Юрьевна: открыть фото или видео обращение"><span class="guest__ava"><img src="assets/img/guests/svyatenko.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Святенко Инна Юрьевна</span><span class="guest__role">Заместитель Председателя Совета Федерации</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/sponyakov.webp" data-caption="Споняков Илья Дмитриевич – обращение к участникам диктанта (материалы скоро будут)" aria-label="Споняков Илья Дмитриевич: открыть фото или видео обращение"><span class="guest__ava"><img src="assets/img/guests/sponyakov.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Споняков Илья Дмитриевич</span><span class="guest__role">Герой Российской Федерации, советник Министра культуры Российской Федерации</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/stepyko.webp" data-caption="Степыко Дмитрий Геннадьевич – обращение к участникам диктанта (материалы скоро будут)" aria-label="Степыко Дмитрий Геннадьевич: открыть фото или видео обращение"><span class="guest__ava"><img src="assets/img/guests/stepyko.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Степыко Дмитрий Геннадьевич</span><span class="guest__role">Заместитель директора ФГБУ «Роспатриотцентр»</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-kind="photo" data-src="assets/img/guests/shits.webp" data-caption="Шиц Иван Александрович – обращение к участникам диктанта (материалы скоро будут)" aria-label="Шиц Иван Александрович: открыть фото или видео обращение"><span class="guest__ava"><img src="assets/img/guests/shits.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Шиц Иван Александрович</span><span class="guest__role">Герой Российской Федерации, председатель Совета общественного движения участников специальной военной операции «Войсковое братство “СВОи”»</span></span></button>
+        </div>
       </section>
 
       <!-- ═══════ FAQ ═══════ -->

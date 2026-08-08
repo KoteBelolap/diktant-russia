@@ -635,7 +635,7 @@ ul[role='list'], ol[role='list'] { list-style: none; padding: 0; }
 /* ============================================================
    ДЛЯ КОГО
    ============================================================ */
-.aud-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 20px; }
+
 .aud-card { position: relative; padding: 34px 26px 28px; border-radius: 26px; overflow: clip;
   transition: transform .45s var(--ease-spring), box-shadow .45s; }
 .aud-card:hover { transform: translateY(-8px) rotate(var(--hr,0deg)); box-shadow: var(--shadow-2); }
@@ -650,7 +650,7 @@ ul[role='list'], ol[role='list'] { list-style: none; padding: 0; }
 .aud-card:nth-child(3) .aud-card__ic { background: linear-gradient(135deg, #a81212, #e03b32); }
 .aud-card:hover .aud-card__ic { transform: rotate(-6deg) scale(1.06); }
 .aud-card__ic svg { width: 32px; height: 32px; }
-.aud-card h3 { font-family: var(--font-d); font-weight: 600; font-size: 19px; line-height: 1.3; color: var(--navy-900); }
+
 
 /* ============================================================
    ИНФОРМАЦИЯ О ДИКТАНТЕ
@@ -1172,7 +1172,7 @@ ul[role='list'], ol[role='list'] { list-style: none; padding: 0; }
   .countdown__label small { margin-inline: auto; }
   .countdown__grid { justify-content: center; }
   .aim, .format, .contacts { grid-template-columns: 1fr; }
-  .tasks-grid, .aud-grid, .prizes, .news-grid, .res-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .tasks-grid, .prizes, .news-grid, .res-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .quotes { grid-template-columns: 1fr; }
   .quote-card--main { grid-row: auto; }
   .footer__grid { grid-template-columns: 1fr 1fr; }
@@ -1188,7 +1188,7 @@ ul[role='list'], ol[role='list'] { list-style: none; padding: 0; }
   .countdown { margin-inline: 10px; padding: 16px 14px; }
   .cd-cell { min-width: 0; flex: 1; padding: 10px 6px 9px; border-radius: 16px; }
   .cd-cell span { font-size: 9px; letter-spacing: .08em; }
-  .tasks-grid, .aud-grid, .prizes, .news-grid, .res-grid, .guests, .logos-grid, .logos-grid--4,
+  .tasks-grid, .prizes, .news-grid, .res-grid, .guests, .logos-grid, .logos-grid--4,
   .f-grid, .f-grid--3, .test-cats { grid-template-columns: 1fr; }
   .stats { padding: 22px 16px; border-radius: 24px; }
   .stats__grid { grid-template-columns: 1fr; }
@@ -1645,14 +1645,11 @@ html { scroll-padding-top: 96px; }
 @media (max-width: 1197px) { .broadcast { justify-items: center; } } /* таймер на мобильном – колонкой по центру */
 /* заметка про эфир: чуть темнее/чётче обычной подписи под таймером,
    но не спорит с главным текстом дат */
-.countdown__note--broadcast { color: var(--ink); }
+
 
 /* 23.2. «О чём диктант»: добавилась третья колонка – видео о проекте.
    Широкий макет – три колонки; обёртка 1fr (базовый медиазапрос выше)
    остаётся для планшета и телефона, там видео ограничено по ширине. */
-@media (min-width: 1198px) {
-  .format { grid-template-columns: minmax(0,1.05fr) minmax(0,.9fr) minmax(0,.62fr); }
-}
 .format-video { margin: 0; width: 100%; max-width: 400px; justify-self: center; align-self: start;
   padding: 12px 12px 14px; border-radius: 24px; }
 .format-video__play { position: relative; display: block; width: 100%; padding: 0; border: 0; border-radius: 18px;
@@ -1667,34 +1664,8 @@ html { scroll-padding-top: 96px; }
 .format-video:hover .format-video__zoom, .format-video__play:focus-visible .format-video__zoom { opacity: 1; transform: none; }
 @media (hover: none) { .format-video__zoom { opacity: 1; transform: none; } } /* на тач-экранах подсказка видна всегда */
 .format-video__zoom svg { width: 15px; height: 15px; flex: 0 0 auto; }
-.format-video__cap { padding: 12px 6px 0; margin: 0; font-size: 12.5px; font-weight: 650; line-height: 1.55; color: var(--ink-55); word-break: break-word; }
-.format-video__cap a { color: var(--blue-700); }
 
-/* 23.3. Описания категорий участников – под облаком тем
-   (перенесены из секции «Для кого» по требованию заказчика) */
-.topics__cats { margin: 18px 0 0; padding: 0; display: grid; gap: 10px; }
-.topics__cat { padding: 12px 14px; border-radius: 16px;
-  background: rgba(207,232,249,.5); border: 1px solid rgba(255,255,255,.7); border-left: 3px solid var(--sky-500); }
-.topics__cat:nth-child(2) { border-left-color: var(--gold-500); }
-.topics__cat:nth-child(3) { border-left-color: var(--red-600); }
-.topics__cat dt { font-family: var(--font-d); font-weight: 600; font-size: 13.5px; color: var(--navy-900); }
-.topics__cat dd { margin: 5px 0 0; font-size: 13px; line-height: 1.55; font-weight: 600; color: var(--ink-55); }
 
-/* 23.4. Почётные гости: кнопка «Фото/видео обращения».
-   Сейчас это заглушка (открывает портрет гостя в лайтбоксе); когда
-   заказчик пришлёт материалы – у кнопки меняются только data-kind
-   (photo|video) и data-src, стили и механика уже готовы. */
-.guest__media { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px;
-  padding: 9px 14px; border-radius: 999px; cursor: zoom-in;
-  font-family: var(--font-d); font-weight: 500; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase;
-  color: var(--blue-700); background: rgba(207,232,249,.55); border: 1px solid rgba(32,94,152,.25);
-  transition: color .25s, background .25s, border-color .25s, transform .3s var(--ease-spring); }
-.guest__media svg { width: 15px; height: 15px; flex: 0 0 auto; }
-.guest__media:hover { color: #fff; background: linear-gradient(135deg, var(--blue-700), var(--sky-500));
-  border-color: transparent; transform: translateY(-2px); }
-/* текст гостя теперь не последний ребёнок карточки (после него идёт
-   кнопка) – блочная раскладка имени/роли переназначена точечнее */
-.guest > span:last-of-type { display: flex; flex-direction: column; }
 
 /* 23.5. Карусель: первый слайд – видео об итогах, помечен бейджем */
 .slide--video::before { content: "Видео"; position: absolute; top: 12px; left: 12px; z-index: 2;
@@ -1707,3 +1678,101 @@ html { scroll-padding-top: 96px; }
 .lightbox__video { display: block; max-width: 100%; max-height: 80svh; width: auto; height: auto; margin-inline: auto;
   border-radius: 18px; box-shadow: var(--shadow-3); background: #000; }
 .lightbox__nav[hidden] { display: none; }
+
+/* ============ 24. Итерация 3 правок заказчика (08.08.2026) ============
+   – раздел «Для кого» удалён; его плашки аудиторий – компактной
+     карточкой «Диктант – для всех» внутри раздела «О чём диктант»
+     (оформление «как в блоке Для кого, только немного меньше»,
+     поэтому переиспользуем .aud-card с модификатором --sm);
+   – сетка «О чём диктант» снова двухколоночная (правило блока 23.2
+     снято): строка 1 – тематические блоки | Диктант – для всех,
+     строка 2 – сертификат | видео;
+   – на видео вместо подписи-ссылки – текст-наслоение в стилистике
+     наклеек сайта (.format-video__stickers);
+   – дублирующая подпись о трансляции под таймером удалена (остаётся
+     тёмная кнопка РУТУБ) – правило .countdown__note--broadcast убрано;
+   – карточка почётного гостя кликабельна ЦЕЛИКОМ (фото/имя/должность)
+     – отдельной кнопки «Фото/видео обращения» больше нет, правила
+     .guest__media убраны; когда заказчик пришлёт материалы, у кнопки
+     .guest меняются только data-kind (photo|video) и data-src;
+   – после теста: панель решения «сертификат или анонимная запись»
+     (.result-cta) и панель «Изменить данные» в post-анкете.
+   Убрано из ранних блоков (мёртвое): .aud-grid, .aud-card h3,
+   .topics__cats, .guest__media, .format-video__cap, 3-колоночный
+   @media у .format, .countdown__note--broadcast. */
+
+/* 24.1. Карточка «Диктант – для всех»: повторяет ритм .topics */
+.forall { padding: clamp(24px,3vw,36px); border-radius: 26px;
+  display: flex; flex-direction: column; justify-content: center; }
+.forall__h { font-family: var(--font-d); font-weight: 600; font-size: 17px; color: var(--navy-900); margin-bottom: 8px; }
+.forall__lead { font-size: 14px; color: var(--ink-55); font-weight: 650; margin-bottom: 20px; }
+.forall__grid { display: grid; gap: 14px; }
+
+/* компактные плашки аудиторий – «как в Для кого, только меньше» */
+.aud-card--sm { display: flex; align-items: center; gap: 16px;
+  padding: 16px 20px 16px 16px; border-radius: 20px; }
+.aud-card--sm::after { display: none; }        /* свечение-арка большой карточки на плашке не читается */
+.aud-card--sm:hover { transform: translateY(-3px) rotate(var(--hr,0deg)); }
+.aud-card--sm .aud-card__ic { width: 48px; height: 48px; border-radius: 16px; margin-bottom: 0; flex: 0 0 auto; }
+.aud-card--sm .aud-card__ic svg { width: 24px; height: 24px; }
+.aud-card--sm .aud-card__ic-img { width: 26px; height: 26px; }
+.aud-card__t { font-family: var(--font-d); font-weight: 600; font-size: 15px; line-height: 1.3; color: var(--navy-900); }
+@media (max-width: 680px) {
+  .aud-card__t { font-size: 14px; }
+  .aud-card--sm { padding: 13px 16px 13px 13px; gap: 12px; }
+  .aud-card--sm .aud-card__ic { width: 42px; height: 42px; border-radius: 14px; }
+}
+
+/* 24.2. Текст-наслоение на видео о проекте: белая наклейка «Видео»
+   и красная «о проекте» в фирменных поворотах (макет заказчика) */
+.format-video__stickers { position: absolute; top: 16px; left: 14px; right: 14px; z-index: 3;
+  display: flex; flex-direction: column; align-items: flex-start; pointer-events: none; }
+.format-video__st { font-family: var(--font-d); font-weight: 600; font-size: clamp(16px,1.9vw,20px); line-height: 1.05;
+  padding: 9px 15px; border-radius: 15px; box-shadow: 0 12px 24px -10px rgba(7,31,44,.55); }
+.format-video__st--l { background: rgba(255,255,255,.96); color: var(--navy-900); transform: rotate(-7deg);
+  border: 1px solid rgba(255,255,255,.7); }
+.format-video__st--r { align-self: flex-end; margin-top: 8px; color: #fff; transform: rotate(3.5deg);
+  background: linear-gradient(135deg, #e0352b, var(--red-600)); }
+@media (prefers-reduced-motion: no-preference) {
+  .format-video__st { transition: transform .4s var(--ease-spring); }
+  .format-video:hover .format-video__st--l { transform: rotate(-4deg) }
+  .format-video:hover .format-video__st--r { transform: rotate(1.5deg) }
+}
+
+/* 24.3. Карточка гостя теперь сама кнопка (клик по фото, имени или
+   должности открывает обращение) */
+.guest { cursor: pointer; text-align: left; width: 100%; font: inherit; color: inherit; }
+.guest:focus-visible { outline: 3px solid var(--sky-500); outline-offset: 3px; }
+.guest__name { display: block; }   /* сохраняем блочность внутри <button> */
+
+/* 24.4. Панель решения после теста (баллы → «Дозаполнить данные» /
+   «Отказаться» / таймаут 2 минут → запись без ФИО) */
+.result-cta { margin-top: 22px; padding: clamp(22px,3vw,30px); border-radius: 24px; text-align: center; }
+.result-cta__text { margin: 0 auto 20px; max-width: 46ch;
+  font-size: clamp(15px,1.8vw,17.5px); font-weight: 750; line-height: 1.5; color: var(--navy-900); }
+.result-cta__timer { margin: 18px auto 0; max-width: 54ch; font-size: 13px; font-weight: 600; line-height: 1.5; color: var(--ink-55); }
+.result-cta__timer b { color: var(--red-600); font-variant-numeric: tabular-nums; }
+.result-cta__saved { margin: 14px auto 0; max-width: 54ch; padding: 10px 16px; border-radius: 12px;
+  background: rgba(207,232,249,.55); border: 1px solid rgba(32,94,152,.16);
+  font-size: 13px; font-weight: 700; line-height: 1.5; color: var(--navy-800); }
+.result-cta__done { margin: 0 auto 20px; max-width: 56ch; font-size: 15px; font-weight: 650; line-height: 1.55; color: var(--ink-70); }
+.result-cta__done b { color: var(--navy-900); }
+
+/* 24.5. Post-анкета: кнопка «Изменить данные» и её раскрывающаяся
+   панель с предзаполненными полями pre */
+.pre-summary__edit { margin-top: 14px; display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 18px; border-radius: 999px; cursor: pointer;
+  font-weight: 800; font-size: 13px; color: var(--blue-700);
+  background: rgba(255,255,255,.65); border: 1.5px solid rgba(32,94,152,.25);
+  transition: background .25s, color .25s, transform .3s var(--ease-spring), box-shadow .25s; }
+.pre-summary__edit:hover { background: #fff; transform: translateY(-1px); box-shadow: var(--shadow-1); }
+.pre-summary__edit[aria-expanded="true"] { color: #fff; border-color: transparent;
+  background: linear-gradient(135deg, var(--blue-700), var(--blue-600)); }
+.post-edit { margin-top: 18px; padding-top: 18px; border-top: 1px dashed rgba(32,94,152,.3);
+  display: grid; gap: 18px; }
+.post-edit .f-grid--3 { margin-bottom: 0; }
+
+/* 24.6. Сегмент категории участия в pre-анкете: подписи длинные –
+   каждую опцию на всю ширину строки (удобно и на телефоне) */
+.reg-form--pre .seg .seg__opt { flex: 1 1 200px; }
+.reg-form--pre .seg .seg__opt span { width: 100%; justify-content: center; text-align: center; }

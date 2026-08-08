@@ -24,6 +24,15 @@
      или до конца времени.
    – Повторное прохождение с того же устройства запрещено
      (localStorage-флаг); дубли участников отсекаются регистрацией.
+   Механика от 08.08.2026 (запросы заказчика, итерация 3):
+   – категорию участия выбирает САМ участник в pre-анкете
+     (тип организации лишь подсвечивает правдоподобный вариант,
+     пока участник не трогал переключатель сам);
+   – после теста показываются баллы и панель решения «Дозаполнить
+     данные» / «Отказаться»; 2 минуты без ответа или отказ – ответ
+     записывается в базу без ФИО («не заполнено»), см. setupCta();
+   – тренировочные тесты открываются только вручную (config.js,
+     trainingMode: 'on'), авто-открытия по дате больше нет.
    Тренировочный режим (?mode=training) работает по-прежнему:
    плитки категорий и повторные попытки без ограничений.
    ============================================================ */
@@ -59,10 +68,17 @@
   const doneRecRead = () => { try { return JSON.parse(localStorage.getItem(DONE_KEY) || 'null'); } catch { return null; } };
   const doneRecWrite = r => { try { localStorage.setItem(DONE_KEY, JSON.stringify(r)); } catch { /* приватный режим */ } };
 
+  /* Панель решения после теста (заказчик, 08.08.2026, ит. 3): сколько
+     секунд ждём выбора «Дозаполнить данные»/«Отказаться», прежде чем
+     записать результат в базу без ФИО. Значение – в config.js
+     (certDecisionSec, по ТЗ 2 минуты); приёмка может уменьшить. */
+  const DECISION_SEC = window.DIKTANT?.CONFIG?.certDecisionSec ?? 120;
+
   const state = {
     cat: null, qs: [], q: 0, answers: [],
     left: DURATION, timer: null, done: false, locked: false,
-    demo: true, attemptId: null, pre: null   /* pre – анкета перед тестом */
+    demo: true, attemptId: null, pre: null,   /* pre – анкета перед тестом */
+    ctaTimer: null, anon: false   /* анонимная запись уже ушла в базу */
   };
 
   const esc = s => String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
@@ -458,7 +474,115 @@
         : 'Загляните в материалы для подготовки – следующая попытка будет сильнее.' };
   }
 
+  /* ---------- панель решения после результата (заказчик, 08.08.2026) ----------
+     Исходная разметка панели запоминается один раз – при повторных показах
+     (переигранный тест, возврат на страницу) панель собирается заново. */
+  let CTA_HTML = null;
+  const mmss = s => String(Math.floor(s / 60)) + ':' + String(s % 60).padStart(2, '0');
+
+  function setupCta(score, max) {
+    const cta = $('#result-cta');
+    if (!cta) return;
+    if (CTA_HTML === null) CTA_HTML = cta.innerHTML;
+    clearInterval(state.ctaTimer);
+    cta.innerHTML = CTA_HTML;
+    cta.hidden = false;
+
+    /* если анонимная запись уже сохранялась (прошлый визит), честно
+       напоминаем об этом – но заполнить данные всё ещё можно */
+    const saved = $('#result-cta-saved');
+    if (saved && state.anon) saved.hidden = false;
+
+    const leftEl = $('#result-cta-left');
+    let left = DECISION_SEC;
+    if (leftEl) leftEl.textContent = mmss(left);
+    state.ctaTimer = setInterval(() => {
+      left--;
+      if (leftEl) leftEl.textContent = mmss(Math.max(0, left));
+      if (left <= 0) anonSave(score, max, 'таймаут 2 минут без ответа');
+    }, 1000);
+
+    $('#result-cta-fill')?.addEventListener('click', () => revealReg());
+    $('#result-cta-decline')?.addEventListener('click', () => anonSave(score, max, 'участник отказался'));
+  }
+
+  /* «Дозаполнить данные»: ждать больше нечего – открываем и монтируем
+     регистрационную форму участника (вариант post: ФИО + почта, данные
+     из pre показаны сводкой с кнопкой «Изменить данные», 05/08.08.2026) */
+  function revealReg() {
+    clearInterval(state.ctaTimer);
+    const cta = $('#result-cta'), regHost = $('#result-reg');
+    if (cta) cta.hidden = true;
+    if (!regHost) return;
+    regHost.hidden = false;
+    if (!regHost.dataset.mounted && window.RegForm) {
+      regHost.dataset.mounted = '1';
+      window.RegForm.mount(regHost, {
+        variant: 'post', pre: state.pre, score: state.lastScore, total: state.lastMax,
+        onSuccess: () => {   /* сертификат заказан – устройство «чистое» */
+          const r = doneRecRead(); if (r) { r.registered = true; doneRecWrite(r); }
+        }
+      });
+    }
+    regHost.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
+  }
+
+  /* «Отказаться» или 2 минуты без ответа: результат пишется в базу
+     БЕЗ ФИО – вместо них «не заполнено» (формулировка заказчика).
+     Бой: POST /api/register с признаком anonymous. Демо: та же запись
+     в локальный журнал регистраций (зеркалит демо-ветку reg-form.js). */
+  async function anonSave(score, max, reason) {
+    clearInterval(state.ctaTimer);
+    if (!state.anon) {
+      state.anon = true;
+      const rec = doneRecRead();
+      if (rec) { rec.anon = true; doneRecWrite(rec); }
+      const pre = state.pre || {};
+      const payload = {
+        variant: 'anonymous', reason,
+        surname: 'не заполнено', name: 'не заполнено', patronymic: '',
+        email: 'не заполнено',
+        sex: pre.sex || '', age: pre.age || '', region: pre.region || '',
+        orgType: pre.orgType || '', org: pre.org || '',
+        category: pre.category || '', categoryKey: state.cat || '',
+        score, total: max
+      };
+      let ok = false;
+      try {
+        const r = await fetch('/api/register', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        ok = r.ok;
+      } catch { /* статичное демо */ }
+      if (!ok) {   /* демо-журнал устройства (как в reg-form.js) */
+        try {
+          const REG_KEY = 'diktant_registrations_demo';
+          const regs = JSON.parse(localStorage.getItem(REG_KEY) || '[]');
+          const regNumber = 'ПА/НОТА-26/' + String(regs.length + 1).padStart(6, '0');
+          regs.push({
+            key: [payload.surname, payload.name, payload.patronymic, payload.sex, payload.age,
+                  payload.region, payload.orgType, payload.org, payload.category]
+              .join('|').toLowerCase().replace(/\s+/g, ' ').trim(),
+            email: payload.email, regNumber, anonymous: true,
+            at: new Date().toISOString()
+          });
+          localStorage.setItem(REG_KEY, JSON.stringify(regs));
+        } catch { /* приватный режим */ }
+      }
+    }
+    const cta = $('#result-cta');
+    if (cta) {
+      cta.innerHTML = `
+        <p class="result-cta__done"><b>Ответ записан.</b> Ваш результат – <b>${score} из ${max}</b> – сохранён в базе без ФИО (вместо них указано «не заполнено»), поэтому сертификат участника по этой записи не высылается.</p>
+        <div class="btn-row" style="justify-content:center">
+          <a class="btn btn--blue" href="index.html">На главную</a>
+        </div>`;
+    }
+  }
+
   function renderResult(score, max, byTime) {
+    state.lastScore = score; state.lastMax = max;   /* для ленивого монтажа post-формы */
     const C = 2 * Math.PI * 88;
     const ring = $('#ring-fg');
     ring.style.strokeDasharray = C;
@@ -481,21 +605,18 @@
       ? 'Время вышло – показан результат по уже данным ответам.'
       : 'Верных ответов: ' + score + ' из ' + max + '.';
 
-    /* основной режим: вторая анкета (ФИО + почта + согласия) сразу
-       под результатом; поля из pre подставляются сводкой (05.08.2026) */
+    /* основной режим: сначала ТОЛЬКО баллы и панель решения
+       (заказчик, 08.08.2026, ит. 3): «Дозаполнить данные» открывает
+       регистрационную форму участника ниже; «Отказаться» или 2 минуты
+       молчания – результат пишется в базу без ФИО («не заполнено»).
+       Вторая анкета (ФИО + почта + согласия) монтируется по требованию. */
     const regHost = $('#result-reg');
+    const cta = $('#result-cta');
     if (MODE === 'main') {
-      regHost.hidden = false;
-      if (!regHost.dataset.mounted && window.RegForm) {
-        regHost.dataset.mounted = '1';
-        window.RegForm.mount(regHost, {
-          variant: 'post', pre: state.pre, score, total: max,
-          onSuccess: () => {   /* сертификат заказан – устройство «чистое» */
-            const r = doneRecRead(); if (r) { r.registered = true; doneRecWrite(r); }
-          }
-        });
-      }
+      regHost.hidden = true;
+      if (cta) setupCta(score, max);
     } else {
+      if (cta) cta.hidden = true;
       regHost.hidden = true;
     }
 
@@ -524,6 +645,7 @@
     if (!rec) return false;
     if (!rec.registered && gateState() === 'open' && rec.pre) {
       state.pre = rec.pre;
+      state.anon = !!rec.anon;   /* возможно, результат уже записан без ФИО */
       show('result');
       renderResult(rec.score, rec.max, false);
       return true;

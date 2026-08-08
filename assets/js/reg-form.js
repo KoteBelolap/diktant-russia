@@ -60,9 +60,17 @@ window.RegForm = (() => {
     { v: 'Студент вуза или СПО', k: 'student' },
     { v: 'Закончил(а) обучение', k: 'adult' }
   ];
-  /* Категория участника выводится из типа организации (механика
-     05.08.2026: короткая анкета перед тестом спрашивает организацию,
-     от неё зависят вопросы); school/student/adult – ключи банка */
+  /* Подписи категорий для выбора участником в pre-анкете – точная
+     формулировка заказчика (08.08.2026, ит. 3). Ключи те же. */
+  const CATS_PRE = [
+    { v: 'Школьники 5–11 классов', k: 'school' },
+    { v: 'Студенты вузов и СПО', k: 'student' },
+    { v: 'Взрослые и пенсионеры', k: 'adult' }
+  ];
+  /* Правдоподобная категория по типу организации – только ПОДСКАЗКА
+     (предустановка переключателя в pre-анкете). С 08.08.2026 категорию
+     выбирает сам участник, организация её не определяет (запрос
+     заказчика, ит. 3); school/student/adult – ключи банка */
   const CAT_OF_ORGTYPE = {
     'Школы, лицеи и гимназии': 'Школьник 5–11 класс',
     'Колледжи, техникумы': 'Студент вуза или СПО',
@@ -77,12 +85,17 @@ window.RegForm = (() => {
   let uid = 0;
 
   /* ---------- HTML формы ----------
-     Три варианта (запрос заказчика 05.08.2026):
+     Три варианта (запрос заказчика 05.08.2026; уточнения 08.08.2026, ит. 3):
        full – полная анкета (register.html);
        pre  – короткая анкета ПЕРЕД тестом (test.html): пол, возраст,
-              регион, организация. ФИО и почту спрашиваем после теста;
+              регион, организация + шаг 3 «Категория участия», которую
+              выбирает САМ участник (тип организации – только подсказка,
+              пока переключатели не трогали). ФИО и почту – после теста;
        post – анкета ПОСЛЕ теста (test.html): ФИО, почта, согласия;
-              сведения из pre приходят через preset.pre сводкой. */
+              сведения из pre приходят сводкой, под ней кнопка
+              «Изменить данные» раскрывает те же поля (пол/регион/
+              организация/возраст) с предзаполнением – правки уходят
+              на сервер вместо исходных, закрытая панель = без правок. */
   function markup(u, preset) {
     const variant = preset.variant || 'full';
     const orgTypes = ['Школы, лицеи и гимназии', 'Колледжи, техникумы', 'Президентская академия и её филиалы', 'Вузы', 'Иные организации', 'Личное участие'];
@@ -141,12 +154,10 @@ window.RegForm = (() => {
         </div>
       </section>`;
 
-    /* шаг 2 анкеты: регион и организация (в post не нужен – пришёл из pre);
-       субъектов Российской Федерации ровно 89, 90-й пункт – зарубежье */
-    const secRegionOrg = variant === 'post' ? '' : `
-      <section class="f-card glass" aria-labelledby="${u}-h2">
-        <header class="f-card__head"><span class="f-card__num">2</span><h2 id="${u}-h2">Регион и организация</h2></header>
-        <div class="f-grid">
+    /* Блок «регион + организация» – один на всех (субъектов РФ ровно 89,
+       90-й пункт – зарубежье). В post-анкете тот же блок живёт в скрытой
+       панели «Изменить данные» (заказчик, 08.08.2026, ит. 3). */
+    const fRegionOrg = `
           <div class="f-field f-field--full">
             <label for="${u}-region">Регион проживания</label>
             <span class="f-select-wrap"><select class="f-select" id="${u}-region" required>
@@ -182,7 +193,15 @@ window.RegForm = (() => {
             <label for="${u}-org-custom">Введите наименование организации</label>
             <input class="f-input" id="${u}-org-custom" type="text" placeholder="Полное название Вашей организации" autocomplete="organization">
             <span class="f-error"></span>
-          </div>
+          </div>`;
+
+    /* шаг 2 анкеты: регион и организация (в post отдельного шага нет –
+       блок переезжает в панель «Изменить данные» сводки) */
+    const secRegionOrg = variant === 'post' ? '' : `
+      <section class="f-card glass" aria-labelledby="${u}-h2">
+        <header class="f-card__head"><span class="f-card__num">2</span><h2 id="${u}-h2">Регион и организация</h2></header>
+        <div class="f-grid">
+          ${fRegionOrg}
           ${variant === 'full' ? `
           <div class="f-field f-field--full" id="${u}-w-category">
             <label>Ваша возрастная категория</label>
@@ -194,12 +213,38 @@ window.RegForm = (() => {
         </div>
       </section>`;
 
-    /* post: сводка того, что участник указал перед тестом */
+    /* шаг 3 pre-анкеты: категория участия – выбирает САМ участник
+       (заказчик, 08.08.2026, ит. 3: «не подставляй автоматически
+       на основе организации, человек вправе сам выбрать») */
+    const secCat = variant === 'pre' ? `
+      <section class="f-card glass" aria-labelledby="${u}-h3">
+        <header class="f-card__head"><span class="f-card__num">3</span><h2 id="${u}-h3">Категория участия</h2></header>
+        <div class="f-field f-field--full" id="${u}-w-category">
+          <div class="seg" role="radiogroup" aria-label="Категория участия">
+            ${CATS_PRE.map(c => `<label class="seg__opt"><input type="radio" name="${u}-category" value="${c.k}"><span>${c.v}</span></label>`).join('')}
+          </div>
+          <p class="pre-summary__note" style="margin-top:12px">От выбранной категории зависят Ваши вопросы. Выбор за Вами: тип организации лишь подсвечивает правдоподобный вариант – категорию всегда можно сменить.</p>
+          <span class="f-error"></span>
+        </div>
+      </section>` : '';
+
+    /* post: сводка того, что участник указал перед тестом, + кнопка
+       «Изменить данные» (заказчик, 08.08.2026, ит. 3): ниже раскрываются
+       пол, регион, организация и возраст – ПРЕДЗАПОЛНЕННЫЕ ответами pre */
     const preSummary = variant === 'post' ? `
       <section class="f-card glass pre-summary" id="${u}-pre-summary-box" hidden>
         <h2 class="pre-summary__h">Вы уже указали</h2>
         <p class="pre-summary__row" id="${u}-pre-summary"></p>
-        <p class="pre-summary__note">Если здесь ошибка – напишите нам: <a href="mailto:diktant-russia@ranepa.ru">diktant-russia@ranepa.ru</a>.</p>
+        <button class="pre-summary__edit" type="button" id="${u}-pre-edit" aria-expanded="false" aria-controls="${u}-post-edit">Изменить данные</button>
+        <div class="post-edit" id="${u}-post-edit" hidden>
+          <div class="f-grid f-grid--3 post-edit__who">
+            ${fSex}${fAge}
+          </div>
+          <div class="f-grid">
+            ${fRegionOrg}
+          </div>
+        </div>
+        <p class="pre-summary__note">Если здесь ошибка и Вы не нашли её исправление выше – напишите нам: <a href="mailto:diktant-russia@ranepa.ru">diktant-russia@ranepa.ru</a>.</p>
       </section>` : '';
 
     /* согласия (в pre не спрашиваем – по запросу заказчика они во
@@ -229,6 +274,7 @@ window.RegForm = (() => {
     <form class="reg-form reg-form--${variant}" id="${u}-form" novalidate>
       ${secWho}
       ${secRegionOrg}
+      ${secCat}
       ${preSummary}
       ${consent}
       <div class="form-foot">
@@ -560,22 +606,25 @@ window.RegForm = (() => {
         box.hidden = false;
         const line1 = [pre.sex, pre.age ? `${pre.age} ${ageWord(pre.age)}` : '', pre.region].filter(Boolean).join(' · ');
         const line2 = pre.orgType ? escH(pre.orgType) + (pre.org ? ' – ' + escH(pre.org) : '') : '';
-        $(`#${u}-pre-summary`, form).innerHTML = escH(line1) + (line2 ? '<br>' + line2 : '');
+        const line3 = pre.category ? 'Категория: ' + escH(pre.category) : '';
+        $(`#${u}-pre-summary`, form).innerHTML = [escH(line1), line2, line3].filter(Boolean).join('<br>');
       }
     }
 
-    /* --- комбобокс организации (в post-варианте этого блока нет) --- */
-    /* ВНИМАНИЕ про область видимости: ссылки на эти элементы стоят
+    /* --- комбобокс организации ---
+       Есть во всех вариантах: в post – внутри скрытой панели «Изменить
+       данные» (заказчик, 08.08.2026, ит. 3).
+       ВНИМАНИЕ про область видимости: ссылки на эти элементы стоят
        и в collect()/validate() ниже (функции уровня mount), поэтому
        переменные объявлены ЗДЕСЬ, на уровне mount(), а инициализируются
-       внутри if-блока. Объявить их внутри if нельзя: const/let
+       внутри блока ниже. Объявить их внутри if нельзя: const/let
        там останутся недоступны validate()/collect() → ReferenceError. */
     let regionSel, typeSel, fwOrg, orgInput, orgDrop, orgSelected,
         orgCustomWrap, orgCustom, orgMiss,
         chosen = null, activeIdx = -1, items = [],
         orgPool = null,        /* стартовый пул: выбранный регион + none */
         orgPoolRegion = null;  /* для какого региона загружены */
-    if (variant !== 'post') {
+    {
     regionSel = $(`#${u}-region`, form);
     typeSel = $(`#${u}-orgtype`, form);
     fwOrg = $(`#${u}-w-org`, form);
@@ -762,6 +811,50 @@ window.RegForm = (() => {
       prefetchRegionOrgs(regionSel.value);
       renderDrop();
     });
+
+    /* pre: категорию участия выбирает САМ участник (заказчик 08.08.2026,
+       ит. 3). Тип организации лишь предустанавливает правдоподобный
+       переключатель – и только пока участник сам их не трогал. */
+    let catTouched = false;
+    if (variant === 'pre') {
+      $$(`input[name="${u}-category"]`, form).forEach(r =>
+        r.addEventListener('change', () => { catTouched = true; }));
+      typeSel.addEventListener('change', () => {
+        if (catTouched) return;
+        const k = CAT_KEY[CAT_OF_ORGTYPE[typeSel.value]] || '';
+        const r = $(`input[name="${u}-category"][value="${k}"]`, form);
+        if (r) r.checked = true;
+      });
+    }
+
+    /* post: предзаполнение панели «Изменить данные» ответами pre
+       (заказчик, 08.08.2026, ит. 3). Закрытая панель = правки отменены:
+       collect() тогда берёт исходные поля pre. */
+    if (variant === 'post' && preset.pre) {
+      const pre = preset.pre;
+      $$(`input[name="${u}-sex"]`, form).forEach(r => { r.checked = r.value === pre.sex; });
+      $(`#${u}-age`, form).value = pre.age || '';
+      regionSel.value = pre.region || '';
+      if (pre.region && REGIONS.indexOf(pre.region) >= 0) prefetchRegionOrgs(pre.region);
+      typeSel.value = pre.orgType || '';
+      if (pre.orgMiss) orgMiss.checked = true;
+      if (!pre.orgMiss && pre.org) {
+        chosen = { n: pre.org, s: '', r: pre.region || '' };
+        orgInput.value = pre.org;
+        $(`#${u}-org-selected-name`, form).textContent = pre.org;
+        orgSelected.classList.add('is-show');
+      }
+      syncOrgVisibility();
+      orgInput.disabled = !!orgMiss.checked;
+      if (orgMiss.checked && pre.org) orgCustom.value = pre.org;
+      const editBtn = $(`#${u}-pre-edit`, form), editBox = $(`#${u}-post-edit`, form);
+      if (editBtn && editBox) editBtn.addEventListener('click', () => {
+        const open = editBox.hidden;
+        editBox.hidden = !open;
+        editBtn.setAttribute('aria-expanded', String(open));
+        editBtn.textContent = open ? 'Свернуть' : 'Изменить данные';
+      });
+    }
     }
 
     /* --- валидация --- */
@@ -778,31 +871,42 @@ window.RegForm = (() => {
         total: typeof preset.total === 'number' ? preset.total : null
       };
       /* pre: короткая анкета перед тестом – пол/возраст/регион/организация,
-         категория выводится из типа организации */
+         а категорию с 08.08.2026 выбирает сам участник (ит. 3) */
       if (variant === 'pre') {
         const orgType = typeSel.value || '';
         const org = fwOrg.hidden ? ''
           : (orgMiss.checked ? orgCustom.value.trim() : (chosen ? chosen.n : ''));
+        const catKey = radioValue('category');
+        const catLabel = (CATS.find(c => c.k === catKey) || {}).v || '';
         return Object.assign(base, {
           variant, sex: radioValue('sex'),
           age: $(`#${u}-age`, form).value.trim(),
           region: regionSel.value || '',
           orgType, org,
-          category: CAT_OF_ORGTYPE[orgType] || '',
-          categoryKey: CAT_KEY[CAT_OF_ORGTYPE[orgType]] || ''
+          orgMiss: orgMiss.checked,
+          category: catLabel,        /* каноническая подпись для сервера */
+          categoryKey: catKey
         });
       }
-      /* post: ФИО/почта + всё содержимое pre (preset.pre) */
+      /* post: ФИО/почта + содержимое pre; но если участник открыл панель
+         «Изменить данные» (заказчик, 08.08.2026) – берём правки из неё */
       if (variant === 'post') {
         const pre = preset.pre || {};
+        const editBox = $(`#${u}-post-edit`, form);
+        const editOpen = editBox && !editBox.hidden;
         return Object.assign(base, {
           surname: $(`#${u}-surname`, form).value.trim(),
           name: $(`#${u}-name`, form).value.trim(),
           patronymic: $(`#${u}-patronymic`, form).value.trim(),
           email: $(`#${u}-email`, form).value.trim(),
-          sex: pre.sex || '', age: pre.age || '',
-          region: pre.region || '', orgType: pre.orgType || '',
-          org: pre.org || '', category: pre.category || ''
+          sex: editOpen ? radioValue('sex') : (pre.sex || ''),
+          age: editOpen ? $(`#${u}-age`, form).value.trim() : (pre.age || ''),
+          region: editOpen ? (regionSel.value || '') : (pre.region || ''),
+          orgType: editOpen ? (typeSel.value || '') : (pre.orgType || ''),
+          org: editOpen
+            ? (fwOrg.hidden ? '' : (orgMiss.checked ? orgCustom.value.trim() : (chosen ? chosen.n : '')))
+            : (pre.org || ''),
+          category: pre.category || ''   /* категория уже определила вопросы теста */
         });
       }
       /* full */
@@ -826,6 +930,10 @@ window.RegForm = (() => {
       const fail = (w, msg) => { setError(w, msg); firstBad = firstBad || w; };
       const letters = v => /^[А-Яа-яЁёA-Za-z\-\s]+$/.test(v);
       const isPre = variant === 'pre', isPost = variant === 'post';
+      /* post: блок «пол/возраст/регион/организация» проверяем только когда
+         участник открыл панель «Изменить данные» – иначе действуют
+         уже валидированные ответы pre (заказчик, 08.08.2026) */
+      const editOpen = isPost && !$(`#${u}-post-edit`, form).hidden;
       if (!isPre) {
         if (!d.surname) fail($(`#${u}-surname`, form).closest('.f-field'), 'Укажите фамилию');
         else if (!letters(d.surname)) fail($(`#${u}-surname`, form).closest('.f-field'), 'Только буквы');
@@ -834,7 +942,7 @@ window.RegForm = (() => {
         if (d.patronymic && !letters(d.patronymic)) fail($(`#${u}-patronymic`, form).closest('.f-field'), 'Только буквы');
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email)) fail($(`#${u}-email`, form).closest('.f-field'), 'Укажите корректную электронную почту');
       }
-      if (!isPost) {
+      if (!isPost || editOpen) {
         if (!d.sex) fail($(`#${u}-w-sex`, form), 'Выберите пол');
         if (!/^\d+$/.test(d.age) || +d.age < 0 || +d.age > 120) fail($(`#${u}-age`, form).closest('.f-field'), 'Укажите возраст цифрами');
         if (!d.region) fail(regionSel.closest('.f-field'), 'Выберите регион');
@@ -844,6 +952,7 @@ window.RegForm = (() => {
           else if (!chosen) fail(fwOrg, 'Начните вводить название и выберите организацию из списка');
         }
       }
+      if (isPre && !d.categoryKey) fail($(`#${u}-w-category`, form), 'Выберите категорию участия');
       if (variant === 'full' && !d.category) fail($(`#${u}-w-category`, form), 'Выберите возрастную категорию');
       if (!isPre && !$(`#${u}-consent`, form).checked) fail($(`#${u}-w-consent`, form), 'Необходимо согласие на обработку персональных данных');
       return firstBad;
