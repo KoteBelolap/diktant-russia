@@ -8,7 +8,7 @@ JavaScript: без фреймворков, сборщиков и внешних 
 
 ## Актуальные страницы демо
 
-1. [Главная](https://kotebelolap.github.io/diktant-russia/index.html)
+1. [Главная](https://kotebelolap.github.io/diktant-russia/main.html)
 2. [Материалы для подготовки](https://kotebelolap.github.io/diktant-russia/materials.html)
 3. [Новости](https://kotebelolap.github.io/diktant-russia/news.html)
 4. [Страница теста](https://kotebelolap.github.io/diktant-russia/test.html)
@@ -71,7 +71,7 @@ production сервер самостоятельно контролирует п
 
 ```text
 /
-├── index.html                 главная страница
+├── main.html                  главная страница
 ├── materials.html             статьи и тренировочные тесты
 ├── news.html                  лента новостей
 ├── article.html               новость/статья по ?id=…&type=…
@@ -244,7 +244,7 @@ API возвращает полный номер вида `ПА/НОТА-26/0001
 
 ```bash
 python3 -m http.server 8901
-# http://127.0.0.1:8901/
+# http://127.0.0.1:8901/main.html
 ```
 
 Чтобы локально проверить состояние мероприятия, временно добавьте в `<head>`

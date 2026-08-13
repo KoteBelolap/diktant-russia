@@ -150,7 +150,7 @@ def audit_html_and_assets() -> None:
 
 def audit_guest_media() -> None:
     manifest_path = ROOT / "assets/media/guests/source-manifest.json"
-    index = text("index.html")
+    homepage = text("main.html")
     media_js = text("assets/js/guest-media.js")
     try:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -161,7 +161,22 @@ def audit_guest_media() -> None:
     guests = manifest.get("guests", {})
     items = [item for guest in guests.values() for item in guest.get("items", [])]
     check("13 медиаподборок почётных гостей", len(guests) == 13, str(len(guests)))
-    check("46 файлов почётных гостей описаны в manifest", len(items) == 46, str(len(items)))
+    check("45 файлов почётных гостей описаны в manifest", len(items) == 45, str(len(items)))
+
+    try:
+        runtime = json.loads(media_js.split("=", 1)[1].strip().removesuffix(";"))
+    except Exception as exc:  # noqa: BLE001 - отдельная понятная ошибка runtime-данных
+        check("runtime-медиаданные гостей читаются", False, str(exc))
+        runtime = {}
+    expected_runtime = {
+        slug: [
+            {key: item[key] for key in ("kind", "src", "caption")}
+            for item in guest.get("items", [])
+        ]
+        for slug, guest in guests.items()
+    }
+    check("runtime-медиаданные совпадают с manifest и не содержат метаданных",
+          runtime == expected_runtime)
 
     bad_order = []
     for slug, guest in guests.items():
@@ -172,14 +187,12 @@ def audit_guest_media() -> None:
     check("в подборках видео идут перед фотографиями", not bad_order, ", ".join(bad_order))
 
     file_errors = []
-    listed_paths = set()
     transcoded = 0
     for item in items + [manifest.get("pastSeasons", {})]:
         rel = item.get("src", "")
         if not rel:
             file_errors.append("элемент без src")
             continue
-        listed_paths.add(rel)
         path = ROOT / rel
         if not path.is_file():
             file_errors.append(f"нет {rel}")
@@ -202,13 +215,13 @@ def audit_guest_media() -> None:
     check("медиафайлы сверены по размеру и SHA-256", not file_errors, " | ".join(file_errors))
     check("только три файла перекодированы до 100 MB", transcoded == 3, str(transcoded))
 
-    card_keys = set(re.findall(r'data-guest-media="([^"]+)"', index))
+    card_keys = set(re.findall(r'data-guest-media="([^"]+)"', homepage))
     check("все карточки гостей связаны с подборками", card_keys == set(guests),
           f"cards={sorted(card_keys)}, manifest={sorted(guests)}")
 
     track_match = re.search(
         r'<div class="carousel__track">(.*?)</div>\s*</div>\s*<div class="carousel__ui">',
-        index, re.S)
+        homepage, re.S)
     slides = re.findall(r'<figure class="slide\b.*?</figure>',
                         track_match.group(1) if track_match else "", re.S)
     target = "assets/video/media-interviews-participants.mp4"
@@ -218,13 +231,13 @@ def audit_guest_media() -> None:
           len(positions) == 1 and positions[0] in middle,
           f"slides={len(slides)}, position={positions}")
     check("место RUTUBE-плеера помечено для специалистов",
-          "ДЛЯ СПЕЦИАЛИСТОВ АКАДЕМИИ" in index
-          and "CONFIG.broadcastUrl" in index
-          and 'id="broadcast"' in index)
+          "ДЛЯ СПЕЦИАЛИСТОВ АКАДЕМИИ" in homepage
+          and "CONFIG.broadcastUrl" in homepage
+          and 'id="broadcast"' in homepage)
 
 
 def audit_image_loading() -> None:
-    pages = ["index.html", "materials.html", "news.html", "article.html", "test.html"]
+    pages = ["main.html", "materials.html", "news.html", "article.html", "test.html"]
     missing = []
     for page in pages:
         source = text(page)
@@ -309,7 +322,9 @@ def audit_production_safety() -> None:
     check("боевой справочник использует /api/orgs",
           "static_orgs_disabled_in_production" in reg_js and "'/api/orgs?q='" in reg_js)
     check("production-регистрация не откатывается в localStorage",
-          "только demo: номер" in reg_js and "if (PRODUCTION) throw err" in reg_js)
+          "if (PRODUCTION) throw err" in reg_js
+          and "else if (PRODUCTION)" in reg_js
+          and "diktant_registrations_demo" in reg_js)
     check("анонимная ошибка имеет pending и повтор",
           "anonPending" in test_js and "data-anon-retry" in test_js)
     check("отдельная небезопасная страница регистрации удалена",
@@ -355,6 +370,15 @@ def audit_docs() -> None:
     check("документы согласованы по шести цифрам",
           "шесть цифр без префикса" in readme.lower()
           and "шесть цифр без префикса" in guide.lower())
+    public_sources = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in [*ROOT.glob("*.html"), *(ROOT / "assets/js").glob("*.js")]
+    )
+    check("главная страница переименована в main.html",
+          (ROOT / "main.html").is_file()
+          and not (ROOT / "index.html").exists()
+          and "index.html" not in public_sources
+          and "/main.html" in readme)
 
 
 def main() -> int:

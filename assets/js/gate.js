@@ -83,9 +83,7 @@
       }
     });
 
-    /* Блок тренировочных тестов: виден только когда trainingOpen().
-       Авто-открытия по дате нет (заказчик, 08.08.2026, ит. 3): это
-       только ручное включение trainingMode: 'on' в config.js через CMS. */
+    /* Тренировочные тесты открываются только при trainingMode: 'on'. */
     document.querySelectorAll('[data-gate="training"]').forEach(box => {
       if (window.DIKTANT.status.trainingOpen()) {
         box.classList.add('is-open-training');
@@ -113,14 +111,13 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
   else apply();
 
-  /* живой переход: 05.11.2026 10:00 (мск, время сервера) – кнопки сами
-     активируются без перезагрузки страницы */
+  /* Кнопки активируются в момент старта без перезагрузки страницы. */
   (() => {
     const iv = setInterval(() => {
       if (!window.DIKTANT || !window.DIKTANT.status.started()) return;
       clearInterval(iv);
       document.querySelectorAll('[data-gate="start"].is-locked').forEach(unlock);
-      /* тренировочные карточки включатся при следующем заходе на страницу */
+      /* Тренировочные карточки применят настройку при следующем заходе. */
     }, 1000);
   })();
 })();

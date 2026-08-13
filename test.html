@@ -39,12 +39,12 @@
 
       <!-- полоса разделов -->
       <nav class="topnav" aria-label="Разделы сайта">
-        <a class="topnav__brand" href="index.html" aria-label="На главную">
+        <a class="topnav__brand" href="main.html" aria-label="На главную">
           <img src="assets/img/logo-diktant-short.png" alt="">
           <span>Всероссийский гражданско-патриотический диктант</span>
         </a>
         <span class="topnav__links">
-          <a class="topnav__link" href="index.html">
+          <a class="topnav__link" href="main.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2Z"/></svg>
             Главная</a>
           <a class="topnav__link" href="materials.html">
@@ -67,7 +67,7 @@
         <div id="test-start" hidden>
           <section class="page-hero">
             <nav class="crumbs" aria-label="Хлебные крошки">
-              <a href="index.html">Главная</a>
+              <a href="main.html">Главная</a>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 6 6 6-6 6"/></svg>
               <span id="crumb-mode">Прохождение диктанта</span>
             </nav>
@@ -77,9 +77,7 @@
             </div>
           </section>
 
-          <!-- короткая анкета перед тестом (основной режим; запрос заказчика 05.08.2026):
-               монтируется reg-form.js вариантом pre. Плитки категорий ниже –
-               только для тренировочного режима (?mode=training) -->
+          <!-- Основной режим монтирует pre-анкету; тренировка показывает категории. -->
           <div id="pre-reg-mount" hidden></div>
           <div class="test-cats" id="start-cats" hidden>
             <button class="test-cat glass" data-cat="school">
@@ -105,8 +103,6 @@
           <div class="test-rules glass">
             <span class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="#205e98" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>40 минут на прохождение</span>
             <span class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="#205e98" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg>30 вопросов: один или несколько верных ответов</span>
-            <!-- Указания «Вопросы у всех разные: выборка из банка» и «5–8 ноября 2026 года»
-                 убраны по запросу заказчика 08.08.2026 (ит. 3) -->
           </div>
         </div>
 
@@ -175,18 +171,10 @@
               <button class="btn btn--glass" type="button" data-restart>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>
                 Пройти ещё раз</button>
-              <a class="btn btn--glass" href="index.html">На главную</a>
+              <a class="btn btn--glass" href="main.html">На главную</a>
             </div>
           </div>
-          <!-- Панель решения после теста (заказчик, 08.08.2026, ит. 3;
-               ужесточение – ит. 5): сначала только баллы и предложение
-               дозаполнить ФИО и почту для сертификата. Отсчёт идёт по
-               РЕАЛЬНОМУ времени от момента финиша (rec.at + certDecisionSec)
-               и не перезапускается при уходе/возврате; если 2 минуты
-               прошли (или нажали «Отказаться») – результат записывается
-               в базу без ФИО («не заполнено»), и после такой записи
-               дозаполнить данные уже НЕ предлагаем (запрет заказчика).
-               Механика – в test.js (setupCta/anonSave). -->
+          <!-- Дедлайн выбора хранится вместе с попыткой; после записи без ФИО post-анкета недоступна. -->
           <div class="result-cta glass" id="result-cta" hidden>
             <p class="result-cta__text">Чтобы получить сертификат нам нужно немного информации о Вас: ФИО и электронная почта.</p>
             <div class="btn-row" style="justify-content:center">
@@ -211,7 +199,7 @@
       <!-- нижняя полоса разделов -->
       <nav class="footnav" aria-label="Разделы сайта (повтор)">
         <span class="footnav__title">Разделы</span>
-        <a class="topnav__link" href="index.html">Главная</a>
+        <a class="topnav__link" href="main.html">Главная</a>
         <a class="topnav__link" href="materials.html">Материалы для подготовки</a>
         <a class="topnav__link" href="news.html">Новости</a>
       </nav>
@@ -226,7 +214,6 @@
     </div>
   </main>
 </div>
-
 
 <script src="assets/js/config.js"></script>
 <script src="assets/js/typograf.js"></script>

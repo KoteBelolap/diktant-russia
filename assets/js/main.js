@@ -1,43 +1,5 @@
-/* ============================================================
-   «МОЯ ЛЮБОВЬ, ДУША МОЯ – РОССИЯ!» - основной скрипт главной
-   ------------------------------------------------------------
-   Подключается только на index.html, после config.js и gate.js.
-   Никакой бизнес-логики теста здесь нет: только оживление витрины
-   (меню, анимации появления, графики, таймер, карусель, аккордеон).
-
-   КАРТА ФАЙЛА (по разделам ниже):
-   - Мобильное меню......бургер + выдвижная панель
-   - Секция появилась....IntersectionObserver: запуск графиков и
-                         появление блоков (.anim -> .in-view);
-                         страховка 6 с - если observer не сработал,
-                         показываем всё как есть
-   - Счётчики............числа статистики добегают до значений,
-                         когда секция попадает в экран
-   - Диаграммы...........высоты столбцов и геометрия линии
-                         пересчитываются из цифр в разметке:
-                         меняешь число - диаграмма следует сама
-   - Обратный отсчёт.....3 фазы до старта/во время/после диктанта;
-                         берёт время СЕРВЕРА из <meta name="server-time">,
-                         без меты работает в демо-режиме от часов клиента
-   - Трансляция открытия.кнопка РУТУБ под таймером: адрес
-                         подставляется из CONFIG.broadcastUrl
-   - Карусель............фото и видео прошлых сезонов: свайп, drag,
-                         счётчик "N из <слайдов>" ставится из DOM
-   - Лайтбокс............единый для карусели и отдельных элементов;
-                         карточки почётных гостей открывают собственные
-                         галереи: сначала видео, затем фотографии;
-                         умеет фото и видео (data-kind="video")
-   - FAQ-аккордеон.......вопросы-ответы
-   - Плавающая CTA.......круглая кнопка "Участвовать" после hero
-   - Топбар тень.........тень у верхней полосы при скролле
-   - Год в футере........автоподстановка текущего года
-   - Параллакс hero......коллаж едет за курсором (только мышь,
-                         отключается при prefers-reduced-motion)
-
-   ПРАВИЛО ДЛЯ ПРАВОК: новые блоки добавлять внизу по тому же
-   образцу - отдельный подписанный раздел, строку про него сюда.
-   Ответы на вопросы теста в JS не храним никогда - только сервер.
-   ============================================================ */
+/* Главная страница: графики, таймер, трансляция, карусель,
+   медиагалереи гостей, FAQ и плавающая кнопка участия. */
 (() => {
   'use strict';
   document.documentElement.classList.add('js');
@@ -45,31 +7,6 @@
   const $  = (s, c = document) => c.querySelector(s);
   const $$ = (s, c = document) => [...c.querySelectorAll(s)];
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  /* ---------- Мобильное меню ---------- */
-  const burger = $('.burger');
-  const drawer = $('.drawer');
-  if (burger && drawer) {
-    const openDrawer = () => {
-      drawer.classList.add('is-open');
-      requestAnimationFrame(() => drawer.classList.add('is-show'));
-      burger.classList.add('is-open');
-      burger.setAttribute('aria-expanded', 'true');
-      document.body.style.overflow = 'hidden';
-    };
-    const closeDrawer = () => {
-      drawer.classList.remove('is-show');
-      burger.classList.remove('is-open');
-      burger.setAttribute('aria-expanded', 'false');
-      document.body.style.overflow = '';
-      setTimeout(() => drawer.classList.remove('is-open'), 380);
-    };
-    burger.addEventListener('click', () => drawer.classList.contains('is-open') ? closeDrawer() : openDrawer());
-    $('.drawer__scrim', drawer).addEventListener('click', closeDrawer);
-    $('.drawer__close', drawer)?.addEventListener('click', closeDrawer);
-    document.addEventListener('keydown', e => { if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeDrawer(); });
-    $$('.drawer .nav__link').forEach(l => l.addEventListener('click', closeDrawer));
-  }
 
   /* ---------- Секция появилась (запуск графиков) ----------
      Класс 'anim' (скрытое исходное состояние графиков) ставится ТОЛЬКО если
@@ -256,11 +193,8 @@
   }
 
   /* ---------- Трансляция открытия (РУТУБ) ---------- */
-  /* Адрес прямого эфира заказчик пришлёт позже: он вписывается ОДИН
-     раз в CONFIG.broadcastUrl (assets/js/config.js), а здесь
-     подставляется во все элементы [data-broadcast-link].
-     Сам iframe-плеер вставляется в #broadcast – готовый фрагмент
-     лежит комментарием в index.html. */
+  /* CONFIG.broadcastUrl заполняет все ссылки на эфир. Iframe-плеер
+     размещается в #broadcast на main.html. */
   $$('[data-broadcast-link]').forEach(a => {
     const url = window.DIKTANT && window.DIKTANT.CONFIG.broadcastUrl;
     if (url) a.href = url;
@@ -468,10 +402,6 @@
     const onScroll = () => fcta.classList.toggle('is-show', scrollY > innerHeight * .85);
     addEventListener('scroll', onScroll, { passive: true }); onScroll();
   }
-
-  /* ---------- Топбар тень при скролле ---------- */
-  const tb = $('.topbar');
-  if (tb) addEventListener('scroll', () => tb.style.boxShadow = scrollY > 10 ? '0 12px 40px -20px rgba(11,48,65,.45)' : '', { passive: true });
 
   /* ---------- Год в футере ---------- */
   $$('[data-year]').forEach(el => el.textContent = new Date().getFullYear());
