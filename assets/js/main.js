@@ -23,11 +23,10 @@
                          подставляется из CONFIG.broadcastUrl
    - Карусель............фото и видео прошлых сезонов: свайп, drag,
                          счётчик "N из <слайдов>" ставится из DOM
-   - Лайтбокс............единый для слайдов карусели (со стрелками)
-                         и элементов [data-lightbox] (одиночно):
-                         видео «О чём диктант», карточки почётных
-                         гостей (клик по фото/имени/должности);
-                         умеет видео (data-kind="video")
+   - Лайтбокс............единый для карусели и отдельных элементов;
+                         карточки почётных гостей открывают собственные
+                         галереи: сначала видео, затем фотографии;
+                         умеет фото и видео (data-kind="video")
    - FAQ-аккордеон.......вопросы-ответы
    - Плавающая CTA.......круглая кнопка "Участвовать" после hero
    - Топбар тень.........тень у верхней полосы при скролле
@@ -347,19 +346,20 @@
 
   /* ---------- Лайтбокс (фото и видео) ---------- */
   /* Единый на всю страницу:
-     – слайды карусели открываются со стрелками «влево/вправо» по кругу;
-     – любой элемент [data-lightbox] (видео «О чём диктант», кликабельные
-       карточки почётных гостей) открывается одиночно, без стрелок;
-     data-kind="video" – вместо <img> показывается <video controls>
-     (вертикальные ролики вписываются в экран стилями);
-     воспроизведение останавливается при закрытии и при смене слайда.
-     Подпись под кадром берётся из data-caption. */
+     – слайды карусели открываются общей галереей со стрелками;
+     – карточка почётного гостя открывает только его медиаподборку из
+       guest-media.js: сначала все видео, затем все фотографии;
+     – остальные [data-lightbox] открываются одиночно, без стрелок.
+     data-kind="video" показывает <video controls>; вертикальные ролики
+     вписываются в экран стилями. Воспроизведение останавливается при
+     закрытии и при смене элемента. */
   const lb = $('.lightbox');
   if (lb) {
     const lbImg = $('img', lb), lbCap = $('figcaption', lb), lbVid = $('.lightbox__video', lb);
     const navBtns = $$('.lightbox__nav', lb);
     const lbSlides = $$('.slide');
-    let cur = 0, solo = true;
+    const guestMedia = window.DIKTANT_GUEST_MEDIA || {};
+    let cur = 0, solo = true, activeItems = [];
 
     const stopVid = () => {
       if (!lbVid) return;
@@ -367,8 +367,14 @@
       lbVid.removeAttribute('src');
       lbVid.load();
     };
-    const closeLb = () => { stopVid(); lb.classList.remove('is-open'); document.body.style.overflow = ''; };
+    const closeLb = () => {
+      stopVid();
+      lb.classList.remove('is-open');
+      document.body.style.overflow = '';
+      activeItems = [];
+    };
     const showItem = item => {
+      if (!item || !item.src) return;
       const isVideo = item.kind === 'video';
       stopVid();
       if (isVideo && lbVid) lbVid.src = item.src;
@@ -382,50 +388,60 @@
       document.body.style.overflow = 'hidden';
       if (isVideo && lbVid) lbVid.play().catch(() => { /* автоплей мог быть запрещён – стартуем кнопкой плеера */ });
     };
-    const openSlide = i => {
-      solo = false;
-      navBtns.forEach(b => { b.hidden = false; });
-      cur = (i + lbSlides.length) % lbSlides.length;
-      const s = lbSlides[cur], im = $('img', s);
-      showItem({
+    const openAt = i => {
+      if (!activeItems.length) return;
+      cur = (i + activeItems.length) % activeItems.length;
+      showItem(activeItems[cur]);
+    };
+    const openItems = (items, start = 0) => {
+      activeItems = items.filter(item => item && item.src);
+      if (!activeItems.length) return;
+      solo = activeItems.length < 2;
+      navBtns.forEach(b => { b.hidden = solo; });
+      openAt(start);
+    };
+    const slideItems = lbSlides.map(s => {
+      const im = $('img', s);
+      return {
         kind: s.dataset.kind === 'video' ? 'video' : 'img',
         src: s.dataset.src || (im && im.src),
         alt: im ? im.alt : '',
         caption: s.dataset.caption || (im ? im.alt : '')
-      });
-    };
-    const openSolo = el => {
-      solo = true;
-      cur = -1;
-      navBtns.forEach(b => { b.hidden = true; });
+      };
+    });
+    const openSoloOrGuest = el => {
+      const gallery = guestMedia[el.dataset.guestMedia];
+      if (Array.isArray(gallery) && gallery.length) {
+        openItems(gallery);
+        return;
+      }
       const media = $('img', el) || $('video', el);
-      showItem({
+      openItems([{
         kind: el.dataset.kind === 'video' ? 'video' : 'img',
         src: el.dataset.src || (media && (media.currentSrc || media.src)),
         caption: el.dataset.caption || (media ? (media.getAttribute('alt') || '') : '')
-      });
+      }]);
     };
-    lbSlides.forEach((s, i) => s.addEventListener('click', () => openSlide(i)));
+    lbSlides.forEach((s, i) => s.addEventListener('click', () => openItems(slideItems, i)));
     $$('[data-lightbox]').forEach(el => el.addEventListener('click', e => {
       if (e.target.closest('a')) return;   /* ссылка в подписи работает как обычно */
       e.preventDefault();
-      openSolo(el);
+      openSoloOrGuest(el);
     }));
     $('.lightbox__close', lb).addEventListener('click', closeLb);
     navBtns.forEach(b => b.addEventListener('click', e => {
       e.stopPropagation();
-      if (!solo) openSlide(cur + (b.classList.contains('lightbox__nav--prev') ? -1 : 1));
+      if (!solo) openAt(cur + (b.classList.contains('lightbox__nav--prev') ? -1 : 1));
     }));
     lb.addEventListener('click', e => { if (e.target === lb) closeLb(); });
     document.addEventListener('keydown', e => {
       if (!lb.classList.contains('is-open')) return;
       if (e.key === 'Escape') closeLb();
       if (solo) return;
-      if (e.key === 'ArrowLeft') openSlide(cur - 1);
-      if (e.key === 'ArrowRight') openSlide(cur + 1);
+      if (e.key === 'ArrowLeft') openAt(cur - 1);
+      if (e.key === 'ArrowRight') openAt(cur + 1);
     });
   }
-
   /* ---------- FAQ-аккордеон ---------- */
   $$('.faq-item').forEach(item => {
     const btn = $('.faq-item__q', item);

@@ -2,6 +2,7 @@
 """Автономный QA-гейт репозитория. Только Python stdlib + установленный Node.js."""
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import shutil
@@ -140,6 +141,81 @@ def audit_html_and_assets() -> None:
           f"{{={css.count('{')} }}={css.count('}')}")
 
 
+def audit_guest_media() -> None:
+    manifest_path = ROOT / "assets/media/guests/source-manifest.json"
+    index = text("index.html")
+    media_js = text("assets/js/guest-media.js")
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001 - отдельная понятная ошибка медиа
+        check("manifest медиаматериалов гостей читается", False, str(exc))
+        return
+
+    guests = manifest.get("guests", {})
+    items = [item for guest in guests.values() for item in guest.get("items", [])]
+    check("13 медиаподборок почётных гостей", len(guests) == 13, str(len(guests)))
+    check("46 файлов почётных гостей описаны в manifest", len(items) == 46, str(len(items)))
+
+    bad_order = []
+    for slug, guest in guests.items():
+        kinds = [item.get("kind") for item in guest.get("items", [])]
+        first_image = kinds.index("img") if "img" in kinds else len(kinds)
+        if any(kind == "video" for kind in kinds[first_image:]):
+            bad_order.append(slug)
+    check("в подборках видео идут перед фотографиями", not bad_order, ", ".join(bad_order))
+
+    file_errors = []
+    listed_paths = set()
+    transcoded = 0
+    for item in items + [manifest.get("pastSeasons", {})]:
+        rel = item.get("src", "")
+        if not rel:
+            file_errors.append("элемент без src")
+            continue
+        listed_paths.add(rel)
+        path = ROOT / rel
+        if not path.is_file():
+            file_errors.append(f"нет {rel}")
+            continue
+        size = path.stat().st_size
+        if size != item.get("storedSize"):
+            file_errors.append(f"{rel}: размер {size} != {item.get('storedSize')}")
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        if digest != item.get("storedSha256"):
+            file_errors.append(f"{rel}: SHA-256 не совпадает")
+        if size >= 100_000_000:
+            file_errors.append(f"{rel}: {size} >= 100 MB")
+        if item.get("transcodedToFitGitHub"):
+            transcoded += 1
+        elif (size != item.get("originalSize")
+              or digest != item.get("originalSha256")):
+            file_errors.append(f"{rel}: файл без перекодирования отличается от оригинала")
+        if rel not in media_js and rel.startswith("assets/media/guests/"):
+            file_errors.append(f"{rel}: нет в guest-media.js")
+    check("медиафайлы сверены по размеру и SHA-256", not file_errors, " | ".join(file_errors))
+    check("только три файла перекодированы до 100 MB", transcoded == 3, str(transcoded))
+
+    card_keys = set(re.findall(r'data-guest-media="([^"]+)"', index))
+    check("все карточки гостей связаны с подборками", card_keys == set(guests),
+          f"cards={sorted(card_keys)}, manifest={sorted(guests)}")
+
+    track_match = re.search(
+        r'<div class="carousel__track">(.*?)</div>\s*</div>\s*<div class="carousel__ui">',
+        index, re.S)
+    slides = re.findall(r'<figure class="slide\b.*?</figure>',
+                        track_match.group(1) if track_match else "", re.S)
+    target = "assets/video/media-interviews-participants.mp4"
+    positions = [number for number, slide in enumerate(slides) if target in slide]
+    middle = {max(0, len(slides) // 2 - 1), len(slides) // 2}
+    check("видеоинтервью стоит в середине карусели",
+          len(positions) == 1 and positions[0] in middle,
+          f"slides={len(slides)}, position={positions}")
+    check("место RUTUBE-плеера помечено для специалистов",
+          "TODO ДЛЯ СПЕЦИАЛИСТОВ АКАДЕМИИ" in index
+          and "VIDEO_ID_ТРАНСЛЯЦИИ" in index
+          and 'id="broadcast"' in index)
+
+
 def audit_organizations() -> None:
     directory = ROOT / "assets/data/orgs"
     manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
@@ -243,6 +319,7 @@ def main() -> int:
     audit_python()
     audit_json()
     audit_html_and_assets()
+    audit_guest_media()
     audit_organizations()
     audit_production_safety()
     audit_certificate()

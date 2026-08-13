@@ -1,0 +1,617 @@
+/* Generated from assets/media/guests/source-manifest.json. Videos are listed before photos. */
+window.DIKTANT_GUEST_MEDIA = {
+  "ashirov": [
+    {
+      "kind": "img",
+      "src": "assets/media/guests/ashirov/img-01.png",
+      "caption": "Аширов Денис Валерьевич — фотография",
+      "originalName": "Аширов.png",
+      "originalPath": "/Аширов/Аширов.png",
+      "originalSize": 177560,
+      "originalSha256": "957818d3eba064bdf45a9c3c84fb937b8024dc1ea2d9a80589db5b6cb085d149",
+      "storedSize": 177560,
+      "storedSha256": "957818d3eba064bdf45a9c3c84fb937b8024dc1ea2d9a80589db5b6cb085d149",
+      "transcodedToFitGitHub": false
+    }
+  ],
+  "barinov": [
+    {
+      "kind": "video",
+      "src": "assets/media/guests/barinov/video-01.mp4",
+      "caption": "Баринов Игорь Вячеславович — видео 1",
+      "originalName": "Баринов(1).mp4",
+      "originalPath": "/Баринов/Баринов(1).mp4",
+      "originalSize": 55538723,
+      "originalSha256": "8a0e0a2fa21ba51e9c09bad3460ac8e3b80149af19924ce5952cbf57f118b70f",
+      "storedSize": 55538723,
+      "storedSha256": "8a0e0a2fa21ba51e9c09bad3460ac8e3b80149af19924ce5952cbf57f118b70f",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "video",
+      "src": "assets/media/guests/barinov/video-02.mp4",
+      "caption": "Баринов Игорь Вячеславович — видео 2",
+      "originalName": "Баринов.mp4",
+      "originalPath": "/Баринов/Баринов.mp4",
+      "originalSize": 49479489,
+      "originalSha256": "c33348182cfbe40f4184fd6e435c6fc7a66dfce42d12ec6c93b13acd3f68fd09",
+      "storedSize": 49479489,
+      "storedSha256": "c33348182cfbe40f4184fd6e435c6fc7a66dfce42d12ec6c93b13acd3f68fd09",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/barinov/img-01.png",
+      "caption": "Баринов Игорь Вячеславович — фотография",
+      "originalName": "Баринов.png",
+      "originalPath": "/Баринов/Баринов.png",
+      "originalSize": 182212,
+      "originalSha256": "18f6dae5be8eb522456e22bb8f08c1d514b24b2b9984f16f1152023f0cc3f602",
+      "storedSize": 182212,
+      "storedSha256": "18f6dae5be8eb522456e22bb8f08c1d514b24b2b9984f16f1152023f0cc3f602",
+      "transcodedToFitGitHub": false
+    }
+  ],
+  "boyko": [
+    {
+      "kind": "img",
+      "src": "assets/media/guests/boyko/img-01.jpg",
+      "caption": "Бойко Сергей Николаевич — фотография 1",
+      "originalName": "DSC03102.JPG",
+      "originalPath": "/Бойко/DSC03102.JPG",
+      "originalSize": 5111808,
+      "originalSha256": "018dafa69ea00c663eef5786a7b5b29b839b1b3143e27a7bb8e5cf29e084f7a2",
+      "storedSize": 5111808,
+      "storedSha256": "018dafa69ea00c663eef5786a7b5b29b839b1b3143e27a7bb8e5cf29e084f7a2",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/boyko/img-02.jpg",
+      "caption": "Бойко Сергей Николаевич — фотография 2",
+      "originalName": "DSC03118.JPG",
+      "originalPath": "/Бойко/DSC03118.JPG",
+      "originalSize": 5603328,
+      "originalSha256": "0c1ab89eb52c2e90c696f25dca9cb2c523b79c72984674c546b154b8cfcf076f",
+      "storedSize": 5603328,
+      "storedSha256": "0c1ab89eb52c2e90c696f25dca9cb2c523b79c72984674c546b154b8cfcf076f",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/boyko/img-03.jpg",
+      "caption": "Бойко Сергей Николаевич — фотография 3",
+      "originalName": "DSC03119.JPG",
+      "originalPath": "/Бойко/DSC03119.JPG",
+      "originalSize": 5799936,
+      "originalSha256": "64d53d213d2347eb39c00f60f96e65ecedc20c29e1e463d15ba874b6e018729e",
+      "storedSize": 5799936,
+      "storedSha256": "64d53d213d2347eb39c00f60f96e65ecedc20c29e1e463d15ba874b6e018729e",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/boyko/img-04.png",
+      "caption": "Бойко Сергей Николаевич — фотография 4",
+      "originalName": "Бойко.png",
+      "originalPath": "/Бойко/Бойко.png",
+      "originalSize": 201426,
+      "originalSha256": "d689af50062c58267eef6cb1fca3012743c7fea9ad0ddb9c49ade3d938592876",
+      "storedSize": 201426,
+      "storedSha256": "d689af50062c58267eef6cb1fca3012743c7fea9ad0ddb9c49ade3d938592876",
+      "transcodedToFitGitHub": false
+    }
+  ],
+  "zanko": [
+    {
+      "kind": "video",
+      "src": "assets/media/guests/zanko/video-01.mp4",
+      "caption": "Занко Ольга Николаевна — видео 1",
+      "originalName": "Занко(1).mp4",
+      "originalPath": "/Занко/Занко(1).mp4",
+      "originalSize": 43794516,
+      "originalSha256": "7f96e3f247b2599ef75673cd3d009587ff0a06d4c53a6089c075128e3ea6fd6e",
+      "storedSize": 43794516,
+      "storedSha256": "7f96e3f247b2599ef75673cd3d009587ff0a06d4c53a6089c075128e3ea6fd6e",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "video",
+      "src": "assets/media/guests/zanko/video-02.mp4",
+      "caption": "Занко Ольга Николаевна — видео 2",
+      "originalName": "Занко.mp4",
+      "originalPath": "/Занко/Занко.mp4",
+      "originalSize": 37910796,
+      "originalSha256": "305eb7c043a04220333a8ea5bf7bd74826fdd178ad905af94b5d7f620dbf9c75",
+      "storedSize": 37910796,
+      "storedSha256": "305eb7c043a04220333a8ea5bf7bd74826fdd178ad905af94b5d7f620dbf9c75",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/zanko/img-01.png",
+      "caption": "Занко Ольга Николаевна — фотография",
+      "originalName": "Занко.png",
+      "originalPath": "/Занко/Занко.png",
+      "originalSize": 233054,
+      "originalSha256": "ff32f9e7c53b1f10e74f54450d7a227784b6fc65a4852f6db56bf859766fe19c",
+      "storedSize": 233054,
+      "storedSha256": "ff32f9e7c53b1f10e74f54450d7a227784b6fc65a4852f6db56bf859766fe19c",
+      "transcodedToFitGitHub": false
+    }
+  ],
+  "zakharova": [
+    {
+      "kind": "video",
+      "src": "assets/media/guests/zakharova/video-01.mp4",
+      "caption": "Захарова Мария Владимировна — видео",
+      "originalName": "Захарова.mp4",
+      "originalPath": "/Захарова/Захарова.mp4",
+      "originalSize": 84270888,
+      "originalSha256": "7a7815c03d3fc357a0ff06828a1d8b6ea950df6d03f9c2b26f1d27d4477c63f6",
+      "storedSize": 84270888,
+      "storedSha256": "7a7815c03d3fc357a0ff06828a1d8b6ea950df6d03f9c2b26f1d27d4477c63f6",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/zakharova/img-01.png",
+      "caption": "Захарова Мария Владимировна — фотография",
+      "originalName": "Захарова.png",
+      "originalPath": "/Захарова/Захарова.png",
+      "originalSize": 223456,
+      "originalSha256": "90a0395d42f31396cfaf53162d4fd35704a8f2b51b0cd0a2c9108c962060258b",
+      "storedSize": 223456,
+      "storedSha256": "90a0395d42f31396cfaf53162d4fd35704a8f2b51b0cd0a2c9108c962060258b",
+      "transcodedToFitGitHub": false
+    }
+  ],
+  "koneva": [
+    {
+      "kind": "video",
+      "src": "assets/media/guests/koneva/video-01.mov",
+      "caption": "Конева Наталия Ивановна — видео 1",
+      "originalName": "IMG_1342.mov",
+      "originalPath": "/Конева/IMG_1342.mov",
+      "originalSize": 16160702,
+      "originalSha256": "c8b0e9b308446e4213979602fb225facb792b53da223909b54a044e087c2a8a3",
+      "storedSize": 16160702,
+      "storedSha256": "c8b0e9b308446e4213979602fb225facb792b53da223909b54a044e087c2a8a3",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "video",
+      "src": "assets/media/guests/koneva/video-02.mov",
+      "caption": "Конева Наталия Ивановна — видео 2",
+      "originalName": "IMG_1343.mov",
+      "originalPath": "/Конева/IMG_1343.mov",
+      "originalSize": 11432934,
+      "originalSha256": "ab2970cc817c18e14e205f669264714d9bde525cd31a6a2a5e92d52c2574e13a",
+      "storedSize": 11432934,
+      "storedSha256": "ab2970cc817c18e14e205f669264714d9bde525cd31a6a2a5e92d52c2574e13a",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "video",
+      "src": "assets/media/guests/koneva/video-03.mov",
+      "caption": "Конева Наталия Ивановна — видео 3",
+      "originalName": "IMG_1344.mov",
+      "originalPath": "/Конева/IMG_1344.mov",
+      "originalSize": 10476629,
+      "originalSha256": "3611c379c1a4279d471d0a1cd6ee4e637d9b85fbc805f35e2317b4f263097cfc",
+      "storedSize": 10476629,
+      "storedSha256": "3611c379c1a4279d471d0a1cd6ee4e637d9b85fbc805f35e2317b4f263097cfc",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "video",
+      "src": "assets/media/guests/koneva/video-04.mov",
+      "caption": "Конева Наталия Ивановна — видео 4",
+      "originalName": "IMG_1345.mov",
+      "originalPath": "/Конева/IMG_1345.mov",
+      "originalSize": 20963320,
+      "originalSha256": "f9042b03302155a1b4869ed59e2acb70cabbf77e977d53a22aaed57e8aa23da9",
+      "storedSize": 20963320,
+      "storedSha256": "f9042b03302155a1b4869ed59e2acb70cabbf77e977d53a22aaed57e8aa23da9",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/koneva/img-01.jpg",
+      "caption": "Конева Наталия Ивановна — фотография 1",
+      "originalName": "5253565136063106635.jpg",
+      "originalPath": "/Конева/5253565136063106635.jpg",
+      "originalSize": 90797,
+      "originalSha256": "2d7312a2712d06460205e2b1ead7acf2808a932972bcbeed5590f024ff4d098f",
+      "storedSize": 90797,
+      "storedSha256": "2d7312a2712d06460205e2b1ead7acf2808a932972bcbeed5590f024ff4d098f",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/koneva/img-02.jpg",
+      "caption": "Конева Наталия Ивановна — фотография 2",
+      "originalName": "DSC03159.JPG",
+      "originalPath": "/Конева/DSC03159.JPG",
+      "originalSize": 5144576,
+      "originalSha256": "9d146e687a26dbd95d42d26d79d4ec2d1ab1db7384b36dc15d96c14118501cf9",
+      "storedSize": 5144576,
+      "storedSha256": "9d146e687a26dbd95d42d26d79d4ec2d1ab1db7384b36dc15d96c14118501cf9",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/koneva/img-03.jpg",
+      "caption": "Конева Наталия Ивановна — фотография 3",
+      "originalName": "DSC03166.JPG",
+      "originalPath": "/Конева/DSC03166.JPG",
+      "originalSize": 2163541,
+      "originalSha256": "191a689cdbc6a04ddd532bcacf1b2b95d9ebda306dcc5151d1d0ef6b0e92620d",
+      "storedSize": 2163541,
+      "storedSha256": "191a689cdbc6a04ddd532bcacf1b2b95d9ebda306dcc5151d1d0ef6b0e92620d",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/koneva/img-04.jpg",
+      "caption": "Конева Наталия Ивановна — фотография 4",
+      "originalName": "Конева.jpg",
+      "originalPath": "/Конева/Конева.jpg",
+      "originalSize": 85296,
+      "originalSha256": "5b93b0b0d4bfa17dbbc2bdf68b97907bd4431f4fe129b1c562720d94fa45dbca",
+      "storedSize": 85296,
+      "storedSha256": "5b93b0b0d4bfa17dbbc2bdf68b97907bd4431f4fe129b1c562720d94fa45dbca",
+      "transcodedToFitGitHub": false
+    }
+  ],
+  "kuznetsov": [
+    {
+      "kind": "video",
+      "src": "assets/media/guests/kuznetsov/video-01.mp4",
+      "caption": "Кузнецов Михаил Михайлович — видео",
+      "originalName": "Кузнецов.mp4",
+      "originalPath": "/Кузнецов/Кузнецов.mp4",
+      "originalSize": 43802359,
+      "originalSha256": "43bbecb461b89f3b85620f2550875defa7eedf84064a005db559682694dd55f0",
+      "storedSize": 43802359,
+      "storedSha256": "43bbecb461b89f3b85620f2550875defa7eedf84064a005db559682694dd55f0",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/kuznetsov/img-01.png",
+      "caption": "Кузнецов Михаил Михайлович — фотография",
+      "originalName": "Кузнецов.png",
+      "originalPath": "/Кузнецов/Кузнецов.png",
+      "originalSize": 215005,
+      "originalSha256": "6b9675a400af216e454f19853f67532dcbd6111badfe20474a13e9ec6d196952",
+      "storedSize": 215005,
+      "storedSha256": "6b9675a400af216e454f19853f67532dcbd6111badfe20474a13e9ec6d196952",
+      "transcodedToFitGitHub": false
+    }
+  ],
+  "nikitin": [
+    {
+      "kind": "img",
+      "src": "assets/media/guests/nikitin/img-01.png",
+      "caption": "Никитин Андрей Сергеевич — фотография",
+      "originalName": "Никитин.png",
+      "originalPath": "/Никитин/Никитин.png",
+      "originalSize": 194558,
+      "originalSha256": "3d2c44aa72fc59ad5e438b57963f758ef6556f40604984074785231be2fbf678",
+      "storedSize": 194558,
+      "storedSha256": "3d2c44aa72fc59ad5e438b57963f758ef6556f40604984074785231be2fbf678",
+      "transcodedToFitGitHub": false
+    }
+  ],
+  "petrova": [
+    {
+      "kind": "video",
+      "src": "assets/media/guests/petrova/video-01.mp4",
+      "caption": "Петрова Ольга Викторовна — видео",
+      "originalName": "Петрова.mp4",
+      "originalPath": "/Петрова/Петрова.mp4",
+      "originalSize": 46538850,
+      "originalSha256": "79e3bbc458fe72806916fa557e3615f866c5e027109de20b4c95680ee8d52dc6",
+      "storedSize": 46538850,
+      "storedSha256": "79e3bbc458fe72806916fa557e3615f866c5e027109de20b4c95680ee8d52dc6",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/petrova/img-01.png",
+      "caption": "Петрова Ольга Викторовна — фотография",
+      "originalName": "Петрова.png",
+      "originalPath": "/Петрова/Петрова.png",
+      "originalSize": 265372,
+      "originalSha256": "69526d4dd411aabe9a48b62c5d201923349143427661e5634d1716219e979130",
+      "storedSize": 265372,
+      "storedSha256": "69526d4dd411aabe9a48b62c5d201923349143427661e5634d1716219e979130",
+      "transcodedToFitGitHub": false
+    }
+  ],
+  "svyatenko": [
+    {
+      "kind": "img",
+      "src": "assets/media/guests/svyatenko/img-01.png",
+      "caption": "Святенко Инна Юрьевна — фотография",
+      "originalName": "Святенко.png",
+      "originalPath": "/Святенко/Святенко.png",
+      "originalSize": 213631,
+      "originalSha256": "78682856e871d801c9377d3a4b271de2f13f628eb0ea321ad4835d9e2d02370a",
+      "storedSize": 213631,
+      "storedSha256": "78682856e871d801c9377d3a4b271de2f13f628eb0ea321ad4835d9e2d02370a",
+      "transcodedToFitGitHub": false
+    }
+  ],
+  "sponyakov": [
+    {
+      "kind": "video",
+      "src": "assets/media/guests/sponyakov/video-01.mov",
+      "caption": "Споняков Илья Дмитриевич — видео 1",
+      "originalName": "IMG_1339.mov",
+      "originalPath": "/Споняков/IMG_1339.mov",
+      "originalSize": 8898079,
+      "originalSha256": "1ab4d5fa63f3362a03662035ebbf9ecbb84e782565c0d69355a5910090c8a38a",
+      "storedSize": 8898079,
+      "storedSha256": "1ab4d5fa63f3362a03662035ebbf9ecbb84e782565c0d69355a5910090c8a38a",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "video",
+      "src": "assets/media/guests/sponyakov/video-02.mov",
+      "caption": "Споняков Илья Дмитриевич — видео 2",
+      "originalName": "IMG_1340.mov",
+      "originalPath": "/Споняков/IMG_1340.mov",
+      "originalSize": 17666758,
+      "originalSha256": "b71049b6812f117cd60560de856eb0d0629895c0e521354d08b3562632251ea4",
+      "storedSize": 17666758,
+      "storedSha256": "b71049b6812f117cd60560de856eb0d0629895c0e521354d08b3562632251ea4",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "video",
+      "src": "assets/media/guests/sponyakov/video-03.mov",
+      "caption": "Споняков Илья Дмитриевич — видео 3",
+      "originalName": "IMG_1341.mov",
+      "originalPath": "/Споняков/IMG_1341.mov",
+      "originalSize": 11003793,
+      "originalSha256": "d86bcdadefcb1835b7d51dc30cb2efbc136cb5283a6b4f2f8bcf979adbaabcd2",
+      "storedSize": 11003793,
+      "storedSha256": "d86bcdadefcb1835b7d51dc30cb2efbc136cb5283a6b4f2f8bcf979adbaabcd2",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/sponyakov/img-01.jpg",
+      "caption": "Споняков Илья Дмитриевич — фотография 1",
+      "originalName": "5253583759041302050.jpg",
+      "originalPath": "/Споняков/5253583759041302050.jpg",
+      "originalSize": 83106,
+      "originalSha256": "23e07f72189583baa0edb270f3cf4da7569bb61fa7e1609be3768770be24fab6",
+      "storedSize": 83106,
+      "storedSha256": "23e07f72189583baa0edb270f3cf4da7569bb61fa7e1609be3768770be24fab6",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/sponyakov/img-02.jpg",
+      "caption": "Споняков Илья Дмитриевич — фотография 2",
+      "originalName": "DSC03103.JPG",
+      "originalPath": "/Споняков/DSC03103.JPG",
+      "originalSize": 5144576,
+      "originalSha256": "eae6ea5ea321b05ed695ac4f6af97560404276ed09e6a12a66c2e2881d5c041b",
+      "storedSize": 5144576,
+      "storedSha256": "eae6ea5ea321b05ed695ac4f6af97560404276ed09e6a12a66c2e2881d5c041b",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/sponyakov/img-03.jpg",
+      "caption": "Споняков Илья Дмитриевич — фотография 3",
+      "originalName": "DSC03118.JPG",
+      "originalPath": "/Споняков/DSC03118.JPG",
+      "originalSize": 5603328,
+      "originalSha256": "0c1ab89eb52c2e90c696f25dca9cb2c523b79c72984674c546b154b8cfcf076f",
+      "storedSize": 5603328,
+      "storedSha256": "0c1ab89eb52c2e90c696f25dca9cb2c523b79c72984674c546b154b8cfcf076f",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/sponyakov/img-04.jpg",
+      "caption": "Споняков Илья Дмитриевич — фотография 4",
+      "originalName": "DSC03119.JPG",
+      "originalPath": "/Споняков/DSC03119.JPG",
+      "originalSize": 5799936,
+      "originalSha256": "64d53d213d2347eb39c00f60f96e65ecedc20c29e1e463d15ba874b6e018729e",
+      "storedSize": 5799936,
+      "storedSha256": "64d53d213d2347eb39c00f60f96e65ecedc20c29e1e463d15ba874b6e018729e",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/sponyakov/img-05.png",
+      "caption": "Споняков Илья Дмитриевич — фотография 5",
+      "originalName": "Споняков.png",
+      "originalPath": "/Споняков/Споняков.png",
+      "originalSize": 204658,
+      "originalSha256": "f8a092f54fd328148c95ad8b5bbfde80b67b9ab83fdce39d0af20e3ca788e5ef",
+      "storedSize": 204658,
+      "storedSha256": "f8a092f54fd328148c95ad8b5bbfde80b67b9ab83fdce39d0af20e3ca788e5ef",
+      "transcodedToFitGitHub": false
+    }
+  ],
+  "stepyko": [
+    {
+      "kind": "video",
+      "src": "assets/media/guests/stepyko/video-01.mov",
+      "caption": "Степыко Дмитрий Геннадьевич — видео 1",
+      "originalName": "IMG_7302.mov",
+      "originalPath": "/Степыко/IMG_7302.mov",
+      "originalSize": 15180061,
+      "originalSha256": "4157d8982ac9cbe11d75e7bdc8492a0dfaad100739b2cc3b50816a3ed19e175a",
+      "storedSize": 15180061,
+      "storedSha256": "4157d8982ac9cbe11d75e7bdc8492a0dfaad100739b2cc3b50816a3ed19e175a",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "video",
+      "src": "assets/media/guests/stepyko/video-02.mp4",
+      "caption": "Степыко Дмитрий Геннадьевич — видео 2",
+      "originalName": "IMG_7304.mov",
+      "originalPath": "/Степыко/IMG_7304.mov",
+      "originalSize": 131160572,
+      "originalSha256": "cf8457d43db5aa9e7bd04615b356de8831e02e6e6f4921dc77d1f69be5fd823c",
+      "storedSize": 89534159,
+      "storedSha256": "525b9774718e2af610d101940723af831fdf46b4494fd8696781d7a55520e5e2",
+      "transcodedToFitGitHub": true,
+      "sourceMedia": {
+        "duration": 11.8,
+        "size": 131160572,
+        "videoCodec": "hevc",
+        "audioCodec": "aac",
+        "width": 3840,
+        "height": 2160,
+        "frameRate": "60/1"
+      },
+      "storedMedia": {
+        "duration": 11.817007,
+        "size": 89534159,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "width": 2160,
+        "height": 3840,
+        "frameRate": "60/1"
+      }
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/stepyko/img-01.jpg",
+      "caption": "Степыко Дмитрий Геннадьевич — фотография 1",
+      "originalName": "IMG_3272.JPG",
+      "originalPath": "/Степыко/IMG_3272.JPG",
+      "originalSize": 3000750,
+      "originalSha256": "f6d7ff83a11c6a6067cf3da4b640b63d2ba5ec8ea298ef4c76b558886b67006d",
+      "storedSize": 3000750,
+      "storedSha256": "f6d7ff83a11c6a6067cf3da4b640b63d2ba5ec8ea298ef4c76b558886b67006d",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/stepyko/img-02.png",
+      "caption": "Степыко Дмитрий Геннадьевич — фотография 2",
+      "originalName": "Степыко.png",
+      "originalPath": "/Степыко/Степыко.png",
+      "originalSize": 187028,
+      "originalSha256": "c244c6cbe6b700121c176eac78acd29a36fd1a5915a4cba510a3b174cb2da68c",
+      "storedSize": 187028,
+      "storedSha256": "c244c6cbe6b700121c176eac78acd29a36fd1a5915a4cba510a3b174cb2da68c",
+      "transcodedToFitGitHub": false
+    }
+  ],
+  "shits": [
+    {
+      "kind": "video",
+      "src": "assets/media/guests/shits/video-01.mov",
+      "caption": "Шиц Иван Александрович — видео 1",
+      "originalName": "IMG_4963.mov",
+      "originalPath": "/Шиц/IMG_4963.mov",
+      "originalSize": 7877093,
+      "originalSha256": "198c2f50b67011c393049c8119c0db18b3b534c496f6e027e9dbc2f2a6ab88b3",
+      "storedSize": 7877093,
+      "storedSha256": "198c2f50b67011c393049c8119c0db18b3b534c496f6e027e9dbc2f2a6ab88b3",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "video",
+      "src": "assets/media/guests/shits/video-02.mov",
+      "caption": "Шиц Иван Александрович — видео 2",
+      "originalName": "IMG_4964.mov",
+      "originalPath": "/Шиц/IMG_4964.mov",
+      "originalSize": 20671300,
+      "originalSha256": "9ac3becb9500b402611c9c23db715bf115efbef7cd69c727febd1c06d5eb49bf",
+      "storedSize": 20671300,
+      "storedSha256": "9ac3becb9500b402611c9c23db715bf115efbef7cd69c727febd1c06d5eb49bf",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "video",
+      "src": "assets/media/guests/shits/video-03.mov",
+      "caption": "Шиц Иван Александрович — видео 3",
+      "originalName": "IMG_7315.mov",
+      "originalPath": "/Шиц/IMG_7315.mov",
+      "originalSize": 79081362,
+      "originalSha256": "e75383e9f3a61f1db807b8cd9f494fea34e4a123bbea4d973147f56c99526dfb",
+      "storedSize": 79081362,
+      "storedSha256": "e75383e9f3a61f1db807b8cd9f494fea34e4a123bbea4d973147f56c99526dfb",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "video",
+      "src": "assets/media/guests/shits/video-04.mov",
+      "caption": "Шиц Иван Александрович — видео 4",
+      "originalName": "IMG_7316.mov",
+      "originalPath": "/Шиц/IMG_7316.mov",
+      "originalSize": 15471077,
+      "originalSha256": "5a43f5be27b880432aa4b05e31fd13dbf3bb403b524a98f664c74442d26943ae",
+      "storedSize": 15471077,
+      "storedSha256": "5a43f5be27b880432aa4b05e31fd13dbf3bb403b524a98f664c74442d26943ae",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "video",
+      "src": "assets/media/guests/shits/video-05.mov",
+      "caption": "Шиц Иван Александрович — видео 5",
+      "originalName": "IMG_7317.mov",
+      "originalPath": "/Шиц/IMG_7317.mov",
+      "originalSize": 5219058,
+      "originalSha256": "2096e70f974608ae7d77d61cbbf308c324c9af28a103868815ae8ef170d6e849",
+      "storedSize": 5219058,
+      "storedSha256": "2096e70f974608ae7d77d61cbbf308c324c9af28a103868815ae8ef170d6e849",
+      "transcodedToFitGitHub": false
+    },
+    {
+      "kind": "video",
+      "src": "assets/media/guests/shits/video-06.mp4",
+      "caption": "Шиц Иван Александрович — видео 6",
+      "originalName": "IMG_7318.mov",
+      "originalPath": "/Шиц/IMG_7318.mov",
+      "originalSize": 185327705,
+      "originalSha256": "aafc45902562724d88502e3048b23fcfcdabe418a3f46e80743409c15666758d",
+      "storedSize": 90657635,
+      "storedSha256": "03e3b3381c530b2315e7e57f5093cd4fe23673edbb3dcf2db203c0be72f482da",
+      "transcodedToFitGitHub": true,
+      "sourceMedia": {
+        "duration": 16.783333,
+        "size": 185327705,
+        "videoCodec": "hevc",
+        "audioCodec": "aac",
+        "width": 3840,
+        "height": 2160,
+        "frameRate": "60/1"
+      },
+      "storedMedia": {
+        "duration": 16.786009,
+        "size": 90657635,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "width": 2160,
+        "height": 3840,
+        "frameRate": "60/1"
+      }
+    },
+    {
+      "kind": "img",
+      "src": "assets/media/guests/shits/img-01.png",
+      "caption": "Шиц Иван Александрович — фотография",
+      "originalName": "Шиц.png",
+      "originalPath": "/Шиц/Шиц.png",
+      "originalSize": 212542,
+      "originalSha256": "42ce17a6ebddf8972b75fa231cdada1bfc844f6c642ea0378766e5dd83ce9add",
+      "storedSize": 212542,
+      "storedSha256": "42ce17a6ebddf8972b75fa231cdada1bfc844f6c642ea0378766e5dd83ce9add",
+      "transcodedToFitGitHub": false
+    }
+  ]
+};
