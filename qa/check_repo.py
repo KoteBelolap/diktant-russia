@@ -216,6 +216,43 @@ def audit_guest_media() -> None:
           and 'id="broadcast"' in index)
 
 
+def audit_image_loading() -> None:
+    pages = ["index.html", "materials.html", "news.html", "article.html", "test.html"]
+    missing = []
+    for page in pages:
+        source = text(page)
+        head = source.split("</head>", 1)[0]
+        if (head.count('src="assets/js/image-loader.js"') != 1
+                or head.find('href="assets/css/style.css"') > head.find('src="assets/js/image-loader.js"')):
+            missing.append(page)
+    check("image-loader подключён в head всех публичных страниц",
+          not missing, ", ".join(missing))
+
+    loader = text("assets/js/image-loader.js")
+    check("image-loader отслеживает новые изображения и смену src",
+          "MutationObserver" in loader
+          and "mutation.addedNodes.forEach(scan)" in loader
+          and "attributeFilter: ['src', 'srcset']" in loader)
+    check("image-loader завершает полоску по load/error",
+          "addEventListener('load'" in loader
+          and "addEventListener('error'" in loader
+          and "is-image-loading" in loader
+          and "is-image-error" in loader)
+
+    main_js = text("assets/js/main.js")
+    prepare_at = main_js.find("imageLoading?.prepare(lbImg)")
+    src_at = main_js.find("lbImg.src = item.src", prepare_at)
+    start_at = main_js.find("imageLoading?.start(lbImg)", src_at)
+    check("лайтбокс скрывает старый кадр до смены src",
+          0 <= prepare_at < src_at < start_at)
+
+    css = text("assets/css/style.css")
+    check("CSS содержит общую полоску загрузки и reduced-motion",
+          ".image-load-bar.is-active" in css
+          and "@keyframes image-load-bar" in css
+          and "prefers-reduced-motion: reduce" in css)
+
+
 def audit_organizations() -> None:
     directory = ROOT / "assets/data/orgs"
     manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
@@ -320,6 +357,7 @@ def main() -> int:
     audit_json()
     audit_html_and_assets()
     audit_guest_media()
+    audit_image_loading()
     audit_organizations()
     audit_production_safety()
     audit_certificate()

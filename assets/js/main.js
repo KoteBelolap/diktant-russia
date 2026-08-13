@@ -359,6 +359,7 @@
     const navBtns = $$('.lightbox__nav', lb);
     const lbSlides = $$('.slide');
     const guestMedia = window.DIKTANT_GUEST_MEDIA || {};
+    const imageLoading = window.DIKTANT_IMAGE_LOADING;
     let cur = 0, solo = true, activeItems = [];
 
     const stopVid = () => {
@@ -380,7 +381,16 @@
       if (isVideo && lbVid) lbVid.src = item.src;
       if (lbImg) {
         lbImg.hidden = isVideo;
-        if (!isVideo) { lbImg.src = item.src; lbImg.alt = item.alt || item.caption || ''; }
+        if (isVideo) {
+          imageLoading?.reset(lbImg);
+        } else {
+          /* Скрываем прежний кадр до присваивания нового src, чтобы он не
+             оставался в лайтбоксе на время сетевой загрузки. */
+          imageLoading?.prepare(lbImg);
+          lbImg.alt = item.alt || item.caption || '';
+          lbImg.src = item.src;
+          imageLoading?.start(lbImg);
+        }
       }
       if (lbVid) lbVid.hidden = !isVideo;
       lbCap.textContent = item.caption || item.alt || '';
