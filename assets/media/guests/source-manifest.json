@@ -27,18 +27,6 @@
           "kind": "video",
           "src": "assets/media/guests/barinov/video-01.mp4",
           "caption": "Баринов Игорь Вячеславович — видео 1",
-          "originalName": "Баринов(1).mp4",
-          "originalPath": "/Баринов/Баринов(1).mp4",
-          "originalSize": 55538723,
-          "originalSha256": "8a0e0a2fa21ba51e9c09bad3460ac8e3b80149af19924ce5952cbf57f118b70f",
-          "storedSize": 55538723,
-          "storedSha256": "8a0e0a2fa21ba51e9c09bad3460ac8e3b80149af19924ce5952cbf57f118b70f",
-          "transcodedToFitGitHub": false
-        },
-        {
-          "kind": "video",
-          "src": "assets/media/guests/barinov/video-02.mp4",
-          "caption": "Баринов Игорь Вячеславович — видео 2",
           "originalName": "Баринов.mp4",
           "originalPath": "/Баринов/Баринов.mp4",
           "originalSize": 49479489,
