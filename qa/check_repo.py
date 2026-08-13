@@ -133,7 +133,14 @@ def audit_html_and_assets() -> None:
         if not target.exists():
             missing.append(f"assets/css/style.css url={value}")
 
+    unclosed_comments = []
+    for page in pages:
+        source = page.read_text(encoding="utf-8")
+        if source.count("<!--") != source.count("-->"):
+            unclosed_comments.append(str(page.relative_to(ROOT)))
+
     check("уникальные HTML id", not duplicate_ids, " | ".join(duplicate_ids))
+    check("HTML-комментарии закрыты", not unclosed_comments, ", ".join(unclosed_comments))
     check(f"локальные ссылки на {refs} ресурсов", not missing, " | ".join(missing))
 
     # Комментарии и data URI не влияют на простой контроль парных скобок.
@@ -211,8 +218,8 @@ def audit_guest_media() -> None:
           len(positions) == 1 and positions[0] in middle,
           f"slides={len(slides)}, position={positions}")
     check("место RUTUBE-плеера помечено для специалистов",
-          "TODO ДЛЯ СПЕЦИАЛИСТОВ АКАДЕМИИ" in index
-          and "VIDEO_ID_ТРАНСЛЯЦИИ" in index
+          "ДЛЯ СПЕЦИАЛИСТОВ АКАДЕМИИ" in index
+          and "CONFIG.broadcastUrl" in index
           and 'id="broadcast"' in index)
 
 
