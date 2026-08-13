@@ -58,6 +58,7 @@
   const D = window.DIKTANT;
   const params = new URLSearchParams(location.search);
   const MODE = params.get('mode') === 'training' ? 'training' : 'main';
+  const PRODUCTION = !!D?.status?.production?.();
 
   /* Параметры ТЗ берутся из config.js (единый источник), значения
      по умолчанию – на случай, если конфиг не подключён */
@@ -87,8 +88,11 @@
   const state = {
     cat: null, qs: [], q: 0, answers: [],
     left: DURATION, timer: null, done: false, locked: false,
-    demo: true, attemptId: null, pre: null,   /* pre – анкета перед тестом */
-    ctaTimer: null, anon: false   /* анонимная запись уже ушла в базу */
+    demo: !PRODUCTION, attemptId: null, pre: null,   /* pre – анкета перед тестом */
+    ctaTimer: null, anon: false, anonPending: false,
+    /* anon – запись подтверждена API/демо; anonPending – дедлайн уже
+       закрыт, но production API не подтвердил запись, нужна повторная отправка */
+    lastScore: null, lastMax: null
   };
 
   const esc = s => String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
@@ -110,6 +114,32 @@
   function show(name) {
     Object.entries(scr).forEach(([k, el]) => { if (el) el.hidden = k !== name; });
     if (name === 'start') prepareStart();
+  }
+
+  /* Ошибки боевого API никогда не маскируются демо-результатом.
+     Блок создаётся динамически, чтобы не размножать служебную разметку
+     по экранам; пользователь может повторить безопасный запрос. */
+  function clearRuntimeError(host) {
+    host?.querySelector('.runtime-error')?.remove();
+  }
+  function showRuntimeError(host, message, onRetry) {
+    if (!host) return;
+    clearRuntimeError(host);
+    const box = document.createElement('div');
+    box.className = 'runtime-error glass';
+    box.setAttribute('role', 'alert');
+    box.style.cssText = 'margin:20px auto;padding:20px;max-width:760px;text-align:center';
+    const p = document.createElement('p');
+    p.textContent = message;
+    box.appendChild(p);
+    if (onRetry) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'btn btn--primary'; b.textContent = 'Повторить запрос';
+      b.addEventListener('click', () => { b.disabled = true; onRetry(); });
+      box.appendChild(b);
+    }
+    host.appendChild(box);
+    box.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' });
   }
 
   /* стартовый экран: основной режим – короткая анкета «pre» (монтируется
@@ -136,6 +166,7 @@
 
   /* ---------- гейт дат (от времени сервера) ---------- */
   function gateState() {
+    if (PRODUCTION && !D.status.timeReady()) return 'error';
     if (MODE === 'training') {
       return D.status.trainingOpen() ? 'open' : 'soon';
     }
@@ -149,7 +180,14 @@
     if (g === 'open') { show('start'); return true; }
     show('gate');
     const box = $('#gate-panel');
-    if (g === 'soon') {
+    if (g === 'error') {
+      box.innerHTML = `
+        <span class="gate-panel__icon">${icons.clock}</span>
+        <h1>Тестирование временно недоступно</h1>
+        <p>Сервер не передал контрольное московское время. Мы не используем часы устройства в боевом режиме, чтобы даты диктанта нельзя было обойти.</p>
+        <div class="btn-row" style="justify-content:center"><button class="btn btn--primary" type="button" data-reload>Обновить страницу</button><a class="btn btn--blue" href="index.html">На главную</a></div>`;
+      $('[data-reload]', box)?.addEventListener('click', () => location.reload());
+    } else if (g === 'soon') {
       box.innerHTML = MODE === 'training' ? `
         <span class="gate-panel__icon">${icons.clock}</span>
         <h1>Тренировочные тесты появятся позже</h1>
@@ -198,24 +236,46 @@
   }
 
   /* ---------- загрузка вопросов: сервер → демо ---------- */
+  /* Банк с правильными ответами не подключён в test.html. В demo он
+     загружается лениво только после неудачного API; в production этот
+     файл браузер не запрашивает вообще. На боевой сервер файл также
+     не копируется (см. CMS-GUIDE). */
+  let demoBankLoading = null;
+  function ensureDemoBank() {
+    if (window.QUESTION_BANK_DEMO) return Promise.resolve(window.QUESTION_BANK_DEMO);
+    if (demoBankLoading) return demoBankLoading;
+    demoBankLoading = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'assets/js/question-bank-demo.js';
+      s.onload = () => window.QUESTION_BANK_DEMO ? resolve(window.QUESTION_BANK_DEMO) : reject(new Error('empty_demo_bank'));
+      s.onerror = () => reject(new Error('demo_bank_unavailable'));
+      document.head.appendChild(s);
+    });
+    return demoBankLoading;
+  }
+
   async function loadQuestions(cat) {
-    /* бой: сервер отдаёт 30 вопросов без правильных ответов */
+    /* бой: сервер отдаёт ровно 30 вопросов без правильных ответов */
     try {
       const r = await fetch('/api/test?cat=' + encodeURIComponent(cat), { headers: { 'Accept': 'application/json' } });
-      if (r.ok) {
-        const data = await r.json();
-        if (data && Array.isArray(data.questions) && data.questions.length) {
-          state.demo = false;
-          state.attemptId = data.attemptId || null;
-          return data.questions;
-        }
-      }
-    } catch { /* статичное демо – сеть недоступна */ }
-    /* демо: локальный банк (вопросы+ответы), случайная выборка и перемешивание */
+      if (!r.ok) throw new Error('test_http_' + r.status);
+      const data = await r.json();
+      if (!data || !Array.isArray(data.questions) || !data.questions.length) throw new Error('test_invalid_payload');
+      if (PRODUCTION && data.questions.length !== QUESTIONS_PER_TEST) throw new Error('test_wrong_question_count');
+      if (PRODUCTION && !data.attemptId) throw new Error('test_missing_attempt_id');
+      state.demo = false;
+      state.attemptId = data.attemptId || null;
+      return data.questions;
+    } catch (err) {
+      if (PRODUCTION) throw err;   /* в бою никакого банка/ответов в браузере */
+    }
+
+    /* demo: локальный банк (вопросы+ответы), случайная выборка и перемешивание */
+    const bank = await ensureDemoBank();
     state.demo = true;
     if (!state.attemptId) state.attemptId = uid();   /* см. uid(): сквозной id попытки */
     const bankKey = MODE === 'training' ? 'training' : cat;
-    const pool = [...(window.QUESTION_BANK_DEMO[bankKey] || [])];
+    const pool = [...(bank[bankKey] || [])];
     shuffle(pool);
     const picked = pool.slice(0, Math.min(QUESTIONS_PER_TEST, pool.length));
     return picked.map(q => {
@@ -250,8 +310,23 @@
     if (gateState() !== 'open') { renderGate(); return; }
     if (MODE === 'main' && !state.pre) { show('start'); return; }   /* без анкеты тест не стартует */
     state.cat = cat;
-    state.qs = await loadQuestions(cat);
-    if (!state.qs.length) return;
+    clearRuntimeError(scr.start);
+    try {
+      state.qs = await loadQuestions(cat);
+    } catch {
+      state.cat = null;
+      show('start');
+      showRuntimeError(scr.start,
+        'Не удалось получить вопросы с сервера. Ответы не были загружены, попытка не началась.',
+        () => begin(cat));
+      return;
+    }
+    if (!state.qs.length) {
+      state.cat = null;
+      show('start');
+      showRuntimeError(scr.start, 'Для выбранной категории пока нет вопросов.', () => begin(cat));
+      return;
+    }
     state.q = 0;
     state.answers = state.qs.map(() => []);
     state.done = false; state.locked = false;
@@ -445,26 +520,38 @@
       max = state.qs.length;
     } else {
       try {
+        clearRuntimeError(scr.run);
         const r = await fetch('/api/test/submit', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ attemptId: state.attemptId, cat: state.cat, answers: state.answers })
         });
+        if (!r.ok) throw new Error('submit_http_' + r.status);
         const data = await r.json();
+        if (!Number.isFinite(data?.score) || !Number.isFinite(data?.max)) throw new Error('submit_invalid_payload');
         score = data.score; max = data.max;
       } catch {
-        score = 0; max = state.qs.length;   /* крайний случай */
+        /* Никогда не подменяем сетевую ошибку результатом «0». Ответы
+           остаются на экране и могут быть отправлены повторно. */
+        state.done = false; state.locked = false;
+        showRuntimeError(scr.run,
+          'Не удалось передать ответы на сервер. Ваши выбранные варианты сохранены на этой странице – повторите отправку.',
+          () => finish(byTime));
+        return;
       }
     }
 
+    clearRuntimeError(scr.run);
     history.replaceState({ diktant: 'result' }, '', location.href);
+
+    /* Запись создаём ДО запуска двухминутного CTA: его дедлайн обязан
+       считаться от одного сохранённого wall-clock, а мгновенный таймаут
+       не должен успеть потерять флаг anonymous. */
+    if (MODE === 'main') {
+      doneRecWrite({ score, max, at: new Date().toISOString(), pre: state.pre,
+        registered: false, attemptId: state.attemptId || null });
+    }
     show('result');
     renderResult(score, max, byTime);
-
-    /* запрет повторного прохождения с устройства (05.08.2026):
-       в тренировке флаг не ставим – там попытки свободны */
-    if (MODE === 'main') {
-      doneRecWrite({ score, max, at: new Date().toISOString(), pre: state.pre, registered: false, attemptId: state.attemptId || null });
-    }
   }
 
   /* ---------- формулировки вердиктов (шкала 30 / 25–29 / 15–24 / 0–14) ---------- */
@@ -506,6 +593,22 @@
           <a class="btn btn--blue" href="index.html">На главную</a>
         </div>`;
 
+  function renderAnonError(score, max, reason) {
+    const cta = $('#result-cta');
+    if (!cta) return;
+    cta.hidden = false;
+    cta.innerHTML = `
+      <p class="result-cta__done"><b>Не удалось подтвердить запись результата.</b> Персональные данные больше не запрашиваются: срок решения завершён. Повторите безопасную отправку результата без ФИО.</p>
+      <div class="btn-row" style="justify-content:center">
+        <button class="btn btn--primary" type="button" data-anon-retry>Повторить запись</button>
+        <a class="btn btn--blue" href="index.html">На главную</a>
+      </div>`;
+    $('[data-anon-retry]', cta)?.addEventListener('click', e => {
+      e.currentTarget.disabled = true;
+      anonSave(score, max, reason || 'повторная отправка после ошибки');
+    });
+  }
+
   function setupCta(score, max) {
     const cta = $('#result-cta');
     if (!cta) return;
@@ -513,9 +616,17 @@
     clearInterval(state.ctaTimer);
     cta.hidden = false;
 
+    const rec = doneRecRead();
     /* анонимная запись уже ушла (этот или прошлый визит) – сразу
-       итоговый экран; «Дозаполнить данные» не возвращаем (заказчик, ит. 5) */
+       итоговый экран; «Дозаполнить данные» не возвращаем. */
     if (state.anon) { cta.innerHTML = ctaDoneHtml(score, max); return; }
+    /* Боевой запрос уже завершился ошибкой: решение закрыто, но вместо
+       ложного «сохранено» показываем честный повтор отправки. */
+    if (state.anonPending || rec?.anonPending) {
+      state.anonPending = true;
+      renderAnonError(score, max, rec?.anonReason);
+      return;
+    }
 
     cta.innerHTML = CTA_HTML;
 
@@ -524,7 +635,6 @@
        останавливает и не перезапускает; вернулся после дедлайна –
        запись без ФИО отправляется сразу (догон). В бою тот же дедлайн
        контролирует и сервер (CMS-GUIDE §5.4). */
-    const rec = doneRecRead();
     const finished = rec && rec.at ? new Date(rec.at).getTime() : Date.now();
     const deadline = (isFinite(finished) ? finished : Date.now()) + DECISION_SEC * 1000;
 
@@ -549,7 +659,8 @@
   function revealReg() {
     /* ит. 5: после записи без ФИО дозаполнение запрещено – на всякий
        случай режем и здесь (кнопку в таком состоянии уже не рисуем) */
-    if (state.anon || (doneRecRead() || {}).anon) return;
+    const saved = doneRecRead() || {};
+    if (state.anon || state.anonPending || saved.anon || saved.anonPending) return;
     clearInterval(state.ctaTimer);
     const cta = $('#result-cta'), regHost = $('#result-reg');
     if (cta) cta.hidden = true;
@@ -574,45 +685,70 @@
      в локальный журнал регистраций (зеркалит демо-ветку reg-form.js). */
   async function anonSave(score, max, reason) {
     clearInterval(state.ctaTimer);
-    if (!state.anon) {
-      state.anon = true;
-      const rec = doneRecRead();
-      if (rec) { rec.anon = true; doneRecWrite(rec); }
-      const pre = state.pre || {};
-      const payload = {
-        variant: 'anonymous', reason,
-        attemptId: state.attemptId || null,   /* связка с возможной регистрацией (ит. 5) */
-        surname: 'не заполнено', name: 'не заполнено', patronymic: '',
-        email: 'не заполнено',
-        sex: pre.sex || '', age: pre.age || '', region: pre.region || '',
-        orgType: pre.orgType || '', org: pre.org || '',
-        category: pre.category || '', categoryKey: state.cat || '',
-        score, total: max
-      };
-      let ok = false;
-      try {
-        const r = await fetch('/api/register', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        ok = r.ok;
-      } catch { /* статичное демо */ }
-      if (!ok) {   /* демо-журнал устройства (как в reg-form.js) */
-        try {
-          const REG_KEY = 'diktant_registrations_demo';
-          const regs = JSON.parse(localStorage.getItem(REG_KEY) || '[]');
-          const regNumber = 'ПА/НОТА-26/' + String(regs.length + 1).padStart(6, '0');
-          regs.push({
-            key: [payload.surname, payload.name, payload.patronymic, payload.sex, payload.age,
-                  payload.region, payload.orgType, payload.org, payload.category]
-              .join('|').toLowerCase().replace(/\s+/g, ' ').trim(),
-            email: payload.email, regNumber, anonymous: true,
-            attemptId: payload.attemptId,
-            at: new Date().toISOString()
-          });
-          localStorage.setItem(REG_KEY, JSON.stringify(regs));
-        } catch { /* приватный режим */ }
+    if (state.anon) return;
+
+    const pre = state.pre || {};
+    const payload = {
+      variant: 'anonymous', reason,
+      attemptId: state.attemptId || null,
+      surname: 'не заполнено', name: 'не заполнено', patronymic: '',
+      email: 'не заполнено',
+      sex: pre.sex || '', age: pre.age || '', region: pre.region || '',
+      orgType: pre.orgType || '', org: pre.org || '',
+      category: pre.category || '', categoryKey: state.cat || '',
+      score, total: max
+    };
+
+    let apiOk = false;
+    try {
+      const r = await fetch('/api/register', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      let data = null;
+      try { data = await r.json(); } catch { /* demo-сервер может вернуть пустой ответ */ }
+      apiOk = r.ok && (!PRODUCTION || data?.ok === true);
+      if (!apiOk && PRODUCTION) throw new Error('anonymous_http_' + r.status);
+    } catch {
+      if (PRODUCTION) {
+        /* Дедлайн/отказ уже закрыли возможность регистрации, но сервер
+           не подтвердил запись. Запоминаем pending и не говорим
+           пользователю, что база обновлена, пока API не ответит. */
+        state.anonPending = true;
+        const rec = doneRecRead();
+        if (rec) {
+          rec.anonPending = true; rec.anonReason = reason; rec.anon = false;
+          doneRecWrite(rec);
+        }
+        renderAnonError(score, max, reason);
+        return;
       }
+    }
+
+    if (!apiOk) {   /* только demo: локальный журнал устройства */
+      try {
+        const REG_KEY = 'diktant_registrations_demo';
+        const regs = JSON.parse(localStorage.getItem(REG_KEY) || '[]');
+        const regNumber = 'ПА/НОТА-26/' + String(regs.length + 1).padStart(6, '0');
+        regs.push({
+          key: [payload.surname, payload.name, payload.patronymic, payload.sex, payload.age,
+                payload.region, payload.orgType, payload.org, payload.category]
+            .join('|').toLowerCase().replace(/\s+/g, ' ').trim(),
+          email: payload.email, regNumber, anonymous: true,
+          attemptId: payload.attemptId,
+          at: new Date().toISOString()
+        });
+        localStorage.setItem(REG_KEY, JSON.stringify(regs));
+      } catch { /* приватный режим */ }
+    }
+
+    state.anon = true;
+    state.anonPending = false;
+    const rec = doneRecRead();
+    if (rec) {
+      rec.anon = true; rec.anonPending = false;
+      delete rec.anonReason;
+      doneRecWrite(rec);
     }
     const cta = $('#result-cta');
     if (cta) { cta.hidden = false; cta.innerHTML = ctaDoneHtml(score, max); }
@@ -683,7 +819,8 @@
     if (!rec.registered && gateState() === 'open' && rec.pre) {
       state.pre = rec.pre;
       state.anon = !!rec.anon;   /* возможно, результат уже записан без ФИО */
-      state.attemptId = rec.attemptId || null;   /* связка записей (ит. 5) */
+      state.anonPending = !!rec.anonPending;   /* API не подтвердил запись – предложим повтор */
+      state.attemptId = rec.attemptId || null;   /* связка записей */
       show('result');
       renderResult(rec.score, rec.max, false);
       return true;

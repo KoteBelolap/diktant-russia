@@ -43,6 +43,7 @@ window.RegForm = (() => {
   const $  = (s, c = document) => c.querySelector(s);
   const $$ = (s, c = document) => [...c.querySelectorAll(s)];
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const PRODUCTION = !!window.DIKTANT?.status?.production?.();
 
   const REGIONS = ["Республика Адыгея","Республика Алтай","Республика Башкортостан","Республика Бурятия","Республика Дагестан","Донецкая Народная Республика","Республика Ингушетия","Кабардино-Балкарская Республика","Республика Калмыкия","Карачаево-Черкесская Республика","Республика Карелия","Республика Коми","Республика Крым","Луганская Народная Республика","Республика Марий Эл","Республика Мордовия","Республика Саха (Якутия)","Республика Северная Осетия – Алания","Республика Татарстан","Республика Тыва","Удмуртская Республика","Республика Хакасия","Чеченская Республика","Чувашская Республика","Алтайский край","Забайкальский край","Камчатский край","Краснодарский край","Красноярский край","Пермский край","Приморский край","Ставропольский край","Хабаровский край","Амурская область","Архангельская область","Астраханская область","Белгородская область","Брянская область","Владимирская область","Волгоградская область","Вологодская область","Воронежская область","Запорожская область","Ивановская область","Иркутская область","Калининградская область","Калужская область","Кемеровская область – Кузбасс","Кировская область","Костромская область","Курганская область","Курская область","Ленинградская область","Липецкая область","Магаданская область","Московская область","Мурманская область","Нижегородская область","Новгородская область","Новосибирская область","Омская область","Оренбургская область","Орловская область","Пензенская область","Псковская область","Ростовская область","Рязанская область","Самарская область","Саратовская область","Сахалинская область","Свердловская область","Смоленская область","Тамбовская область","Тверская область","Томская область","Тульская область","Тюменская область","Ульяновская область","Херсонская область","Челябинская область","Ярославская область","Москва","Санкт-Петербург","Севастополь","Еврейская автономная область","Ненецкий автономный округ","Ханты-Мансийский автономный округ – Югра","Чукотский автономный округ","Ямало-Ненецкий автономный округ",
     "За пределами Российской Федерации"];
@@ -342,9 +343,11 @@ window.RegForm = (() => {
      контракт ответа тот же: [{n, r, s?}]. */
   const ORG_DIR = 'assets/data/orgs/';
   const orgCache = {};            /* имя файла -> Promise<JSON> */
-  const loadFile = f =>
-    orgCache[f] = orgCache[f] || fetch(ORG_DIR + f + '.json')
+  const loadFile = f => {
+    if (PRODUCTION) return Promise.reject(new Error('static_orgs_disabled_in_production'));
+    return orgCache[f] = orgCache[f] || fetch(ORG_DIR + f + '.json')
       .then(r => { if (!r.ok) throw new Error(f + ': ' + r.status); return r.json(); });
+  };
 
   const mkOrg = (n, s, r) => ({ n, s, r, _t: tokenize(n + ' ' + (s || '')) });
 
@@ -365,7 +368,7 @@ window.RegForm = (() => {
   /* Тихий прогрев кэша, как только выбран регион – к моменту ввода
      названия данные обычно уже на месте. */
   function prefetchRegionOrgs(region) {
-    if (REGIONS.indexOf(region) < 0) return;
+    if (PRODUCTION || REGIONS.indexOf(region) < 0) return;
     loadFile('r' + String(REGIONS.indexOf(region) + 1).padStart(2, '0')).catch(() => {});
     loadFile('none').catch(() => {});
   }
@@ -581,9 +584,18 @@ window.RegForm = (() => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      if (!r.ok) return null;
-      return await r.json();
-    } catch { return null; }
+      let data = null;
+      try { data = await r.json(); } catch { /* ответ без JSON */ }
+      if (!r.ok) {
+        const err = new Error(data?.error || ('http_' + r.status));
+        err.status = r.status; err.data = data;
+        throw err;
+      }
+      return data;
+    } catch (err) {
+      if (PRODUCTION) throw err;
+      return null;   /* только статичное demo имеет право на локальную имитацию */
+    }
   }
 
   /* ============================================================
@@ -759,6 +771,33 @@ window.RegForm = (() => {
         dropNote('Сначала выберите регион проживания выше – так найдём Вашу организацию быстрее.');
         return;
       }
+
+      /* В production справочник всегда ищет сервер. Статичные all.json /
+         rNN.json не скачиваются и не могут незаметно подменить отказ API. */
+      if (PRODUCTION) {
+        const myReq = ++dropReq;
+        dropNote('Ищу организации…');
+        fetch('/api/orgs?q=' + encodeURIComponent(q) + '&region=' + encodeURIComponent(region),
+          { headers: { 'Accept': 'application/json' } })
+          .then(async r => {
+            let data = null;
+            try { data = await r.json(); } catch { /* ответ без JSON */ }
+            if (!r.ok || !Array.isArray(data)) throw new Error('orgs_http_' + r.status);
+            return data;
+          })
+          .then(data => {
+            if (myReq !== dropReq) return;
+            const list = data.filter(o => o && o.n).slice(0, DROP_LIMIT)
+              .map(o => ({ o: mkOrg(String(o.n), String(o.s || ''), String(o.r || '')), score: 0 }));
+            showItems(list, tokenize(q));
+          })
+          .catch(() => {
+            if (myReq !== dropReq) return;
+            dropNote('Не удалось получить справочник с сервера. Повторите поиск позже или включите «Моей организации нет в списке» и укажите название вручную.');
+          });
+        return;
+      }
+
       const foundNow = findOrgs(q, region);
       if (foundNow) {                   /* данные уже в памяти – ищем мгновенно */
         showItems(foundNow, tokenize(q));
@@ -989,24 +1028,47 @@ window.RegForm = (() => {
     }
 
     /* --- отправка --- */
+    function clearApiError() { $('.form-api-error', form)?.remove(); }
+    function showApiError(message) {
+      clearApiError();
+      const box = document.createElement('p');
+      box.className = 'form-api-error'; box.setAttribute('role', 'alert');
+      box.style.cssText = 'margin:16px 0;padding:14px 16px;border:1px solid #c00000;border-radius:14px;background:#fff4f4;color:#7d0000';
+      box.textContent = message;
+      $('.form-foot', form)?.prepend(box);
+      box.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' });
+    }
+
     async function submitAll(d) {
       const btn = $(`#${u}-submit`, form);
+      const originalBtn = btn.innerHTML;
       btn.disabled = true;
       btn.textContent = 'Отправляем…';
+      clearApiError();
 
       let regNumber = null;
-      const res = await api('/api/register', d);      // бой: сервер вернёт { ok, regNumber }
-      if (res && res.ok && res.regNumber) {
-        regNumber = res.regNumber;
-      } else {
-        /* демо: номер – «ПА/НОТА-26/» + ID с добивкой нулями до 6 знаков */
-        const regs = readRegs();
-        regNumber = 'ПА/НОТА-26/' + String(regs.length + 1).padStart(6, '0');
-        regs.push({ key: dupKeyOf(d), email: d.email, regNumber, at: new Date().toISOString() });
-        writeRegs(regs);
+      try {
+        const res = await api('/api/register', d);      // бой: сервер вернёт { ok, regNumber }
+        if (res && res.ok && res.regNumber) {
+          regNumber = res.regNumber;
+        } else if (PRODUCTION) {
+          throw new Error(res?.error || 'invalid_registration_response');
+        } else {
+          /* только demo: номер – «ПА/НОТА-26/» + ID до 6 знаков */
+          const regs = readRegs();
+          regNumber = 'ПА/НОТА-26/' + String(regs.length + 1).padStart(6, '0');
+          regs.push({ key: dupKeyOf(d), email: d.email, regNumber, at: new Date().toISOString() });
+          writeRegs(regs);
+        }
+      } catch (err) {
+        btn.disabled = false; btn.innerHTML = originalBtn;
+        const closed = err?.status === 409 || err?.data?.error === 'attempt_closed' || err?.message === 'attempt_closed';
+        showApiError(closed
+          ? 'Срок заполнения данных завершён: результат уже записан без ФИО. Сертификат по этой попытке заказать нельзя.'
+          : 'Сервер не подтвердил регистрацию. Данные не считаются отправленными – проверьте соединение и повторите попытку.');
+        return false;
       }
 
-      form.closest('div');
       const okWrap = document.createElement('div');
       okWrap.innerHTML = successMarkup(u, d.name, d.email, regNumber);
       form.replaceWith(okWrap);
@@ -1014,10 +1076,12 @@ window.RegForm = (() => {
       $('.success__regnum b', okWrap).textContent = regNumber;
       okWrap.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
       if (typeof preset.onSuccess === 'function') preset.onSuccess(d, regNumber);
+      return true;
     }
 
     form.addEventListener('submit', async e => {
       e.preventDefault();
+      clearApiError();
       const d = collect();
       const firstBad = validate(d);
       if (firstBad) {
@@ -1031,11 +1095,17 @@ window.RegForm = (() => {
         if (typeof preset.onSubmit === 'function') preset.onSubmit(d);
         return;
       }
-      /* дубль-проверка: сервер, при недоступности – демо-журнал устройства */
+      /* дубль-проверка: сервер; локальный журнал разрешён только в demo */
       let duplicate = null;
-      const dup = await api('/api/check-duplicate', d);
-      if (dup && typeof dup.duplicate === 'boolean') duplicate = dup.duplicate;
-      else duplicate = readRegs().some(r => r.key === dupKeyOf(d));
+      try {
+        const dup = await api('/api/check-duplicate', d);
+        if (dup && typeof dup.duplicate === 'boolean') duplicate = dup.duplicate;
+        else if (PRODUCTION) throw new Error('invalid_duplicate_response');
+        else duplicate = readRegs().some(r => r.key === dupKeyOf(d));
+      } catch {
+        showApiError('Не удалось проверить регистрацию на дубликаты. Данные не отправлены – повторите попытку после восстановления соединения.');
+        return;
+      }
 
       if (duplicate) confirmDuplicate(() => submitAll(d));
       else await submitAll(d);

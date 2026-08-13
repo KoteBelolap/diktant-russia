@@ -225,6 +225,11 @@
       if (el.textContent !== String(val)) { el.textContent = val; el.classList.remove('tick'); void el.offsetWidth; el.classList.add('tick'); }
     };
     const tickCd = () => {
+      if (window.DIKTANT?.status?.production?.() && !window.DIKTANT.status.timeReady()) {
+        if (cdLabel) cdLabel.textContent = 'Ожидаем синхронизацию с серверным московским временем';
+        setCell('d', '–'); setCell('h', '–'); setCell('m', '–'); setCell('s', '–');
+        return;
+      }
       const t = nowMs();
       if (cdBox) {
         if (t > ENDAT) { /* диктант завершён – только финальная фраза */

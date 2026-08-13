@@ -34,7 +34,9 @@
     const cap = document.createElement('span');
     cap.className = 'gate-caption';
     cap.setAttribute('role', 'status');
-    cap.textContent = window.DIKTANT.CONFIG.gateCaption;
+    cap.textContent = window.DIKTANT.status.production() && !window.DIKTANT.status.timeReady()
+      ? 'Участие временно недоступно: ожидаем синхронизацию времени сервера'
+      : window.DIKTANT.CONFIG.gateCaption;
     w.appendChild(cap);
 
     let timer;

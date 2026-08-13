@@ -19,8 +19,8 @@
     fio2 – имя (капсом)
     fio3 – отчество (капсом; если нет отчества – пустая строка)
     score – итоговый балл 0–30
-    regnum – 6 цифр ID с добивкой нулями (ник без префикса «ПА/НОТА-26/» –
-             он нанесён на фоне)
+    regnum – ровно 6 цифр ID с добивкой нулями, без префикса
+             «ПА/НОТА-26/» – он уже нанесён на фоне
 
   ШРИФТЫ (по макету дизайнера; файлы лежат рядом в папке fonts/,
   подключены через @font-face – при генерации PDF применяются именно они):
@@ -73,14 +73,15 @@
     color: #ffffff; font-size: 48pt; line-height: 1; letter-spacing: .01em; left: 13.2mm; top: 166mm; }
   /* регистрационный номер: 6 цифр после напечатанного «ПА/НОТА-26/»; Manrope SemiBold */
   .field--regnum { font-family: 'Manrope Cert SB', 'Manrope', 'Arial', sans-serif; font-weight: 600;
-    color: #ffffff; font-size: 7pt; letter-spacing: .1em; left: 14.94mm; top: 197.2mm; }
+    color: #ffffff; font-size: 7pt; letter-spacing: .1em; left: 36.35mm; top: 197.2mm; }
 
   /* маски поверх плейсдолеров фона (пиксельные координаты → мм, см. fields.json) */
   .cover--fio1 { left: 113.4mm; top: 80.6mm; width: 62mm; height: 11.3mm; }
   .cover--fio2 { left: 113.4mm; top: 91.8mm; width: 62mm; height: 10.7mm; }
   .cover--fio3 { left: 113.4mm; top: 102.2mm; width: 62mm; height: 10mm; }
   .cover--score { left: 12.6mm; top: 164.6mm; width: 40mm; height: 19mm; }
-  .cover--regnum { left: 14.2mm; top: 196.2mm; width: 36mm; height: 5.2mm; }
+  /* закрываем только XXXXXX, напечатанный префикс ПА/НОТА-26/ остаётся */
+  .cover--regnum { left: 36.15mm; top: 196.6mm; width: 13.75mm; height: 5.2mm; }
 </style>
 </head>
 <body>
@@ -100,7 +101,7 @@
     <span class="field field--fio field--fio2" data-field="fio2">Мария</span>
     <span class="field field--fio field--fio3" data-field="fio3">Сергеевна</span>
     <span class="field field--score" data-field="score">27</span>
-    <span class="field field--regnum" data-field="regnum">ПА/НОТА-26/000001</span>
+    <span class="field field--regnum" data-field="regnum">000001</span>
   </div>
 <script>
   /* демо-режим ?clean – без масок (когда фон чистый) */
@@ -110,7 +111,9 @@
   const p = new URLSearchParams(location.search);
   document.querySelectorAll('[data-field]').forEach(el => {
     const v = p.get(el.dataset.field);
-    if (v !== null) el.textContent = el.dataset.field === 'regnum' ? ('ПА/НОТА-26/' + v) : v.toUpperCase();
+    if (v !== null) el.textContent = el.dataset.field === 'regnum'
+      ? String(v).replace(/\D/g, '').slice(-6).padStart(6, '0')
+      : v.toUpperCase();
   });
 </script>
 </body>

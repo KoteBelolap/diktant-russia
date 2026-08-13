@@ -16,7 +16,21 @@
 window.DIKTANT = (() => {
   'use strict';
 
+  /* Режим задаёт ШАБЛОН страницы, а не часы/URL пользователя:
+       demo        – статичный GitHub Pages, разрешены локальные заглушки;
+       production  – 1С-Битрикс, только реальные API, без тихого отката
+                     к демо и без загрузки банка с правильными ответами.
+     В бою шаблон обязан вывести:
+       <meta name="diktant-mode" content="production">
+       <meta name="server-time" content="2026-11-01T12:34:56+03:00"> */
+  const modeMeta = document.querySelector('meta[name="diktant-mode"]');
+  const RUNTIME_MODE = modeMeta?.getAttribute('content')?.trim().toLowerCase() === 'production'
+    ? 'production' : 'demo';
+
   const CONFIG = {
+    /* Среда выполнения. Не переключать по hostname: боевой режим должен
+       включаться только явно мета-тегом шаблона Битрикса. */
+    runtimeMode: RUNTIME_MODE,
     /* Параметры теста по ТЗ (единый источник для движка test.js):
        30 вопросов в варианте, 40 минут на прохождение */
     questionsPerTest: 30,
@@ -63,12 +77,16 @@ window.DIKTANT = (() => {
   const at = iso => Date.parse(iso);
 
   const status = {
+    /* В production отсутствие времени сервера – ошибка конфигурации:
+       клиентские часы не могут открыть или закрыть боевой диктант. */
+    production: () => CONFIG.runtimeMode === 'production',
+    timeReady: () => CONFIG.runtimeMode !== 'production' || SYNCED,
     /* диктант начался? */
-    started: () => now() >= at(CONFIG.startDate),
+    started: () => status.timeReady() && now() >= at(CONFIG.startDate),
     /* диктант ещё идёт? */
-    ongoing: () => now() >= at(CONFIG.startDate) && now() <= at(CONFIG.endDate),
+    ongoing: () => status.timeReady() && now() >= at(CONFIG.startDate) && now() <= at(CONFIG.endDate),
     /* тренировочные тесты видны? Только по явному включению
-       (trainingMode: 'on') – датавто-открытия больше нет (08.08.2026) */
+       (trainingMode: 'on') – авто-открытия по дате нет. */
     trainingOpen: () => CONFIG.trainingMode === 'on',
     synced: SYNCED
   };
