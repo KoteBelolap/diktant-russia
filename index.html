@@ -110,23 +110,16 @@
           <div class="cd-cell"><b data-cd="m">00</b><span data-cdl="m">минут</span></div>
           <div class="cd-cell"><b data-cd="s">00</b><span data-cdl="s">секунд</span></div>
         </div>
-        <p class="countdown__note">Диктант проходит с 5 ноября 2026 года 10:00 до 23:59 8 ноября по московскому времени</p>
-        <!-- Убрано по запросу заказчика 08.08.2026 (ит. 3): дублирующая подпись
-             о трансляции – эта информация есть в тёмной кнопке РУТУБ ниже -->
+        <p class="countdown__note">Диктант проходит с 10:00 5 ноября до 23:59 8 ноября 2026 года по московскому времени</p>
         <p class="countdown__ended" hidden>Диктант закончился 08 ноября. Ждём Вас в следующем году!</p>
         <div class="broadcast" id="broadcast">
           <a class="broadcast__link" href="https://rutube.ru/" target="_blank" rel="noopener" data-broadcast-link>
             <img class="broadcast__logo" src="assets/img/logo-rutube.webp" alt="RUTUBE" width="44" height="44">
             <span><b>Трансляция открытия на RUTUBE</b><small>ссылку на прямой эфир опубликуем здесь за несколько часов до старта</small></span>
           </a>
-          <!-- TODO ДЛЯ СПЕЦИАЛИСТОВ АКАДЕМИИ — ПЛЕЕР ТРАНСЛЯЦИИ RUTUBE:
+          <!-- ДЛЯ СПЕЦИАЛИСТОВ АКАДЕМИИ — ПЛЕЕР ТРАНСЛЯЦИИ RUTUBE:
                за несколько часов до старта вставьте сюда iframe плеера с id
                трансляции (см. CONFIG.broadcastUrl в assets/js/config.js).
-               Готовый фрагмент примерно такой:
-               <iframe width="100%" height="100%" src="https://rutube.ru/play/embed/VIDEO_ID_ТРАНСЛЯЦИИ"
-                       style="aspect-ratio:16/9;border:none" allow="clipboard-write; autoplay"
-                       allowFullScreen title="Прямая трансляция открытия Диктанта"></iframe>
-               Пока id нет – видна кнопка-заглушка выше. -->
         </div>
       </div>
 
@@ -140,8 +133,8 @@
         <a class="chip" href="#media">Медиагалерея</a>
         <a class="chip" href="#prizes">Награды</a>
         <a class="chip" href="#guests">Почётные гости</a>
-        <a class="chip" href="#faq">Вопросы</a>
-        <a class="chip" href="#organizers">Организаторы</a>
+        <a class="chip" href="#faq">Часто задаваемые вопросы</a>
+        <a class="chip" href="#organizers">Организаторы и партнёры</a>
         <a class="chip" href="#contacts">Контакты</a>
       </nav>
 
@@ -227,7 +220,7 @@
         </div>
       </section>
 
-      <!-- ═══════ НОВОСТИ (полоса) ═══════ -->
+      <!-- ═══════ НОВОСТИ ═══════ -->
       <section class="sec" id="news">
         <header class="sec-head">
           <span class="sec-overline">Новости</span>
@@ -301,10 +294,6 @@
         </div>
       </section>
 
-      <!-- Раздел «Для кого» удалён по запросу заказчика 08.08.2026 (ит. 3):
-           его плашки аудиторий переехали в отдельную карточку «Диктант – для всех»
-           внутри раздела «О чём диктант» ниже -->
-
       <!-- ═══════ О ЧЁМ ДИКТАНТ ═══════ -->
       <section class="sec" id="format">
         <header class="sec-head">
@@ -323,16 +312,13 @@
               <span class="topic topic--green">Гражданская идентичность</span>
               <span class="topic">Религии</span>
             </div>
-            <!-- Возрастные группы отсюда убраны совсем по запросу заказчика
-                 08.08.2026 (ит. 3): они – в соседней карточке «Диктант – для всех» -->
+
             <div class="topics__grid">
               <div class="mini-fact"><b>30</b><span>вопросов в каждом варианте диктанта</span></div>
               <div class="mini-fact"><b>40 мин</b><span>на прохождение теста</span></div>
             </div>
           </div>
-          <!-- Карточка «Диктант – для всех» (заказчик, 08.08.2026, ит. 3):
-               плашки аудиторий из удалённого раздела «Для кого», компактная
-               версия – только названия возрастных групп, без описаний -->
+
           <div class="forall glass">
             <h3 class="forall__h">Диктант – для всех</h3>
             <p class="forall__lead">Вопросы адаптированы под три возрастные категории – каждому будет интересно и по силам.</p>
@@ -366,8 +352,7 @@
             <button class="format-video__play" type="button" aria-label="Открыть видео о проекте в полном размере">
               <video src="assets/video/about-project.mp4" poster="assets/video/about-project-poster.webp"
                      autoplay muted loop playsinline preload="metadata" aria-hidden="true" tabindex="-1"></video>
-              <!-- Наслоение-текст в общей стилистике сайта (заказчик, 08.08.2026,
-                   ит. 3): вместо подписи со ссылкой на Яндекс.Диск под роликом -->
+
               <span class="format-video__stickers" aria-hidden="true">
                 <span class="format-video__st format-video__st--l">Видео</span>
                 <span class="format-video__st format-video__st--r">о проекте</span>
@@ -471,7 +456,7 @@
       <!-- ═══════ FAQ ═══════ -->
       <section class="sec" id="faq">
         <header class="sec-head">
-          <span class="sec-overline">Вопросы и ответы</span>
+          <span class="sec-overline">Часто задаваемые вопросы</span>
           <h2 class="sec-title">Спрашивали? <em>Отвечаем</em></h2>
         </header>
         <div class="faq">
@@ -506,8 +491,8 @@
         </header>
         <div class="logos-grid" style="margin-bottom:44px">
           <a class="logo-tile glass" href="https://ranepa.ru" target="_blank" rel="noopener">
-            <img src="assets/img/logo-ranepa.png" alt="Российская академия народного хозяйства и государственной службы при Президенте Российской Федерации">
-            <span>Президентская академия (РАНХиГС)</span>
+            <img src="assets/img/logo-ranepa.png" alt="Президентская академия">
+            <span>Президентская академия</span>
           </a>
           <a class="logo-tile glass" href="https://nota-theology.ru" target="_blank" rel="noopener" style="--d:.1s">
             <img src="assets/img/logo-nota.png" alt="Научно-образовательная теологическая ассоциация">
