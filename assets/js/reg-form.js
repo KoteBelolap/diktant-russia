@@ -1,8 +1,9 @@
 /* ============================================================
-   Регистрационная форма участника – ЕДИНЫЙ МОДУЛЬ.
-   Используется на двух страницах:
-     – test.html: сразу под результатом теста (ТЗ п. 1.3);
-     – register.html: отдельная страница (прямая ссылка).
+   Регистрационные анкеты участника – единый модуль test.html:
+     – pre: пол, возраст, регион, организация и категория до теста;
+     – post: ФИО, почта, согласия и возможная правка pre-данных после.
+   Отдельной страницы регистрации нет: результат, attemptId и дедлайн
+   должны оставаться в одном защищённом сценарии прохождения.
    ------------------------------------------------------------
    БОЕВАЯ ИНТЕГРАЦИЯ (1С-Битрикс, сервер Академии):
      1) Дубль-проверка ДО регистрации (точное совпадение
@@ -86,19 +87,13 @@ window.RegForm = (() => {
   let uid = 0;
 
   /* ---------- HTML формы ----------
-     Три варианта (запрос заказчика 05.08.2026; уточнения 08.08.2026, ит. 3):
-       full – полная анкета (register.html);
-       pre  – короткая анкета ПЕРЕД тестом (test.html): пол, возраст,
-              регион, организация + шаг 3 «Категория участия», которую
-              выбирает САМ участник (тип организации – только подсказка,
-              пока переключатели не трогали). ФИО и почту – после теста;
-       post – анкета ПОСЛЕ теста (test.html): ФИО, почта, согласия;
-              сведения из pre приходят сводкой, под ней кнопка
-              «Изменить данные» раскрывает те же поля (пол/регион/
-              организация/возраст) с предзаполнением – правки уходят
-              на сервер вместо исходных, закрытая панель = без правок. */
+     Два варианта:
+       pre  – короткая анкета ПЕРЕД тестом: пол, возраст, регион,
+              организация и выбранная участником категория;
+       post – анкета ПОСЛЕ теста: ФИО, почта, согласия и сводка pre с
+              возможностью исправить прежние данные. */
   function markup(u, preset) {
-    const variant = preset.variant || 'full';
+    const variant = preset.variant === 'post' ? 'post' : 'pre';
     const orgTypes = ['Школы, лицеи и гимназии', 'Колледжи, техникумы', 'Президентская академия и её филиалы', 'Вузы', 'Иные организации', 'Личное участие'];
     const fSurname = `
           <div class="f-field">
@@ -151,7 +146,7 @@ window.RegForm = (() => {
       <section class="f-card glass" aria-labelledby="${u}-h1">
         <header class="f-card__head"><span class="f-card__num">1</span><h2 id="${u}-h1">Кто Вы</h2></header>
         <div class="f-grid--3 f-grid">
-          ${variant === 'post' ? fSurname + fName + fPatr + fEmail : fSurname + fName + fPatr + fSex + fAge + fEmail}
+          ${fSurname}${fName}${fPatr}${fEmail}
         </div>
       </section>`;
 
@@ -203,14 +198,6 @@ window.RegForm = (() => {
         <header class="f-card__head"><span class="f-card__num">2</span><h2 id="${u}-h2">Регион и организация</h2></header>
         <div class="f-grid">
           ${fRegionOrg}
-          ${variant === 'full' ? `
-          <div class="f-field f-field--full" id="${u}-w-category">
-            <label>Ваша возрастная категория</label>
-            <div class="seg" role="radiogroup" aria-label="Ваша возрастная категория">
-              ${CATS.map(c => `<label class="seg__opt"><input type="radio" name="${u}-category" value="${c.v}"${preset && preset.category === c.k ? ' checked' : ''}><span>${c.v}</span></label>`).join('')}
-            </div>
-            <span class="f-error"></span>
-          </div>` : ''}
         </div>
       </section>`;
 
@@ -599,11 +586,11 @@ window.RegForm = (() => {
   }
 
   /* ============================================================
-     mount(host, preset): превратить контейнер в регистрационный блок
-       preset = { score: Number|null, category: 'school'|'student'|null, total: Number }
+     mount(host, preset): смонтировать pre- или post-анкету test.html.
+       preset.variant = 'pre' | 'post'
      ============================================================ */
   function mount(host, preset = {}) {
-    const variant = preset.variant || 'full';   /* full | pre | post – см. markup() */
+    const variant = preset.variant === 'post' ? 'post' : 'pre';
     const u = 'rf' + (++uid);
     const wrap = document.createElement('div');
     wrap.innerHTML = markup(u, preset);
@@ -933,38 +920,22 @@ window.RegForm = (() => {
       }
       /* post: ФИО/почта + содержимое pre; но если участник открыл панель
          «Изменить данные» (заказчик, 08.08.2026) – берём правки из неё */
-      if (variant === 'post') {
-        const pre = preset.pre || {};
-        const editBox = $(`#${u}-post-edit`, form);
-        const editOpen = editBox && !editBox.hidden;
-        return Object.assign(base, {
-          surname: $(`#${u}-surname`, form).value.trim(),
-          name: $(`#${u}-name`, form).value.trim(),
-          patronymic: $(`#${u}-patronymic`, form).value.trim(),
-          email: $(`#${u}-email`, form).value.trim(),
-          sex: editOpen ? radioValue('sex') : (pre.sex || ''),
-          age: editOpen ? $(`#${u}-age`, form).value.trim() : (pre.age || ''),
-          region: editOpen ? (regionSel.value || '') : (pre.region || ''),
-          orgType: editOpen ? (typeSel.value || '') : (pre.orgType || ''),
-          org: editOpen
-            ? (fwOrg.hidden ? '' : (orgMiss.checked ? orgCustom.value.trim() : (chosen ? chosen.n : '')))
-            : (pre.org || ''),
-          category: pre.category || ''   /* категория уже определила вопросы теста */
-        });
-      }
-      /* full */
+      const pre = preset.pre || {};
+      const editBox = $(`#${u}-post-edit`, form);
+      const editOpen = editBox && !editBox.hidden;
       return Object.assign(base, {
         surname: $(`#${u}-surname`, form).value.trim(),
         name: $(`#${u}-name`, form).value.trim(),
         patronymic: $(`#${u}-patronymic`, form).value.trim(),
-        sex: radioValue('sex'),
-        age: $(`#${u}-age`, form).value.trim(),
         email: $(`#${u}-email`, form).value.trim(),
-        region: regionSel.value || '',
-        orgType: typeSel.value || '',
-        org: fwOrg.hidden ? ''
-          : (orgMiss.checked ? orgCustom.value.trim() : (chosen ? chosen.n : '')),
-        category: radioValue('category')
+        sex: editOpen ? radioValue('sex') : (pre.sex || ''),
+        age: editOpen ? $(`#${u}-age`, form).value.trim() : (pre.age || ''),
+        region: editOpen ? (regionSel.value || '') : (pre.region || ''),
+        orgType: editOpen ? (typeSel.value || '') : (pre.orgType || ''),
+        org: editOpen
+          ? (fwOrg.hidden ? '' : (orgMiss.checked ? orgCustom.value.trim() : (chosen ? chosen.n : '')))
+          : (pre.org || ''),
+        category: pre.category || ''   /* категория уже определила вопросы теста */
       });
     }
 
@@ -996,7 +967,6 @@ window.RegForm = (() => {
         }
       }
       if (isPre && !d.categoryKey) fail($(`#${u}-w-category`, form), 'Выберите категорию участия');
-      if (variant === 'full' && !d.category) fail($(`#${u}-w-category`, form), 'Выберите возрастную категорию');
       if (!isPre && !$(`#${u}-consent`, form).checked) fail($(`#${u}-w-consent`, form), 'Необходимо согласие на обработку персональных данных');
       return firstBad;
     }

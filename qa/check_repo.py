@@ -192,6 +192,11 @@ def audit_production_safety() -> None:
           "только demo: номер" in reg_js and "if (PRODUCTION) throw err" in reg_js)
     check("анонимная ошибка имеет pending и повтор",
           "anonPending" in test_js and "data-anon-retry" in test_js)
+    check("отдельная небезопасная страница регистрации удалена",
+          not (ROOT / "register.html").exists()
+          and not (ROOT / "assets/js/register.js").exists()
+          and "отдельная полная регистрационная форма" not in text("README.md")
+          and "отдельная полная регистрационная форма" not in text("CMS-GUIDE.md"))
 
 
 def audit_certificate() -> None:

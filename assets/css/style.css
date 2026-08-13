@@ -1228,13 +1228,6 @@ ul[role='list'], ol[role='list'] { list-style: none; padding: 0; }
 .modal__box p { font-size: 15px; font-weight: 600; color: var(--ink-70); margin-bottom: 24px; }
 @keyframes fadeIn { from { opacity: 0; } }
 
-/* чип с баллом на странице регистрации */
-.score-chip { display: inline-flex; align-items: center; gap: 10px; padding: 13px 20px; border-radius: 16px; margin-top: 20px;
-  font-weight: 800; font-size: 15px; color: var(--navy-950);
-  background: linear-gradient(135deg, #f0d26b, var(--gold-500)); box-shadow: 0 14px 30px -12px rgba(210,175,62,.65), inset 0 1px 0 rgba(255,255,255,.5);
-  transform: rotate(-1.5deg); }
-.score-chip b { font-family: var(--font-d); font-size: 19px; }
-
 /* фикс: имя и роль не должны слипаться */
 .quote-card__name, .guest__name { display: block; }
 .quote-card__who > span:last-child, .guest > span:last-child { display: flex; flex-direction: column; }
