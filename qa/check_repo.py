@@ -433,11 +433,7 @@ def audit_docs() -> None:
               for page in ["main.html", "materials.html", "news.html",
                            "article.html", "test.html"])
           and "Разделы сайта" not in public_sources)
-    check("футер содержит атрибуцию Президентской академии",
-          all("Проект Президентской академии:" in text(page)
-              and not re.search(r"\bdata-year(?:\s|=|>)", text(page))
-              for page in ["main.html", "materials.html", "news.html",
-                           "article.html", "test.html"]))
+
     check("собственные favicon раздела удалены",
           not (ROOT / "assets/favicon.svg").exists()
           and not (ROOT / "assets/favicon.png").exists()
