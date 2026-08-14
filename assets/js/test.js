@@ -19,8 +19,8 @@
   const MODE = params.get('mode') === 'training' ? 'training' : 'main';
   const PRODUCTION = !!D?.status?.production?.();
 
-  /* Параметры ТЗ берутся из config.js (единый источник), значения
-     по умолчанию – на случай, если конфиг не подключён */
+  /* Параметры берутся из config.js; значения по умолчанию используются,
+     если файл конфигурации не подключён. */
   const DURATION = (window.DIKTANT?.CONFIG?.testDurationMin ?? 40) * 60;
   const QUESTIONS_PER_TEST = window.DIKTANT?.CONFIG?.questionsPerTest ?? 30;
 
@@ -54,7 +54,7 @@
   const uid = () => (crypto.randomUUID ? crypto.randomUUID()
     : 'att-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10));
 
-  /* ---------- защита от копирования (ТЗ 1.4) ---------- */
+  /* ---------- Защита от копирования текста вопросов ---------- */
   document.addEventListener('contextmenu', e => { if ($('#test-app .q-card')) e.preventDefault(); });
   document.addEventListener('copy', e => { if ($('#test-app .q-card')) e.preventDefault(); });
   addEventListener('beforeunload', e => { if (state.cat && !state.done) { e.preventDefault(); e.returnValue = ''; } });
@@ -92,7 +92,7 @@
     box.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' });
   }
 
-  /* Основной режим начинает pre-анкета, тренировочный — выбор категории. */
+  /* Основной режим начинает pre-анкета, тренировочный – выбор категории. */
   function prepareStart() {
     const cats = $('#start-cats'), preHost = $('#pre-reg-mount');
     if (MODE === 'training') {
@@ -134,25 +134,25 @@
         <span class="gate-panel__icon">${icons.clock}</span>
         <h1>Тестирование временно недоступно</h1>
         <p>Сервер не передал контрольное московское время. Мы не используем часы устройства в боевом режиме, чтобы даты диктанта нельзя было обойти.</p>
-        <div class="btn-row" style="justify-content:center"><button class="btn btn--primary" type="button" data-reload>Обновить страницу</button><a class="btn btn--blue" href="main.html">На главную</a></div>`;
+        <div class="btn-row" style="justify-content:center"><button class="btn btn--primary" type="button" data-reload>Обновить страницу</button><a class="btn btn--blue" href="main.html">О диктанте</a></div>`;
       $('[data-reload]', box)?.addEventListener('click', () => location.reload());
     } else if (g === 'soon') {
       box.innerHTML = MODE === 'training' ? `
         <span class="gate-panel__icon">${icons.clock}</span>
         <h1>Тренировочные тесты появятся позже</h1>
         <p>Мы готовим для Вас учебные вопросы. Следите за новостями проекта.</p>
-        <div class="btn-row" style="justify-content:center"><a class="btn btn--blue" href="main.html">На главную</a></div>`
+        <div class="btn-row" style="justify-content:center"><a class="btn btn--blue" href="main.html">О диктанте</a></div>`
       : `
         <span class="gate-panel__icon">${icons.clock}</span>
         <h1>Тестирование откроется 5 ноября в 10:00 по московскому времени</h1>
         <p>Проверка знаний будет доступна <b>с 5 ноября 10:00 до 8 ноября 23:59 по московскому времени</b>. Возвращайтесь – мы Вас ждём!</p>
-        <div class="btn-row" style="justify-content:center"><a class="btn btn--blue" href="main.html">На главную</a></div>`;
-    } else { /* closed */
+        <div class="btn-row" style="justify-content:center"><a class="btn btn--blue" href="main.html">О диктанте</a></div>`;
+    } else { /* После завершения мероприятия. */
       box.innerHTML = `
         <span class="gate-panel__icon">${icons.flag}</span>
         <h1>Диктант-2026 завершён</h1>
         <p>Тестирование завершилось 8 ноября в 23:59 по московскому времени. Спасибо всем участникам! Итоги сезона и церемония награждения – в новостях проекта.</p>
-        <div class="btn-row" style="justify-content:center"><a class="btn btn--blue" href="main.html">На главную</a></div>`;
+        <div class="btn-row" style="justify-content:center"><a class="btn btn--blue" href="main.html">О диктанте</a></div>`;
     }
     return false;
   }
@@ -484,7 +484,7 @@
     history.replaceState({ diktant: 'result' }, '', location.href);
 
     /* Запись создаём ДО запуска двухминутного CTA: его дедлайн обязан
-       считаться от одного сохранённого wall-clock, а мгновенный таймаут
+       считаться от одной сохранённой отметки абсолютного времени, а мгновенный таймаут
        не должен успеть потерять флаг anonymous. */
     if (MODE === 'main') {
       doneRecWrite({ score, max, at: new Date().toISOString(), pre: state.pre,
@@ -527,7 +527,7 @@
   const ctaDoneHtml = (score, max) => `
         <p class="result-cta__done"><b>Ответ записан.</b> Ваш результат – <b>${score} из ${max}</b> – сохранён в базе без ФИО (вместо них указано «не заполнено»), поэтому сертификат участника по этой записи не высылается.</p>
         <div class="btn-row" style="justify-content:center">
-          <a class="btn btn--blue" href="main.html">На главную</a>
+          <a class="btn btn--blue" href="main.html">О диктанте</a>
         </div>`;
 
   function renderAnonError(score, max, reason) {
@@ -538,7 +538,7 @@
       <p class="result-cta__done"><b>Не удалось подтвердить запись результата.</b> Персональные данные больше не запрашиваются: срок решения завершён. Повторите безопасную отправку результата без ФИО.</p>
       <div class="btn-row" style="justify-content:center">
         <button class="btn btn--primary" type="button" data-anon-retry>Повторить запись</button>
-        <a class="btn btn--blue" href="main.html">На главную</a>
+        <a class="btn btn--blue" href="main.html">О диктанте</a>
       </div>`;
     $('[data-anon-retry]', cta)?.addEventListener('click', e => {
       e.currentTarget.disabled = true;
@@ -639,7 +639,7 @@
     } catch {
       if (PRODUCTION) {
         /* Дедлайн/отказ уже закрыли возможность регистрации, но сервер
-           не подтвердил запись. Запоминаем pending и не говорим
+           не подтвердил запись. Сохраняем состояние ожидания и не говорим
            пользователю, что база обновлена, пока API не ответит. */
         state.anonPending = true;
         const rec = doneRecRead();
@@ -652,11 +652,11 @@
       }
     }
 
-    if (!apiOk) {   /* только demo: локальный журнал устройства */
+    if (!apiOk) {   /* только локальный режим: журнал устройства */
       try {
         const REG_KEY = 'diktant_registrations_demo';
         const regs = JSON.parse(localStorage.getItem(REG_KEY) || '[]');
-        const regNumber = 'ПА/НОТА-26/' + String(regs.length + 1).padStart(6, '0');
+        const regNumber = String(regs.length + 1).padStart(6, '0');
         regs.push({
           key: [payload.surname, payload.name, payload.patronymic, payload.sex, payload.age,
                 payload.region, payload.orgType, payload.org, payload.category]
@@ -753,7 +753,7 @@
       <h1>На этом устройстве диктант уже пройден</h1>
       <p>Ваш результат: <b>${rec.score} из ${rec.max}</b>${when ? ' (' + when + ')' : ''}. Повторное прохождение с одного устройства недоступно – так результаты всех участников остаются честными.</p>
       <p>Сертификат участника отправлен на почту, указанную при регистрации. Если письма нет – проверьте папки «Спам» и «Нежелательная почта» или напишите на <a href="mailto:diktant-russia@ranepa.ru">diktant-russia@ranepa.ru</a>.</p>
-      <div class="btn-row" style="justify-content:center"><a class="btn btn--blue" href="main.html">На главную</a></div>`;
+      <div class="btn-row" style="justify-content:center"><a class="btn btn--blue" href="main.html">О диктанте</a></div>`;
     return true;
   }
   function init() { if (!checkLock()) renderGate(); }

@@ -4,14 +4,13 @@
 <meta charset="UTF-8">
 <script>document.documentElement.classList.add('js')</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Гражданско-патриотический диктант</title>
+<title>Всероссийский гражданско-патриотический диктант – Президентская академия</title>
 <meta name="description" content="V Всероссийский гражданско-патриотический диктант «Моя любовь, душа моя – Россия!». 5–8 ноября 2026 года. Проверьте знания истории, культуры и традиций народов России – онлайн, бесплатно, с именным сертификатом.">
 <meta property="og:title" content="Всероссийский диктант-2026 «Моя любовь, душа моя – Россия!»">
 <meta property="og:description" content="5–8 ноября 2026. Всероссийский гражданско-патриотический диктант – 40 минут, которые объединяют.">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Президентская академия">
 <meta property="og:image" content="assets/img/og.webp">
-<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-<link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="preload" href="assets/fonts/unbounded-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/manrope-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/style.css">
@@ -35,15 +34,15 @@
     <div class="container">
 
       <!-- полоса разделов -->
-      <nav class="topnav" aria-label="Разделы сайта">
-        <a class="topnav__brand" href="main.html" aria-label="На главную">
+      <nav class="topnav" aria-label="Навигация раздела">
+        <a class="topnav__brand" href="main.html" aria-label="На страницу «О диктанте»">
           <img src="assets/img/logo-diktant-short.png" alt="">
           <span>Всероссийский гражданско-патриотический диктант</span>
         </a>
         <span class="topnav__links">
           <a class="topnav__link is-active" href="main.html" aria-current="page">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2Z"/></svg>
-            Главная</a>
+            О диктанте</a>
           <a class="topnav__link" href="materials.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4a2 2 0 0 0-2-2H6.5A2.5 2.5 0 0 0 4 4.5Zm0 0A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>
             Материалы для подготовки</a>
@@ -54,7 +53,7 @@
         <a class="btn btn--primary btn--sm" data-gate="start" href="test.html">Принять участие</a>
       </nav>
 
-      <!-- ═══════ HERO ═══════ -->
+      <!-- ═══════ ПЕРВЫЙ ЭКРАН ═══════ -->
       <section class="hero">
         <div class="hero__glow hero__glow--1" aria-hidden="true"></div>
         <div class="hero__glow hero__glow--2" aria-hidden="true"></div>
@@ -117,7 +116,7 @@
             <img class="broadcast__logo" src="assets/img/logo-rutube.webp" alt="RUTUBE" width="44" height="44">
             <span><b>Трансляция открытия на RUTUBE</b><small>ссылку на прямой эфир опубликуем здесь за несколько часов до старта</small></span>
           </a>
-          <!-- ДЛЯ СПЕЦИАЛИСТОВ АКАДЕМИИ — ПЛЕЕР ТРАНСЛЯЦИИ RUTUBE:
+          <!-- ПЛЕЕР ПРЯМОЙ ТРАНСЛЯЦИИ RUTUBE:
                за несколько часов до старта вставьте сюда iframe плеера с id
                трансляции (см. CONFIG.broadcastUrl в assets/js/config.js).
           -->
@@ -438,23 +437,23 @@
           <h2 class="sec-title">Наш Диктант поддерживают <span class="grad">известные люди страны</span></h2>
         </header>
         <div class="guests">
-          <button class="guest glass" type="button" data-lightbox data-guest-media="ashirov" aria-label="Аширов Денис Валерьевич: открыть медиаматериалы; сначала видео, затем фотографии"><span class="guest__ava"><img src="assets/img/guests/ashirov.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Аширов Денис Валерьевич</span><span class="guest__role">Заместитель руководителя Федерального агентства по делам молодёжи</span></span></button>
-          <button class="guest glass" type="button" data-lightbox data-guest-media="barinov" aria-label="Баринов Игорь Вячеславович: открыть медиаматериалы; сначала видео, затем фотографии"><span class="guest__ava"><img src="assets/img/guests/barinov.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Баринов Игорь Вячеславович</span><span class="guest__role">Руководитель Федерального агентства по делам национальностей</span></span></button>
-          <button class="guest glass" type="button" data-lightbox data-guest-media="boyko" aria-label="Бойко Сергей Николаевич: открыть медиаматериалы; сначала видео, затем фотографии"><span class="guest__ava"><img src="assets/img/guests/boyko.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Бойко Сергей Николаевич</span><span class="guest__role">Герой Российской Федерации, директор Департамента государственной молодёжной политики и воспитательной деятельности Минобрнауки</span></span></button>
-          <button class="guest glass" type="button" data-lightbox data-guest-media="zanko" aria-label="Занко Ольга Николаевна: открыть медиаматериалы; сначала видео, затем фотографии"><span class="guest__ava"><img src="assets/img/guests/zanko.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Занко Ольга Николаевна</span><span class="guest__role">Заместитель председателя Комитета Государственной Думы по развитию гражданского общества, вопросам общественных и религиозных объединений</span></span></button>
-          <button class="guest glass" type="button" data-lightbox data-guest-media="zakharova" aria-label="Захарова Мария Владимировна: открыть медиаматериалы; сначала видео, затем фотографии"><span class="guest__ava"><img src="assets/img/guests/zakharova.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Захарова Мария Владимировна</span><span class="guest__role">Директор Департамента информации и печати МИД Российской Федерации</span></span></button>
-          <button class="guest glass" type="button" data-lightbox data-guest-media="koneva" aria-label="Конева Наталия Ивановна: открыть медиаматериалы; сначала видео, затем фотографии"><span class="guest__ava"><img src="assets/img/guests/koneva.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Конева Наталия Ивановна</span><span class="guest__role">Президент Фонда памяти полководцев Победы, дочь дважды Героя Советского Союза Маршала Советского Союза Ивана Конева</span></span></button>
-          <button class="guest glass" type="button" data-lightbox data-guest-media="kuznetsov" aria-label="Кузнецов Михаил Михайлович: открыть медиаматериалы; сначала видео, затем фотографии"><span class="guest__ava"><img src="assets/img/guests/kuznetsov.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Кузнецов Михаил Михайлович</span><span class="guest__role">Руководитель исполкома «Народный фронт “За Россию”»</span></span></button>
-          <button class="guest glass" type="button" data-lightbox data-guest-media="nikitin" aria-label="Никитин Андрей Сергеевич: открыть медиаматериалы; сначала видео, затем фотографии"><span class="guest__ava"><img src="assets/img/guests/nikitin.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Никитин Андрей Сергеевич</span><span class="guest__role">Министр транспорта Российской Федерации, экс-губернатор Новгородской области</span></span></button>
-          <button class="guest glass" type="button" data-lightbox data-guest-media="petrova" aria-label="Петрова Ольга Викторовна: открыть медиаматериалы; сначала видео, затем фотографии"><span class="guest__ava"><img src="assets/img/guests/petrova.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Петрова Ольга Викторовна</span><span class="guest__role">Заместитель Министра науки и высшего образования Российской Федерации</span></span></button>
-          <button class="guest glass" type="button" data-lightbox data-guest-media="svyatenko" aria-label="Святенко Инна Юрьевна: открыть медиаматериалы; сначала видео, затем фотографии"><span class="guest__ava"><img src="assets/img/guests/svyatenko.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Святенко Инна Юрьевна</span><span class="guest__role">Заместитель Председателя Совета Федерации</span></span></button>
-          <button class="guest glass" type="button" data-lightbox data-guest-media="sponyakov" aria-label="Споняков Илья Дмитриевич: открыть медиаматериалы; сначала видео, затем фотографии"><span class="guest__ava"><img src="assets/img/guests/sponyakov.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Споняков Илья Дмитриевич</span><span class="guest__role">Герой Российской Федерации, советник Министра культуры Российской Федерации</span></span></button>
-          <button class="guest glass" type="button" data-lightbox data-guest-media="stepyko" aria-label="Степыко Дмитрий Геннадьевич: открыть медиаматериалы; сначала видео, затем фотографии"><span class="guest__ava"><img src="assets/img/guests/stepyko.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Степыко Дмитрий Геннадьевич</span><span class="guest__role">Заместитель директора ФГБУ «Роспатриотцентр»</span></span></button>
-          <button class="guest glass" type="button" data-lightbox data-guest-media="shits" aria-label="Шиц Иван Александрович: открыть медиаматериалы; сначала видео, затем фотографии"><span class="guest__ava"><img src="assets/img/guests/shits.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Шиц Иван Александрович</span><span class="guest__role">Герой Российской Федерации, председатель Совета общественного движения участников специальной военной операции «Войсковое братство “СВОи”»</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-guest-media="ashirov" aria-label="Аширов Денис Валерьевич: открыть медиаматериалы"><span class="guest__ava"><img src="assets/img/guests/ashirov.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Аширов Денис Валерьевич</span><span class="guest__role">Заместитель руководителя Федерального агентства по делам молодёжи</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-guest-media="barinov" aria-label="Баринов Игорь Вячеславович: открыть медиаматериалы"><span class="guest__ava"><img src="assets/img/guests/barinov.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Баринов Игорь Вячеславович</span><span class="guest__role">Руководитель Федерального агентства по делам национальностей</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-guest-media="boyko" aria-label="Бойко Сергей Николаевич: открыть медиаматериалы"><span class="guest__ava"><img src="assets/img/guests/boyko.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Бойко Сергей Николаевич</span><span class="guest__role">Герой Российской Федерации, директор Департамента государственной молодёжной политики и воспитательной деятельности Минобрнауки</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-guest-media="zanko" aria-label="Занко Ольга Николаевна: открыть медиаматериалы"><span class="guest__ava"><img src="assets/img/guests/zanko.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Занко Ольга Николаевна</span><span class="guest__role">Заместитель председателя Комитета Государственной Думы по развитию гражданского общества, вопросам общественных и религиозных объединений</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-guest-media="zakharova" aria-label="Захарова Мария Владимировна: открыть медиаматериалы"><span class="guest__ava"><img src="assets/img/guests/zakharova.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Захарова Мария Владимировна</span><span class="guest__role">Директор Департамента информации и печати МИД Российской Федерации</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-guest-media="koneva" aria-label="Конева Наталия Ивановна: открыть медиаматериалы"><span class="guest__ava"><img src="assets/img/guests/koneva.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Конева Наталия Ивановна</span><span class="guest__role">Президент Фонда памяти полководцев Победы, дочь дважды Героя Советского Союза Маршала Советского Союза Ивана Конева</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-guest-media="kuznetsov" aria-label="Кузнецов Михаил Михайлович: открыть медиаматериалы"><span class="guest__ava"><img src="assets/img/guests/kuznetsov.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Кузнецов Михаил Михайлович</span><span class="guest__role">Руководитель исполкома «Народный фронт “За Россию”»</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-guest-media="nikitin" aria-label="Никитин Андрей Сергеевич: открыть медиаматериалы"><span class="guest__ava"><img src="assets/img/guests/nikitin.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Никитин Андрей Сергеевич</span><span class="guest__role">Министр транспорта Российской Федерации, экс-губернатор Новгородской области</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-guest-media="petrova" aria-label="Петрова Ольга Викторовна: открыть медиаматериалы"><span class="guest__ava"><img src="assets/img/guests/petrova.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Петрова Ольга Викторовна</span><span class="guest__role">Заместитель Министра науки и высшего образования Российской Федерации</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-guest-media="svyatenko" aria-label="Святенко Инна Юрьевна: открыть медиаматериалы"><span class="guest__ava"><img src="assets/img/guests/svyatenko.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Святенко Инна Юрьевна</span><span class="guest__role">Заместитель Председателя Совета Федерации</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-guest-media="sponyakov" aria-label="Споняков Илья Дмитриевич: открыть медиаматериалы"><span class="guest__ava"><img src="assets/img/guests/sponyakov.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Споняков Илья Дмитриевич</span><span class="guest__role">Герой Российской Федерации, советник Министра культуры Российской Федерации</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-guest-media="stepyko" aria-label="Степыко Дмитрий Геннадьевич: открыть медиаматериалы"><span class="guest__ava"><img src="assets/img/guests/stepyko.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Степыко Дмитрий Геннадьевич</span><span class="guest__role">Заместитель директора ФГБУ «Роспатриотцентр»</span></span></button>
+          <button class="guest glass" type="button" data-lightbox data-guest-media="shits" aria-label="Шиц Иван Александрович: открыть медиаматериалы"><span class="guest__ava"><img src="assets/img/guests/shits.webp" alt="" loading="lazy"></span><span class="guest__txt"><span class="guest__name">Шиц Иван Александрович</span><span class="guest__role">Герой Российской Федерации, председатель Совета общественного движения участников специальной военной операции «Войсковое братство “СВОи”»</span></span></button>
         </div>
       </section>
 
-      <!-- ═══════ FAQ ═══════ -->
+      <!-- ═══════ ЧАСТЫЕ ВОПРОСЫ ═══════ -->
       <section class="sec" id="faq">
         <header class="sec-head">
           <span class="sec-overline">Часто задаваемые вопросы</span>
@@ -555,9 +554,9 @@
       </section>
 
 <!-- нижняя полоса разделов -->
-      <nav class="footnav" aria-label="Разделы сайта (повтор)">
-        <span class="footnav__title">Разделы</span>
-        <a class="topnav__link is-active" href="main.html">Главная</a>
+      <nav class="footnav" aria-label="Навигация раздела (повтор)">
+        <span class="footnav__title">Навигация</span>
+        <a class="topnav__link is-active" href="main.html">О диктанте</a>
         <a class="topnav__link" href="materials.html">Материалы для подготовки</a>
         <a class="topnav__link" href="news.html">Новости</a>
       </nav>
@@ -565,15 +564,15 @@
       <!-- ═══════ ФУТЕР ═══════ -->
       <footer class="footer">
         <div class="footer__panel footer__panel--slim">
-          <span>© <span data-year>2026</span> Всероссийский гражданско-патриотический диктант «Моя любовь, душа моя – Россия!»</span>
+          <span>Проект Президентской академии: Всероссийский гражданско-патриотический диктант «Моя любовь, душа моя – Россия!»</span>
         </div>
       </footer>
 
-    </div><!-- /container -->
+    </div><!-- Конец .container. -->
   </main>
-</div><!-- /app -->
+</div><!-- Конец .app. -->
 
-<!-- плавающая CTA -->
+<!-- Плавающая кнопка участия. -->
 <div class="float-cta">
   <a class="btn btn--primary" data-gate="start" href="test.html">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>

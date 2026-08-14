@@ -1,5 +1,5 @@
-/* Главная страница: графики, таймер, трансляция, карусель,
-   медиагалереи гостей, FAQ и плавающая кнопка участия. */
+/* Корневая страница раздела: графики, таймер, трансляция, карусель,
+   медиагалереи гостей, частые вопросы и плавающая кнопка участия. */
 (() => {
   'use strict';
   document.documentElement.classList.add('js');
@@ -238,7 +238,7 @@
     prev?.addEventListener('click', () => go(index - 1));
     next?.addEventListener('click', () => go(index + 1));
 
-    /* drag */
+    /* Перетаскивание карусели. */
     /* ВАЖНО: setPointerCapture только после реального драга (>6px).
        Если захватывать указатель сразу на pointerdown, браузер
        перенацеливает событие click на viewport – и клик по слайду
@@ -327,7 +327,11 @@
         }
       }
       if (lbVid) lbVid.hidden = !isVideo;
-      lbCap.textContent = item.caption || item.alt || '';
+      if (lbCap) {
+        const caption = item.caption || item.alt || '';
+        lbCap.textContent = caption;
+        lbCap.hidden = !caption;
+      }
       lb.classList.add('is-open');
       document.body.style.overflow = 'hidden';
       if (isVideo && lbVid) lbVid.play().catch(() => { /* автоплей мог быть запрещён – стартуем кнопкой плеера */ });
@@ -386,7 +390,7 @@
       if (e.key === 'ArrowRight') openAt(cur + 1);
     });
   }
-  /* ---------- FAQ-аккордеон ---------- */
+  /* ---------- Частые вопросы ---------- */
   $$('.faq-item').forEach(item => {
     const btn = $('.faq-item__q', item);
     btn?.addEventListener('click', () => {
@@ -396,18 +400,16 @@
     });
   });
 
-  /* ---------- Плавающая CTA ---------- */
+  /* ---------- Плавающая кнопка участия ---------- */
   const fcta = $('.float-cta');
   if (fcta && !document.body.hasAttribute('data-no-fcta')) {
     const onScroll = () => fcta.classList.toggle('is-show', scrollY > innerHeight * .85);
     addEventListener('scroll', onScroll, { passive: true }); onScroll();
   }
 
-  /* ---------- Год в футере ---------- */
-  $$('[data-year]').forEach(el => el.textContent = new Date().getFullYear());
 })();
 
-/* ---------- Параллакс коллажа в hero (только точный указатель) ---------- */
+/* ---------- Параллакс коллажа первого экрана (только точный указатель) ---------- */
 (() => {
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const collage = document.querySelector('.collage');

@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <title>Шаблон сертификата участника диктанта</title>
 <!--
-  ШАБЛОН СЕРТИФИКАТА УЧАСТНИКА (ТЗ: «фон сертификата загружается как jpg,
-  тексты формируются скриптом (разметка html + css)»).
+  ШАБЛОН СЕРТИФИКАТА УЧАСТНИКА.
+  Фон загружается как JPG, переменные данные формируются в HTML и CSS.
 
-  Как работает генерация в бою:
+  Как работает генерация на сервере:
   1. Сервер подставляет в span[data-field] значения участника
      (ФИО, балл, регистрационный номер) из JSON (см. fields.json).
   2. Страница печатается в PDF размером ровно 297×210 мм
@@ -30,9 +30,9 @@
   Перенос на сервер: скопируйте папку fonts/ рядом с шаблоном
   (пути в @font-face относительные) либо замените src на URL из MEDIALibrary.
 
-  ДЕМО: по умолчанию показаны демонстрационные значения, а поверх
+  ЛОКАЛЬНАЯ ПРОВЕРКА: по умолчанию показаны тестовые значения, а поверх
   плейсхолдеров фона («Фамилия Имя Отчество», «XX», «XXXXXX») лежат маски
-  в цвет фона. Для боя плейсхолдеры отсутствуют в чистом фоне – маски
+  в цвет фона. В рабочем фоне плейсхолдеры отсутствуют – маски
   выключаются параметром ?clean любым способом: сервер просто НЕ рендерит
   div.cover, либо добавьте ?clean для скрытия масок стилем.
 -->
@@ -55,7 +55,7 @@
   .cert { position: relative; width: 297mm; height: 210mm; overflow: hidden; }
   .cert__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
-  /* маски-заплатки в цвет фона (только для демо-файла с плейсхолдерами) */
+  /* Маски в цвет фона для файла с плейсхолдерами. */
   .cover { position: absolute; display: flex; align-items: center; }
   .cover--light { background: #fbfcf7; }   /* правая часть */
   .cover--navy  { background: #0d2a66; }   /* левая панель */
@@ -85,11 +85,11 @@
 </style>
 </head>
 <body>
-  <!-- добавьте class="clean" для боевого чистого фона без плейсхолдеров -->
+  <!-- Для чистого фона без плейсхолдеров добавьте class="clean". -->
   <div class="cert" id="cert">
     <img class="cert__bg" src="certificate-bg.jpg" alt="">
 
-    <!-- маски на плейсхолдеры исходного макета (демо) -->
+    <!-- Маски на плейсхолдеры исходного макета. -->
     <div class="cover cover--light cover--fio1"></div>
     <div class="cover cover--light cover--fio2"></div>
     <div class="cover cover--light cover--fio3"></div>
@@ -104,9 +104,9 @@
     <span class="field field--regnum" data-field="regnum">000001</span>
   </div>
 <script>
-  /* демо-режим ?clean – без масок (когда фон чистый) */
+  /* Параметр ?clean скрывает маски для чистого фона. */
   if (location.search.includes('clean')) document.getElementById('cert').classList.add('clean');
-  /* демо-заполнение из JSON-подобного параметра:
+  /* Локальное заполнение параметрами адресной строки:
      ?fio1=Иванова&fio2=Мария&fio3=Сергеевна&score=27&regnum=000001 */
   const p = new URLSearchParams(location.search);
   document.querySelectorAll('[data-field]').forEach(el => {

@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <script>document.documentElement.classList.add('js')</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Гражданско-патриотический диктант</title>
+<title>Пройти гражданско-патриотический диктант – Президентская академия</title>
 <meta name="description" content="Прохождение Всероссийского гражданско-патриотического диктанта онлайн: три возрастные категории, 30 вопросов, 40 минут, сертификат участника на почту.">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Диктант «Моя любовь, душа моя – Россия!»">
+<meta property="og:site_name" content="Президентская академия">
 <meta property="og:locale" content="ru_RU">
 <meta property="og:title" content="Пройти диктант – «Моя любовь, душа моя – Россия!» – 2026">
 <meta property="og:description" content="Три возрастные категории, 30 вопросов, 40 минут – с 5 ноября 10:00 до 8 ноября 23:59 по московскому времени.">
@@ -16,8 +16,6 @@
 <meta name="twitter:title" content="Пройти диктант – «Моя любовь, душа моя – Россия!» – 2026">
 <meta name="twitter:description" content="Три возрастные категории, 30 вопросов, 40 минут – с 5 ноября 10:00 до 8 ноября 23:59 по московскому времени.">
 <meta name="twitter:image" content="assets/img/og.webp">
-<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-<link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="preload" href="assets/fonts/unbounded-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/manrope-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/style.css">
@@ -38,15 +36,15 @@
     <div class="container">
 
       <!-- полоса разделов -->
-      <nav class="topnav" aria-label="Разделы сайта">
-        <a class="topnav__brand" href="main.html" aria-label="На главную">
+      <nav class="topnav" aria-label="Навигация раздела">
+        <a class="topnav__brand" href="main.html" aria-label="На страницу «О диктанте»">
           <img src="assets/img/logo-diktant-short.png" alt="">
           <span>Всероссийский гражданско-патриотический диктант</span>
         </a>
         <span class="topnav__links">
           <a class="topnav__link" href="main.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2Z"/></svg>
-            Главная</a>
+            О диктанте</a>
           <a class="topnav__link" href="materials.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4a2 2 0 0 0-2-2H6.5A2.5 2.5 0 0 0 4 4.5Zm0 0A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>
             Материалы для подготовки</a>
@@ -67,7 +65,7 @@
         <div id="test-start" hidden>
           <section class="page-hero">
             <nav class="crumbs" aria-label="Хлебные крошки">
-              <a href="main.html">Главная</a>
+              <a href="main.html">О диктанте</a>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 6 6 6-6 6"/></svg>
               <span id="crumb-mode">Прохождение диктанта</span>
             </nav>
@@ -144,7 +142,7 @@
           </p>
         </div>
 
-        <!-- ═══ ШАГ 3: результат + регистрационная форма (сразу, ТЗ п. 1.3) ═══ -->
+        <!-- ═══ ШАГ 3: результат и регистрационная форма ═══ -->
         <div id="test-result" hidden>
           <div class="result glass">
             <div class="result__ring" role="img" aria-label="Ваш результат">
@@ -171,7 +169,7 @@
               <button class="btn btn--glass" type="button" data-restart>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>
                 Пройти ещё раз</button>
-              <a class="btn btn--glass" href="main.html">На главную</a>
+              <a class="btn btn--glass" href="main.html">О диктанте</a>
             </div>
           </div>
           <!-- Дедлайн выбора хранится вместе с попыткой; после записи без ФИО post-анкета недоступна. -->
@@ -197,9 +195,9 @@
       </div>
 
       <!-- нижняя полоса разделов -->
-      <nav class="footnav" aria-label="Разделы сайта (повтор)">
-        <span class="footnav__title">Разделы</span>
-        <a class="topnav__link" href="main.html">Главная</a>
+      <nav class="footnav" aria-label="Навигация раздела (повтор)">
+        <span class="footnav__title">Навигация</span>
+        <a class="topnav__link" href="main.html">О диктанте</a>
         <a class="topnav__link" href="materials.html">Материалы для подготовки</a>
         <a class="topnav__link" href="news.html">Новости</a>
       </nav>
@@ -207,7 +205,7 @@
       <!-- ═══════ ФУТЕР ═══════ -->
       <footer class="footer">
         <div class="footer__panel footer__panel--slim">
-          <span>© <span data-year>2026</span> Всероссийский гражданско-патриотический диктант «Моя любовь, душа моя – Россия!»</span>
+          <span>Проект Президентской академии: Всероссийский гражданско-патриотический диктант «Моя любовь, душа моя – Россия!»</span>
         </div>
       </footer>
 
