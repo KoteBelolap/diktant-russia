@@ -31,7 +31,7 @@ window.DIKTANT_GUEST_MEDIA = {
     {
       "kind": "video",
       "src": "assets/media/guests/zanko/video-01.mp4"
-
+    }
   ],
   "zakharova": [
     {
